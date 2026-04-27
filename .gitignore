@@ -1,0 +1,5 @@
+.vscode/
+.idea/
+*.log
+error_log
+.DS_Store/nThumbs.db
