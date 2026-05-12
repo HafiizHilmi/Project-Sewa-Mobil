@@ -11,19 +11,21 @@
 </head>
 
 <body>
-    <div class="login-container">
-        <h1>Login</h1>
-        <form action="">
-            <div class="input-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username">
-            </div>
-            <div class="input-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password">
-            </div>
-            <button type="submit">Login</button>
-        </form>
+        <div class="login-container">
+            <div class="login-card">
+    <h1>Login Admin</h1>
+    <form action="">
+        <div class="mb-3 text-start"> 
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" placeholder="Masukkan username">
+        </div>
+        <div class="mb-3 text-start">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" placeholder="Masukkan password">
+        </div>
+        <button type="submit" class="btn btn-primary w-100 py-2">Login</button>
+    </form>
+</div>
     </div>
 </body>
 
