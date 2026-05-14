@@ -2,4 +2,8 @@
 .idea/
 *.log
 error_log
-.DS_Store/nThumbs.db
+/assets/uploads*
+/config/database.php
+.DS_Store
+Thumbs.db
+.env
