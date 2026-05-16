@@ -2,15 +2,16 @@
 
 session_start();
 
-$module = isset($_GET['module']) ? ucfirst($_GET['module']) : 'Inventory';
+$module = isset($_GET['module']) ? ucfirst($_GET['module']) : 'Landing';
 $action = isset($_GET['action']) ? $_GET['action'] : 'index';
 
 $controllers = [    
-    'Inventory' => 'CarController',
+    'Landing' => 'LandingController',
     'Auth'      => 'AuthController',
     'Booking'   => 'BookingController',
     'Dashboard' => 'DashboardController',
-    'Verification'=> 'VerifyController'
+    'Verification'=> 'VerifyController',
+    'Homepage' => 'HomePageController'
 ];
 
 $controllerName = isset($controllers[$module]) ? $controllers[$module] : $module . 'Controller';

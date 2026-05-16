@@ -60,7 +60,7 @@
                     <div>
                         <h3 class="text-2xl font-bold tracking-tight">Toyota Avanza 2024</h3>
                         <p class="text-gray-500 font-medium">MPV</p>
-                    </div>
+                    </div>  
                     <div class="text-right">
                         <p class="text-xl font-bold text-blue-700">Rp350.000 <span class="text-sm font-normal text-gray-500">/hari</span></p>
                     </div>
