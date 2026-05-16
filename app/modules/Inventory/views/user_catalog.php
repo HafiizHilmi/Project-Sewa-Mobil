@@ -3,12 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< HEAD
     <title>SewaMobil - Landing</title>
-=======
-    <title>SewaMobil - Mudah dan Cepat</title>
->>>>>>> eac36ec1b71714b1858d82a988947fabe27583c6
-    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -32,10 +27,6 @@
         .bg-light-blue { background-color: #f5f7fc; }
         .text-muted-custom { color: #6b7280; font-size: 0.875rem; }
         
-<<<<<<< HEAD
-=======
-        /* Card Tweaks */
->>>>>>> eac36ec1b71714b1858d82a988947fabe27583c6
         .card-custom {
             border: none;
             border-radius: 1rem;
@@ -50,10 +41,6 @@
             padding: 0.4em 0.8em;
         }
         
-<<<<<<< HEAD
-=======
-        /* Icons */
->>>>>>> eac36ec1b71714b1858d82a988947fabe27583c6
         .icon-circle {
             width: 60px;
             height: 60px;
@@ -63,11 +50,6 @@
             font-size: 1.5rem;
         }
         
-<<<<<<< HEAD
-
-=======
-        /* Avatar Testi */
->>>>>>> eac36ec1b71714b1858d82a988947fabe27583c6
         .avatar-circle {
             width: 40px;
             height: 40px;
