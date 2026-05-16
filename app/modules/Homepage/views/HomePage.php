@@ -165,24 +165,7 @@
         </section>
     </main>
 
-    <footer class="border-t bg-white mt-16 text-gray-600">
-        <div class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-3 items-center gap-6">
-            <div>
-                <span class="text-blue-700 font-extrabold text-2xl tracking-tight">Sewa<span class="text-gray-900">Mobil</span></span>
-            </div>
-            
-            <div class="flex items-center justify-center gap-5 text-sm">
-                <a href="#" class="hover:text-blue-700 transition">Privacy Policy</a>
-                <a href="#" class="hover:text-blue-700 transition">Terms of Service</a>
-                <a href="#" class="hover:text-blue-700 transition">Safety Standards</a>
-                <a href="#" class="hover:text-blue-700 transition">Support</a>
-            </div>
-
-            <div class="text-center md:text-right text-sm">
-                &copy; 2026 sewamobil. All rights reserved.
-            </div>
-        </div>
-    </footer>
+    <?php include __DIR__ . '/../../../../include/footer.html'; ?>
 
 </body>
 </html>
