@@ -78,10 +78,10 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item me-3">
-                        <a class="nav-link fw-semibold text-dark" href="#">Login</a>
+                        <a class="nav-link fw-semibold text-dark" href="index.php?module=Auth&action=login">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="btn btn-brand rounded-pill px-4 fw-semibold" href="#">Register</a>
+                        <a class="btn btn-brand rounded-pill px-4 fw-semibold" href="index.php?module=Auth&action=register">Register</a>
                     </li>
                 </ul>
             </div>
