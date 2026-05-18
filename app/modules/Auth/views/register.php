@@ -48,6 +48,12 @@
 </head>
 <body>
 
+<?php
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+?>
     <nav class="navbar navbar-light bg-white py-3 shadow-sm">
         <div class="container">
             <a class="navbar-brand fw-bold text-brand fs-4" href="index.php">SewaMobil</a>
@@ -64,7 +70,12 @@
                                 <h3 class="fw-bold mb-1">Buat Akun</h3>
                                 <p class="text-muted mb-4" style="font-size: 0.85rem;">Bergabung dengan kami untuk mendapatkan pengalaman terbaik.</p>
                                 
+                                <?php if (!empty($_SESSION['flash'])): ?>
+                                    <div class="alert alert-info"><?php echo htmlspecialchars($_SESSION['flash']); unset($_SESSION['flash']); ?></div>
+                                <?php endif; ?>
+
                                 <form action="index.php?module=Auth&action=processRegister" method="POST">
+                                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                                     <div class="mb-3">
                                         <label class="form-label fw-semibold" style="font-size: 0.85rem;">Nama Lengkap</label>
                                         <input type="text" name="name" class="form-control form-control-custom" placeholder="Dadang Kurniawan" required>
