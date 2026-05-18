@@ -12,7 +12,7 @@ class AuthController {
 
     public function processLogin() {
         // Process login form securely using PDO
-        require_once __DIR__ . '/../../../../include/db_config.php';
+        require_once __DIR__ . '/../../../include/db_config.php';
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: index.php?module=Auth&action=login');
@@ -37,6 +37,11 @@ class AuthController {
         }
 
         $pdo = getPDO();
+        if (!$pdo) {
+            $_SESSION['flash'] = 'Database connection error.';
+            header('Location: index.php?module=Auth&action=login');
+            exit;
+        }
         $stmt = $pdo->prepare('SELECT id, name, email, password, role FROM users WHERE email = :email LIMIT 1');
         $stmt->execute(['email' => $email]);
         $user = $stmt->fetch();
@@ -58,7 +63,7 @@ class AuthController {
 
     public function processRegister() {
         // Process register form securely using PDO
-        require_once __DIR__ . '/../../../../include/db_config.php';
+        require_once __DIR__ . '/../../../include/db_config.php';
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: index.php?module=Auth&action=register');
@@ -103,6 +108,11 @@ class AuthController {
         }
 
         $pdo = getPDO();
+        if (!$pdo) {
+            $_SESSION['flash'] = 'Database connection error.';
+            header('Location: index.php?module=Auth&action=register');
+            exit;
+        }
 
         // Check existing email
         $stmt = $pdo->prepare('SELECT id FROM users WHERE email = :email LIMIT 1');
@@ -113,24 +123,22 @@ class AuthController {
             exit;
         }
 
+      
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
-        $insert = $pdo->prepare('INSERT INTO users (name, email, password, role, created_at) VALUES (:name, :email, :password, :role, NOW())');
+        $insert = $pdo->prepare('INSERT INTO users (name, email, phone, password, role, created_at) VALUES (:name, :email, :phone, :password, :role, NOW())');
+
+
         $insert->execute([
             'name' => $name,
             'email' => $email,
+            'phone' => $phone,
             'password' => $password_hash,
             'role' => 'user'
         ]);
 
         $newId = $pdo->lastInsertId();
-        session_regenerate_id(true);
-        $_SESSION['user_id'] = $newId;
-        $_SESSION['user_name'] = $name;
-        $_SESSION['user_role'] = 'user';
-
-        header('Location: index.php?module=Homepage&action=index');
-        exit;
-    }
-}
-?>
+        // ... baris kode redirect ...
+            }
+        }
+        ?>

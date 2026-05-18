@@ -1,3 +1,9 @@
+<?php
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -48,12 +54,6 @@
 </head>
 <body>
 
-<?php
-if (session_status() !== PHP_SESSION_ACTIVE) session_start();
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-?>
     <nav class="navbar navbar-light bg-white py-3 shadow-sm">
         <div class="container">
             <a class="navbar-brand fw-bold text-brand fs-4" href="index.php">SewaMobil</a>
@@ -135,7 +135,7 @@ if (empty($_SESSION['csrf_token'])) {
                 </div>
             </div>
         </div>
-    </footer>
+    </footer >
 
 </body>
 </html>

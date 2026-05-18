@@ -34,3 +34,7 @@ yarn-error.log*
 # Misc
 *.cache
 *.tmp
+
+db_config.php
+README_DB.md
+

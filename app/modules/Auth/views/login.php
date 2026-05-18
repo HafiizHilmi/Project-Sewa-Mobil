@@ -1,3 +1,9 @@
+<?php
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -46,13 +52,6 @@
     </style>
 </head>
 <body>
-
-<?php
-if (session_status() !== PHP_SESSION_ACTIVE) session_start();
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-?>
 
     <nav class="navbar navbar-light bg-white py-3 shadow-sm">
         <div class="container">
