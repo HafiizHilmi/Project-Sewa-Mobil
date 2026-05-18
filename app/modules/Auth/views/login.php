@@ -1,9 +1,24 @@
-<?php
-if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+<?php 
+if (session_status() !== PHP_SESSION_ACTIVE) session_start(); 
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 ?>
+
+<?php if (!empty($_SESSION['flash'])): ?>
+    <div class="alert alert-danger" style="font-size: 0.85rem; padding: 0.5rem 1rem; border-radius: 0.5rem;">
+        <?= htmlspecialchars($_SESSION['flash']) ?>
+    </div>
+    <?php unset($_SESSION['flash']); // Hapus pesan setelah ditampilkan ?>
+<?php endif; ?>
+
+<?php if (!empty($_SESSION['flash_success'])): ?>
+    <div class="alert alert-success" style="font-size: 0.85rem; padding: 0.5rem 1rem; border-radius: 0.5rem;">
+        <?= htmlspecialchars($_SESSION['flash_success']) ?>
+    </div>
+    <?php unset($_SESSION['flash_success']); ?>
+<?php endif; ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>

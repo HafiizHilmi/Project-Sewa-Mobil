@@ -42,6 +42,7 @@ class AuthController {
             header('Location: index.php?module=Auth&action=login');
             exit;
         }
+        
         $stmt = $pdo->prepare('SELECT id, name, email, password, role FROM users WHERE email = :email LIMIT 1');
         $stmt->execute(['email' => $email]);
         $user = $stmt->fetch();
@@ -123,11 +124,9 @@ class AuthController {
             exit;
         }
 
-      
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
         $insert = $pdo->prepare('INSERT INTO users (name, email, phone, password, role, created_at) VALUES (:name, :email, :phone, :password, :role, NOW())');
-
 
         $insert->execute([
             'name' => $name,
@@ -138,7 +137,33 @@ class AuthController {
         ]);
 
         $newId = $pdo->lastInsertId();
-        // ... baris kode redirect ...
-            }
+        
+        // --- BARIS KODE REDIRECT DITAMBAHKAN DI SINI ---
+        // Set pesan sukses dan kembalikan ke halaman login
+        $_SESSION['flash_success'] = 'Akun berhasil dibuat! Silakan masuk.';
+        header('Location: index.php?module=Auth&action=login');
+        exit;
+    }
+
+    public function logout() {
+        // Mulai session jika belum berjalan
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
         }
-        ?>
+
+        // Kosongkan semua data session
+        $_SESSION = [];
+
+        // Hancurkan session dari sistem
+        session_destroy();
+
+        // Mulai session baru hanya untuk mengirim pesan flash (opsional)
+        session_start();
+        $_SESSION['flash_success'] = 'Anda berhasil keluar.';
+
+        // Arahkan kembali ke halaman login
+        header('Location: index.php?module=Auth&action=login');
+        exit;
+    }
+}
+?>
