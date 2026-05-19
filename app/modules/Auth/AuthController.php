@@ -11,7 +11,6 @@ class AuthController {
     }
 
     public function processLogin() {
-        // Process login form securely using PDO
         require_once __DIR__ . '/../../../include/db_config.php';
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -19,7 +18,6 @@ class AuthController {
             exit;
         }
 
-        // CSRF check
         if (session_status() !== PHP_SESSION_ACTIVE) session_start();
         if (empty($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
             $_SESSION['flash'] = 'Invalid CSRF token.';
@@ -48,7 +46,6 @@ class AuthController {
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
-            // Successful login
             session_regenerate_id(true);
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['name'];
@@ -63,7 +60,6 @@ class AuthController {
     }
 
     public function processRegister() {
-        // Process register form securely using PDO
         require_once __DIR__ . '/../../../include/db_config.php';
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -115,7 +111,6 @@ class AuthController {
             exit;
         }
 
-        // Check existing email
         $stmt = $pdo->prepare('SELECT id FROM users WHERE email = :email LIMIT 1');
         $stmt->execute(['email' => $email]);
         if ($stmt->fetch()) {
@@ -125,7 +120,6 @@ class AuthController {
         }
 
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
-
         $insert = $pdo->prepare('INSERT INTO users (name, email, phone, password, role, created_at) VALUES (:name, :email, :phone, :password, :role, NOW())');
 
         $insert->execute([
@@ -136,34 +130,24 @@ class AuthController {
             'role' => 'user'
         ]);
 
-        $newId = $pdo->lastInsertId();
-        
-        // --- BARIS KODE REDIRECT DITAMBAHKAN DI SINI ---
-        // Set pesan sukses dan kembalikan ke halaman login
         $_SESSION['flash_success'] = 'Akun berhasil dibuat! Silakan masuk.';
         header('Location: index.php?module=Auth&action=login');
         exit;
     }
 
     public function logout() {
-        // Mulai session jika belum berjalan
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
-
-        // Kosongkan semua data session
-        $_SESSION = [];
-
-        // Hancurkan session dari sistem
+        
+        session_unset();
         session_destroy();
-
-        // Mulai session baru hanya untuk mengirim pesan flash (opsional)
+        
         session_start();
         $_SESSION['flash_success'] = 'Anda berhasil keluar.';
-
-        // Arahkan kembali ke halaman login
+        
         header('Location: index.php?module=Auth&action=login');
         exit;
     }
+
 }
-?>
