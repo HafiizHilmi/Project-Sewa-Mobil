@@ -273,10 +273,11 @@
                         </div>
                         
                         <form action="index.php?module=Booking&action=process" method="POST">
-                            <button type="button" class="w-full bg-blue-700 text-white text-center py-3 rounded-xl font-semibold hover:bg-blue-800 transition">
-                                Konfirmasi Pesanan <i class="bi bi-arrow-right ml-1"></i>
-                            </button>
+                            <button type="submit" class="w-full bg-blue-700 text-white text-center py-3 rounded-xl font-semibold hover:bg-blue-800 transition">
+                            Konfirmasi Pesanan <i class="bi bi-arrow-right ml-1"></i>
+                             </button>
                         </form>
+
                     </div>
                 </div>
             </div>
