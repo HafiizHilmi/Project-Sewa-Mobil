@@ -419,7 +419,7 @@
                 sumDates.textContent = `${startObj.getDate()} ${monthNames[startObj.getMonth()]} - ${endObj.getDate()} ${monthNames[endObj.getMonth()]} ${endObj.getFullYear()}`;
                 sumDays.textContent = `${totalDays} Hari Terpilih`;
             } else if (startDate) {
-                totalDays = 1; /
+                    totalDays = 1;
                 const startObj = new Date(startDate);
                 sumDates.textContent = `${startObj.getDate()} ${monthNames[startObj.getMonth()]} ${startObj.getFullYear()}`;
                 sumDays.textContent = "1 Hari Terpilih";
