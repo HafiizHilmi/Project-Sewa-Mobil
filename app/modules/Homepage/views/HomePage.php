@@ -77,7 +77,7 @@
                     <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Bensin</span>
                     <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">7 Penumpang</span>
                 </div>
-                <button class="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition">Sewa Sekarang</button>
+                <a href="index.php?module=Booking&action=checkout" class="block w-full text-center bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition">Sewa Sekarang</a>
             </div>
 
             <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300">

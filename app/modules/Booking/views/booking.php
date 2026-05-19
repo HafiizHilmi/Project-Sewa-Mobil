@@ -10,7 +10,6 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         
-        /* KALENDER CSS FIX */
         .date-cell {
             cursor: pointer;
             position: relative;
@@ -57,7 +56,7 @@
             background-color: #bfdbfe;
             z-index: -2;
         }
-
+        
         .date-cell.start-date::after {
             content: '';
             position: absolute;
@@ -111,7 +110,7 @@
 
     <nav class="bg-white border-b sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between relative">
-            <a href="index.php" class="text-gray-800 hover:text-blue-600 font-semibold absolute left-6 flex items-center gap-2">
+            <a href="index.php?module=Homepage&action=index" class="text-gray-800 hover:text-blue-600 font-semibold absolute left-6 flex items-center gap-2">
                 <i class="bi bi-arrow-left"></i> Kembali
             </a>
             <h1 class="text-lg font-bold w-full text-center">Reservasi Kendaraan</h1>
@@ -286,7 +285,6 @@
     </main>
 
     <script>
-
         const CAR_BASE_PRICE = 350000; 
         let driverPrice = 0;
         let totalDays = 0;
@@ -334,10 +332,11 @@
                 card.className = 'addon-card border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-blue-300 transition';
             });
             selectedElement.className = 'addon-card border-2 border-blue-600 bg-blue-50/30 rounded-xl p-4 cursor-pointer transition active-addon';
-
+            
             driverPrice = parseInt(selectedElement.getAttribute('data-price'));
             calculateTotal();
         }
+
         let currentDate = new Date(); 
         let currentMonth = currentDate.getMonth(); 
         let currentYear = currentDate.getFullYear();
@@ -413,13 +412,14 @@
                 const startObj = new Date(startDate);
                 const endObj = new Date(endDate);
                 
+                // Hitung selisih hari
                 const diffTime = Math.abs(endObj - startObj);
                 totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
                 
                 sumDates.textContent = `${startObj.getDate()} ${monthNames[startObj.getMonth()]} - ${endObj.getDate()} ${monthNames[endObj.getMonth()]} ${endObj.getFullYear()}`;
                 sumDays.textContent = `${totalDays} Hari Terpilih`;
             } else if (startDate) {
-                totalDays = 1; 
+                    totalDays = 1;
                 const startObj = new Date(startDate);
                 sumDates.textContent = `${startObj.getDate()} ${monthNames[startObj.getMonth()]} ${startObj.getFullYear()}`;
                 sumDays.textContent = "1 Hari Terpilih";
@@ -441,7 +441,6 @@
             generateCalendarGrid(currentMonth, currentYear);
         });
 
-        // Initialize UI
         generateCalendarGrid(currentMonth, currentYear);
         calculateTotal();
     </script>
