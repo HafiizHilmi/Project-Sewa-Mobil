@@ -110,7 +110,7 @@
 
     <nav class="bg-white border-b sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between relative">
-            <a href="index.php" class="text-gray-800 hover:text-blue-600 font-semibold absolute left-6 flex items-center gap-2">
+            <a href="index.php?module=Homepage&action=index" class="text-gray-800 hover:text-blue-600 font-semibold absolute left-6 flex items-center gap-2">
                 <i class="bi bi-arrow-left"></i> Kembali
             </a>
             <h1 class="text-lg font-bold w-full text-center">Reservasi Kendaraan</h1>
