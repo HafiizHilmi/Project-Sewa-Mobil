@@ -130,27 +130,5 @@ if (empty($_SESSION['csrf_token'])) {
             </div>
         </div>
     </main>
-
-    <footer class="bg-white py-4 border-top mt-auto">
-        <div class="container">
-            <div class="row align-items-center flex-column flex-md-row text-center text-md-start">
-                <div class="col-md-3 mb-3 mb-md-0">
-                    <a class="fw-bold text-brand fs-5 text-decoration-none" href="#">SewaMobil</a>
-                </div>
-                <div class="col-md-6 mb-3 mb-md-0 text-center">
-                    <ul class="list-inline mb-0">
-                        <li class="list-inline-item mx-2"><a href="#" class="text-muted text-decoration-none" style="font-size: 0.8rem;">Privacy Policy</a></li>
-                        <li class="list-inline-item mx-2"><a href="#" class="text-muted text-decoration-none" style="font-size: 0.8rem;">Terms of Service</a></li>
-                        <li class="list-inline-item mx-2"><a href="#" class="text-muted text-decoration-none" style="font-size: 0.8rem;">Safety Standards</a></li>
-                        <li class="list-inline-item mx-2"><a href="#" class="text-muted text-decoration-none" style="font-size: 0.8rem;">Support</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3 text-md-end text-muted" style="font-size: 0.75rem;">
-                    &copy; 2026 sewamobil. All rights reserved.
-                </div>
-            </div>
-        </div>
-    </footer >
-
 </body>
 </html>
