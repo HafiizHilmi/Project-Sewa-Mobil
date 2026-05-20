@@ -133,13 +133,13 @@
                         <div class="input-floating-label flex items-center justify-between">
                             <div class="w-full">
                                 <label>Lokasi Pengambilan</label>
-                                <input type="text" id="input-pickup" placeholder="Contoh: Soekarno Hatta T3..." autocomplete="off">
+                                <input type="text" id="input-pickup" name="pickup_location" form="booking-form" placeholder="Contoh: Soekarno Hatta T3..." autocomplete="off">
                             </div>
                             <i class="bi bi-crosshair text-gray-400"></i>
                         </div>
                         <div class="input-floating-label">
                             <label>Lokasi Pengembalian</label>
-                            <input type="text" placeholder="Sama dengan lokasi pengambilan" autocomplete="off">
+                            <input type="text" name="return_location" form="booking-form" placeholder="Sama dengan lokasi pengambilan" autocomplete="off">
                         </div>
                     </div>
                 </div>
@@ -154,19 +154,19 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="input-floating-label">
                             <label>Nama Lengkap</label>
-                            <input type="text" placeholder="Masukkan nama lengkap">
+                            <input type="text" name="full_name" form="booking-form" placeholder="Masukkan nama lengkap">
                         </div>
                         <div class="input-floating-label">
                             <label>Alamat Email</label>
-                            <input type="email" placeholder="contoh@email.com">
+                            <input type="email" name="email" form="booking-form" placeholder="contoh@email.com">
                         </div>
                         <div class="input-floating-label">
                             <label>Nomor HP</label>
-                            <input type="tel" placeholder="+62 812-xxxx-xxxx">
+                            <input type="tel" name="phone" form="booking-form" placeholder="+62 812-xxxx-xxxx">
                         </div>
                         <div class="input-floating-label">
                             <label>Alamat Lengkap</label>
-                            <input type="text" placeholder="Jl. Veteran...">
+                            <input type="text" name="address" form="booking-form" placeholder="Jl. Veteran...">
                         </div>
                     </div>
                 </div>
@@ -272,10 +272,15 @@
                             <span class="text-xl font-bold text-blue-600" id="summary-total">Rp 0</span>
                         </div>
                         
-                        <form action="index.php?module=Booking&action=process" method="POST">
+                        <form action="index.php?module=Booking&action=process" method="POST" id="booking-form">
+                            <input type="hidden" name="car_id" value="1">
+                            <input type="hidden" name="addon_driver" id="addon-driver-input" value="0">
+                            <input type="hidden" name="start_date" id="start-date-input" value="">
+                            <input type="hidden" name="end_date" id="end-date-input" value="">
+                            <input type="hidden" name="total_price" id="total-price-input" value="0">
                             <button type="submit" class="w-full bg-blue-700 text-white text-center py-3 rounded-xl font-semibold hover:bg-blue-800 transition">
-                            Konfirmasi Pesanan <i class="bi bi-arrow-right ml-1"></i>
-                             </button>
+                                Konfirmasi Pesanan <i class="bi bi-arrow-right ml-1"></i>
+                            </button>
                         </form>
 
                     </div>
@@ -299,6 +304,11 @@
         const sumTax = document.getElementById('summary-tax');
         const sumTotal = document.getElementById('summary-total');
         const labelSewa = document.getElementById('label-sewa');
+        const addonDriverInput = document.getElementById('addon-driver-input');
+        const startDateInput = document.getElementById('start-date-input');
+        const endDateInput = document.getElementById('end-date-input');
+        const totalPriceInput = document.getElementById('total-price-input');
+        const bookingForm = document.getElementById('booking-form');
 
         document.getElementById('input-pickup').addEventListener('input', function(e) {
             sumLocation.textContent = e.target.value || 'Lokasi belum ditentukan';
@@ -309,7 +319,7 @@
         };
 
         function calculateTotal() {
-            let baseTotal = CAR_BASE_PRICE * (totalDays === 0 ? 1 : totalDays); 
+            let baseTotal = CAR_BASE_PRICE * (totalDays === 0 ? 1 : totalDays);
             let driverTotal = driverPrice * (totalDays === 0 ? 1 : totalDays);
             let subtotal = baseTotal + driverTotal;
             let tax = subtotal * 0.1; // Pajak 10%
@@ -319,8 +329,9 @@
             sumBasePrice.textContent = formatRupiah(baseTotal);
             sumTax.textContent = formatRupiah(tax);
             sumTotal.textContent = formatRupiah(grandTotal);
+            totalPriceInput.value = grandTotal.toFixed(2);
 
-            if(driverPrice > 0) {
+            if (driverPrice > 0) {
                 rowDriver.classList.remove('hidden');
                 sumDriver.textContent = formatRupiah(driverTotal);
             } else {
@@ -335,6 +346,7 @@
             selectedElement.className = 'addon-card border-2 border-blue-600 bg-blue-50/30 rounded-xl p-4 cursor-pointer transition active-addon';
             
             driverPrice = parseInt(selectedElement.getAttribute('data-price'));
+            addonDriverInput.value = driverPrice > 0 ? '1' : '0';
             calculateTotal();
         }
 
@@ -415,12 +427,12 @@
                 
                 // Hitung selisih hari
                 const diffTime = Math.abs(endObj - startObj);
-                totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; 
                 
                 sumDates.textContent = `${startObj.getDate()} ${monthNames[startObj.getMonth()]} - ${endObj.getDate()} ${monthNames[endObj.getMonth()]} ${endObj.getFullYear()}`;
                 sumDays.textContent = `${totalDays} Hari Terpilih`;
             } else if (startDate) {
-                    totalDays = 1;
+                totalDays = 1;
                 const startObj = new Date(startDate);
                 sumDates.textContent = `${startObj.getDate()} ${monthNames[startObj.getMonth()]} ${startObj.getFullYear()}`;
                 sumDays.textContent = "1 Hari Terpilih";
@@ -429,6 +441,9 @@
                 sumDates.textContent = "Belum pilih tanggal";
                 sumDays.textContent = "0 Hari";
             }
+
+            startDateInput.value = startDate || '';
+            endDateInput.value = endDate || '';
             calculateTotal();
         }
 
@@ -444,6 +459,20 @@
 
         generateCalendarGrid(currentMonth, currentYear);
         calculateTotal();
+
+        bookingForm.addEventListener('submit', function(e) {
+            if (!startDate || !endDate) {
+                alert('Pilih tanggal mulai dan selesai sewa terlebih dahulu.');
+                e.preventDefault();
+                return;
+            }
+
+            if (sumLocation.textContent === 'Lokasi belum ditentukan') {
+                alert('Masukkan lokasi pengambilan.');
+                e.preventDefault();
+                return;
+            }
+        });
     </script>
 </body>
 </html>

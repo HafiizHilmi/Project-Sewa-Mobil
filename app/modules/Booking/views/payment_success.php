@@ -1,3 +1,36 @@
+<?php
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+$booking = $_SESSION['booking_success'] ?? null;
+if ($booking) {
+    unset($_SESSION['booking_success']);
+}
+
+function rupiah($value) {
+    return 'Rp ' . number_format($value, 0, ',', '.');
+}
+
+$orderId = $booking['id'] ?? '8821';
+$startDate = $booking['start_date'] ?? '2026-04-13';
+$endDate = $booking['end_date'] ?? '2026-04-15';
+$rentalDays = 3;
+if ($booking && $booking['start_date'] && $booking['end_date']) {
+    $start = date_create($booking['start_date']);
+    $end = date_create($booking['end_date']);
+    $interval = date_diff($start, $end);
+    $rentalDays = $interval->days + 1;
+}
+$driverText = ($booking['addon_driver'] ?? 0) ? 'Rp 100.000' : 'Rp 0';
+$totalPrice = $booking['total_price'] ?? 1155000;
+$pickupLocation = $booking['pickup_location'] ?? 'Soekarno Hatta T3 International Airport';
+$returnLocation = $booking['return_location'] ?? 'Sama dengan lokasi pengambilan';
+$startLabel = date('j F Y', strtotime($startDate));
+$endLabel = date('j F Y', strtotime($endDate));
+$baseSubtotal = round($totalPrice / 1.1);
+$taxAmount = round($totalPrice - $baseSubtotal);
+
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -50,9 +83,9 @@
             <div class="flex justify-between items-start mb-5">
                 <div>
                     <p class="text-[0.65rem] font-bold text-blue-600 tracking-wider uppercase mb-1">Order ID</p>
-                    <h2 class="text-xl font-black text-gray-900">#RESRV-8821</h2>
+                    <h2 class="text-xl font-black text-gray-900">#RESRV-<?= htmlspecialchars($orderId) ?></h2>
                     <div class="barcode mt-2 opacity-80"></div>
-                    <p class="text-[0.6rem] text-gray-400 mt-1 tracking-widest">8821004928173645</p>
+                    <p class="text-[0.6rem] text-gray-400 mt-1 tracking-widest"><?php echo htmlspecialchars($orderId . '004928173645'); ?></p>
                 </div>
                 <div class="bg-blue-600 text-white text-[0.7rem] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1">
                     <i class="bi bi-shield-check"></i> Verified Safety
@@ -73,7 +106,7 @@
                     <div class="mt-0.5 w-6 flex justify-center"><i class="bi bi-calendar2-range text-blue-600"></i></div>
                     <div>
                         <p class="text-[0.65rem] text-gray-500 font-bold uppercase tracking-wider mb-0.5">Rentang Waktu Sewa</p>
-                        <p class="text-xs font-bold text-gray-900">13 April 2026 <span class="text-gray-400 mx-1">→</span> 15 April 2026</p>
+                        <p class="text-xs font-bold text-gray-900"><?= htmlspecialchars($startLabel) ?> <span class="text-gray-400 mx-1">→</span> <?= htmlspecialchars($endLabel) ?></p>
                     </div>
                 </div>
                 
@@ -83,7 +116,7 @@
                     <div class="mt-0.5 w-6 flex justify-center"><i class="bi bi-geo-alt-fill text-blue-600"></i></div>
                     <div>
                         <p class="text-[0.65rem] text-gray-500 font-bold uppercase tracking-wider mb-0.5">Lokasi Pengambilan</p>
-                        <p class="text-xs font-semibold text-gray-900">Soekarno Hatta T3 International Airport</p>
+                        <p class="text-xs font-semibold text-gray-900"><?= htmlspecialchars($pickupLocation) ?></p>
                     </div>
                 </div>
                 
@@ -91,7 +124,7 @@
                     <div class="mt-0.5 w-6 flex justify-center"><i class="bi bi-geo-fill text-blue-600"></i></div>
                     <div>
                         <p class="text-[0.65rem] text-gray-500 font-bold uppercase tracking-wider mb-0.5">Lokasi Pengembalian</p>
-                        <p class="text-xs font-semibold text-gray-900">Sama dengan lokasi pengambilan</p>
+                        <p class="text-xs font-semibold text-gray-900"><?= htmlspecialchars($returnLocation) ?></p>
                     </div>
                 </div>
             </div>
@@ -106,23 +139,23 @@
                     <span class="font-bold text-gray-900">Transfer Bank</span>
                 </div>
                 <div class="flex justify-between text-xs">
-                    <span class="text-gray-500">Harga Sewa (3 Hari)</span>
-                    <span class="font-bold text-gray-900">Rp 1.050.000</span>
+                    <span class="text-gray-500">Harga Sewa (<?= htmlspecialchars($rentalDays) ?> Hari)</span>
+                    <span class="font-bold text-gray-900"><?= rupiah($baseSubtotal) ?></span>
                 </div>
                 <div class="flex justify-between text-xs">
                     <span class="text-gray-500">Biaya Supir</span>
-                    <span class="font-bold text-gray-900">Rp 0</span>
+                    <span class="font-bold text-gray-900"><?= $driverText ?></span>
                 </div>
                 <div class="flex justify-between text-xs">
                     <span class="text-gray-500">Pajak (10%)</span>
-                    <span class="font-bold text-gray-900">Rp 105.000</span>
+                    <span class="font-bold text-gray-900"><?= rupiah($taxAmount) ?></span>
                 </div>
                 
                 <hr class="border-gray-100 my-4">
                 
                 <div class="text-right">
                     <p class="text-[0.65rem] font-bold text-gray-400 uppercase tracking-wider mb-1">Total Dibayar</p>
-                    <p class="text-2xl font-black text-blue-600 tracking-tight">Rp 1.155.000</p>
+                    <p class="text-2xl font-black text-blue-600 tracking-tight"><?= rupiah($totalPrice) ?></p>
                 </div>
             </div>
 
