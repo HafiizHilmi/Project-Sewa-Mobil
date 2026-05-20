@@ -35,6 +35,7 @@
                         <i class="bi bi-person-circle text-xl"></i>
                     </div>
                     <span class="font-medium">Halo, <?= isset($_SESSION['user_name']) ? htmlspecialchars(explode(' ', trim($_SESSION['user_name']))[0]) : 'Tamu' ?></span>
+                    </div>
                 </div>
                 
                 <div class="border-l border-gray-300 pl-3 ml-1">
