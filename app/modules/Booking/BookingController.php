@@ -30,7 +30,7 @@ class BookingController {
         $total_price = floatval($_POST['total_price'] ?? 0);
 
         if ($pickup_location === '' || $full_name === '' || $email === '' || $phone === '' || $address === '' || $start_date === '' || $end_date === '' || $total_price <= 0) {
-            $_SESSION['flash'] = 'Lengkapi semua data booking terlebih dahulu.';
+            $_SESSION['flash'] = "Lengkapi semua data booking terlebih dahulu. Debug: pickup=$pickup_location, name=$full_name, email=$email, phone=$phone, address=$address, start=$start_date, end=$end_date, total=$total_price";
             header('Location: index.php?module=Booking&action=checkout');
             exit;
         }

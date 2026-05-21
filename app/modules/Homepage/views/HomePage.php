@@ -230,14 +230,13 @@
 
                 const filterText = button.textContent.trim().toUpperCase();
 
-                // Filter kartu mobil
                 carCards.forEach(card => {
                     if (filterText === "SEMUA MOBIL") {
-                        card.style.display = "block";
+                        card.style.display = "";
                     } else {
                         const categoryEl = card.querySelector("p.text-gray-500.font-medium");
                         if (categoryEl && categoryEl.textContent.trim().toUpperCase() === filterText) {
-                            card.style.display = "block";
+                            card.style.display = "";
                         } else {
                             card.style.display = "none";
                         }
