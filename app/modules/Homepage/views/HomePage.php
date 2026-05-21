@@ -24,7 +24,7 @@
             flex: 1 1 auto;
         }
 
-        /* Truncate long titles to max 2 lines with ellipsis */
+        /* Truncate long titles to max 2 lines with ellipsis and enforce height */
         .car-title {
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -32,6 +32,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             word-break: break-word;
+            min-height: 4rem; /* Forces 2 lines of text height (2rem line-height x 2) */
         }
     </style>
 </head>
