@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sewa Mobil SBY — Admin Panel</title>
+  <meta name="description" content="Sistem Admin Dashboard Sewa Mobil SBY — Customers, Settings, dan manajemen armada."/>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="assets/css/style.css"/>
+</head>
+
+<body x-data="appData()" x-cloak class="font-sans antialiased bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-200">
+
+<div class="flex h-screen overflow-hidden">
+
+  <!-- Overlay Mobile Sidebar -->
+  <div x-show="sidebarOpen"
+       @click="sidebarOpen = false"
+       class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden"
+       x-transition:enter="transition ease-out duration-200"
+       x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-150"
+       x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+  </div>
+
+  <?php include 'pages/sidebar.php'; ?>
+
+  <div class="flex-1 flex flex-col overflow-hidden">
+
+    <?php include 'pages/header.php'; ?>
+
+    <main class="flex-1 overflow-hidden relative">
+      <?php include 'pages/dashboard.php'; ?>
+      <?php include 'pages/cars.php'; ?>
+      <?php include 'pages/orders.php'; ?>
+      <?php include 'pages/customers.php'; ?>
+      <?php include 'pages/settings.php'; ?>
+    </main>
+
+  </div>
+</div>
+
+<script src="assets/js/app.js"></script>
+
+</body>
+</html>
