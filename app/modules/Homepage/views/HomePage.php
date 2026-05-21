@@ -9,6 +9,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        /* Card layout: make all cards equal-height and keep button at bottom */
+        .car-grid > div {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            flex: 1 1 auto;
+        }
+
+        /* Truncate long titles to max 2 lines with ellipsis */
+        .car-title {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: break-word;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -62,112 +86,124 @@
             <button class="bg-white text-gray-800 px-6 py-3 rounded-full font-medium hover:bg-gray-100 border border-gray-200 transition">EV</button>
         </section>
 
-        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 car-grid">
             
-            <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300">
+            <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300 car-card">
                 <img src="https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop" alt="Toyota Avanza" class="w-full h-48 object-cover rounded-2xl mb-5">
-                <div class="flex items-start justify-between gap-2 mb-2">
-                    <div>
-                        <h3 class="text-2xl font-bold tracking-tight">Toyota Avanza 2024</h3>
-                        <p class="text-gray-500 font-medium">MPV</p>
-                    </div>  
-                    <div class="text-right">
-                        <p class="text-xl font-bold text-blue-700">Rp350.000 <span class="text-sm font-normal text-gray-500">/hari</span></p>
+                <div class="card-body">
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <div>
+                            <h3 class="text-2xl font-bold tracking-tight car-title">Toyota Avanza 2024</h3>
+                            <p class="text-gray-500 font-medium">MPV</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xl font-bold text-blue-700">Rp350.000 <span class="text-sm font-normal text-gray-500">/hari</span></p>
+                        </div>
                     </div>
-                </div>
-                <div class="flex items-center gap-2 mb-6">
-                    <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Bensin</span>
-                    <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">7 Penumpang</span>
+                    <div class="flex items-center gap-2 mb-6">
+                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Bensin</span>
+                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">7 Penumpang</span>
+                    </div>
                 </div>
                 <a href="index.php?module=Booking&action=checkout" class="block w-full text-center bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition">Sewa Sekarang</a>
             </div>
 
-            <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300">
+            <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300 car-card">
                 <img src="https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop" alt="Toyota Avanza" class="w-full h-48 object-cover rounded-2xl mb-5">
-                <div class="flex items-start justify-between gap-2 mb-2">
-                    <div>
-                        <h3 class="text-2xl font-bold tracking-tight">Toyota Avanza 2024</h3>
-                        <p class="text-gray-500 font-medium">MPV</p>
+                <div class="card-body">
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <div>
+                            <h3 class="text-2xl font-bold tracking-tight car-title">Toyota Avanza 2024</h3>
+                            <p class="text-gray-500 font-medium">MPV</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xl font-bold text-blue-700">Rp350.000 <span class="text-sm font-normal text-gray-500">/hari</span></p>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <p class="text-xl font-bold text-blue-700">Rp350.000 <span class="text-sm font-normal text-gray-500">/hari</span></p>
+                    <div class="flex items-center gap-2 mb-6">
+                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Bensin</span>
+                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">7 Penumpang</span>
                     </div>
-                </div>
-                <div class="flex items-center gap-2 mb-6">
-                    <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Bensin</span>
-                    <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">7 Penumpang</span>
                 </div>
                 <button class="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition">Sewa Sekarang</button>
             </div>
 
-            <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300">
+            <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300 car-card">
                 <img src="https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop" alt="Toyota Avanza" class="w-full h-48 object-cover rounded-2xl mb-5">
-                <div class="flex items-start justify-between gap-2 mb-2">
-                    <div>
-                        <h3 class="text-2xl font-bold tracking-tight">Toyota Avanza 2024</h3>
-                        <p class="text-gray-500 font-medium">MPV</p>
+                <div class="card-body">
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <div>
+                            <h3 class="text-2xl font-bold tracking-tight car-title">Hyundai Ioniq</h3>
+                            <p class="text-gray-500 font-medium">SUV</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xl font-bold text-blue-700">Rp450.000 <span class="text-sm font-normal text-gray-500">/hari</span></p>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <p class="text-xl font-bold text-blue-700">Rp350.000 <span class="text-sm font-normal text-gray-500">/hari</span></p>
+                    <div class="flex items-center gap-2 mb-6">
+                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Listrik</span>
+                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">4 Penumpang</span>
                     </div>
-                </div>
-                <div class="flex items-center gap-2 mb-6">
-                    <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Bensin</span>
-                    <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">7 Penumpang</span>
                 </div>
                 <button class="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition">Sewa Sekarang</button>
             </div>
 
-            <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300">
+            <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300 car-card">
                 <img src="https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop" alt="Toyota Avanza" class="w-full h-48 object-cover rounded-2xl mb-5">
-                <div class="flex items-start justify-between gap-2 mb-2">
-                    <div>
-                        <h3 class="text-2xl font-bold tracking-tight">Toyota Avanza 2024</h3>
-                        <p class="text-gray-500 font-medium">MPV</p>
+                <div class="card-body">
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <div>
+                            <h3 class="text-2xl font-bold tracking-tight car-title">Toyota Avanza 2024</h3>
+                            <p class="text-gray-500 font-medium">MPV</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xl font-bold text-blue-700">Rp350.000 <span class="text-sm font-normal text-gray-500">/hari</span></p>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <p class="text-xl font-bold text-blue-700">Rp350.000 <span class="text-sm font-normal text-gray-500">/hari</span></p>
+                    <div class="flex items-center gap-2 mb-6">
+                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Bensin</span>
+                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">7 Penumpang</span>
                     </div>
-                </div>
-                <div class="flex items-center gap-2 mb-6">
-                    <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Bensin</span>
-                    <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">7 Penumpang</span>
                 </div>
                 <button class="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition">Sewa Sekarang</button>
             </div>
 
-            <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300">
+            <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300 car-card">
                 <img src="https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop" alt="Toyota Avanza" class="w-full h-48 object-cover rounded-2xl mb-5">
-                <div class="flex items-start justify-between gap-2 mb-2">
-                    <div>
-                        <h3 class="text-2xl font-bold tracking-tight">Toyota Avanza 2024</h3>
-                        <p class="text-gray-500 font-medium">MPV</p>
+                <div class="card-body">
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <div>
+                            <h3 class="text-2xl font-bold tracking-tight car-title">Toyota Avanza 2024</h3>
+                            <p class="text-gray-500 font-medium">MPV</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xl font-bold text-blue-700">Rp350.000 <span class="text-sm font-normal text-gray-500">/hari</span></p>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <p class="text-xl font-bold text-blue-700">Rp350.000 <span class="text-sm font-normal text-gray-500">/hari</span></p>
+                    <div class="flex items-center gap-2 mb-6">
+                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Bensin</span>
+                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">7 Penumpang</span>
                     </div>
-                </div>
-                <div class="flex items-center gap-2 mb-6">
-                    <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Bensin</span>
-                    <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">7 Penumpang</span>
                 </div>
                 <button class="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition">Sewa Sekarang</button>
             </div>
 
-            <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300">
+            <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300 car-card">
                 <img src="https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop" alt="Toyota Avanza" class="w-full h-48 object-cover rounded-2xl mb-5">
-                <div class="flex items-start justify-between gap-2 mb-2">
-                    <div>
-                        <h3 class="text-2xl font-bold tracking-tight">Toyota Avanza 2024</h3>
-                        <p class="text-gray-500 font-medium">MPV</p>
+                <div class="card-body">
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <div>
+                            <h3 class="text-2xl font-bold tracking-tight car-title">Toyota Avanza 2024</h3>
+                            <p class="text-gray-500 font-medium">MPV</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xl font-bold text-blue-700">Rp350.000 <span class="text-sm font-normal text-gray-500">/hari</span></p>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <p class="text-xl font-bold text-blue-700">Rp350.000 <span class="text-sm font-normal text-gray-500">/hari</span></p>
+                    <div class="flex items-center gap-2 mb-6">
+                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Bensin</span>
+                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">7 Penumpang</span>
                     </div>
-                </div>
-                <div class="flex items-center gap-2 mb-6">
-                    <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Bensin</span>
-                    <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">7 Penumpang</span>
                 </div>
                 <button class="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition">Sewa Sekarang</button>
             </div>
@@ -177,5 +213,39 @@
 
     <?php include __DIR__ . '/../../../../include/footer.html'; ?>
 
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const filterButtons = document.querySelectorAll("section.flex.items-center.gap-3 button");
+        const carCards = document.querySelectorAll("section.car-grid > div.car-card");
+
+        filterButtons.forEach(button => {
+            button.addEventListener("click", () => {
+                // Reset semua tombol ke gaya tidak aktif
+                filterButtons.forEach(btn => {
+                    btn.className = "bg-white text-gray-800 px-6 py-3 rounded-full font-medium hover:bg-gray-100 border border-gray-200 transition";
+                });
+                
+                // Ubah gaya tombol yang diklik menjadi aktif
+                button.className = "bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition";
+
+                const filterText = button.textContent.trim().toUpperCase();
+
+                // Filter kartu mobil
+                carCards.forEach(card => {
+                    if (filterText === "SEMUA MOBIL") {
+                        card.style.display = "block";
+                    } else {
+                        const categoryEl = card.querySelector("p.text-gray-500.font-medium");
+                        if (categoryEl && categoryEl.textContent.trim().toUpperCase() === filterText) {
+                            card.style.display = "block";
+                        } else {
+                            card.style.display = "none";
+                        }
+                    }
+                });
+            });
+        });
+    });
+    </script>
 </body>
 </html>
