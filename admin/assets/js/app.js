@@ -17,6 +17,7 @@ function appData() {
     /* ── Navigation ── */
     navItems: [
       { key: 'dashboard', label: 'Dashboard',      icon: 'fa-solid fa-gauge-high' },
+      { key: 'verifications', label: 'Verifications', icon: 'fa-solid fa-id-card' },
       { key: 'cars',      label: 'Car Management', icon: 'fa-solid fa-car'        },
       { key: 'orders',    label: 'Orders',         icon: 'fa-solid fa-clipboard-list'},
       { key: 'customers', label: 'Customers',      icon: 'fa-solid fa-users'      },
@@ -30,11 +31,12 @@ function appData() {
     },
 
     get pageTitle() {
-      return { dashboard:'Dashboard', cars:'Car Management', orders:'Orders', customers:'Customers', settings:'Settings' }[this.activePage];
+      return { dashboard:'Dashboard', verifications:'Verifications', cars:'Car Management', orders:'Orders', customers:'Customers', settings:'Settings' }[this.activePage];
     },
     get pageSubtitle() {
       return {
         dashboard: 'Apa yang terjadi pada rental kamu hari ini',
+        verifications: 'Tinjau identitas pelanggan untuk keamanan sewa',
         cars: 'Kelola armada kendaraan rental kamu',
         orders: 'Pantau dan kelola semua pesanan rental',
         customers: 'Data pelanggan setia SewaMobil',
@@ -68,6 +70,25 @@ function appData() {
     openCustomerDetail(c) {
       this.selectedCustomer = c;
       this.showCustomerDetail = true;
+    },
+
+    /* ── Verifications ── */
+    verifications: window.SERVER_VERIFICATIONS || [],
+    verifyFilter: 'Semua',
+    selectedVerification: null,
+    showVerificationDetail: false,
+
+    get filteredVerifications() {
+      if (this.verifyFilter === 'Semua') return this.verifications;
+      return this.verifications.filter(v => v.verification_status === this.verifyFilter.toLowerCase());
+    },
+    openVerificationDetail(v) {
+      this.selectedVerification = v;
+      this.showVerificationDetail = true;
+    },
+    closeVerificationDetail() {
+      this.showVerificationDetail = false;
+      this.selectedVerification = null;
     },
 
     /* ── Settings / Admin ── */

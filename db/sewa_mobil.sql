@@ -13,6 +13,9 @@ CREATE TABLE
     `phone` VARCHAR(30) NOT NULL,
     `password` VARCHAR(255) NOT NULL,
     `role` ENUM ('user', 'admin') NOT NULL DEFAULT 'user',
+    `verification_status` ENUM ('unverified', 'pending', 'verified', 'rejected') NOT NULL DEFAULT 'unverified',
+    `ktp_file` VARCHAR(255) NULL,
+    `sim_file` VARCHAR(255) NULL,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

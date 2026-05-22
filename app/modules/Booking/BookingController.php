@@ -2,6 +2,32 @@
 
 class BookingController {
     public function checkout() {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
+        if (!isset($_SESSION['user_id'])) {
+            $_SESSION['flash'] = "Silakan login terlebih dahulu untuk menyewa mobil.";
+            header('Location: index.php?module=Auth&action=login');
+            exit;
+        }
+
+        require_once __DIR__ . '/../../../include/db_config.php';
+        $pdo = getPDO();
+        if (!$pdo) {
+            die("Database connection error.");
+        }
+
+        $stmt = $pdo->prepare("SELECT verification_status FROM users WHERE id = :id");
+        $stmt->execute(['id' => $_SESSION['user_id']]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$user || $user['verification_status'] !== 'verified') {
+            $_SESSION['flash_error'] = "Sesuai kebijakan keamanan, Anda wajib melengkapi dan memverifikasi identitas (KTP & SIM) terlebih dahulu sebelum dapat melanjutkan transaksi sewa mobil.";
+            header('Location: index.php?module=Profile&action=index');
+            exit;
+        }
+
         require_once __DIR__ . '/views/booking.php';
     }
 

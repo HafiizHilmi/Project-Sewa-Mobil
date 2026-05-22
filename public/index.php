@@ -11,7 +11,8 @@ $controllers = [
     'Booking'   => 'BookingController',
     'Dashboard' => 'DashboardController',
     'Verification'=> 'VerifyController',
-    'Homepage' => 'HomePageController'
+    'Homepage' => 'HomePageController',
+    'Profile' => 'ProfileController'
 ];
 
 $controllerName = isset($controllers[$module]) ? $controllers[$module] : $module . 'Controller';

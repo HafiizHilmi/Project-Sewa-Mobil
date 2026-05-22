@@ -1,3 +1,12 @@
+<?php
+session_start();
+require_once __DIR__ . '/../include/db_config.php';
+$pdo = getPDO();
+
+// Ambil data user yang memiliki status verifikasi selain unverified (pending, verified, rejected)
+$stmt = $pdo->query("SELECT id, name, email, verification_status, ktp_file, sim_file, created_at FROM users WHERE verification_status != 'unverified' ORDER BY FIELD(verification_status, 'pending') DESC, id DESC");
+$verifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -52,12 +61,16 @@
       <?php include 'pages/cars.php'; ?>
       <?php include 'pages/orders.php'; ?>
       <?php include 'pages/customers.php'; ?>
+      <?php include 'pages/verifications.php'; ?>
       <?php include 'pages/settings.php'; ?>
     </main>
 
   </div>
 </div>
 
+<script>
+  window.SERVER_VERIFICATIONS = <?= json_encode($verifications) ?>;
+</script>
 <script src="assets/js/app.js"></script>
 
 </body>

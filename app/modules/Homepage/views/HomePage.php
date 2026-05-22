@@ -54,13 +54,21 @@
             </div>
 
             <div class="flex items-center gap-3">
+                <?php if(isset($_SESSION['user_id'])): ?>
+                <a href="index.php?module=Profile&action=index" class="flex items-center gap-2 group cursor-pointer no-underline">
+                    <div class="w-10 h-10 rounded-full bg-blue-50 group-hover:bg-blue-100 transition flex items-center justify-center text-blue-600 shrink-0">
+                        <i class="bi bi-person-circle text-xl"></i>
+                    </div>
+                    <span class="font-medium text-gray-800 group-hover:text-blue-600 transition relative after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-0 after:bg-blue-600 after:transition-all after:duration-300 group-hover:after:w-full">Halo, <?= htmlspecialchars(explode(' ', trim($_SESSION['user_name']))[0]) ?></span>
+                </a>
+                <?php else: ?>
                 <div class="flex items-center gap-2">
                     <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
                         <i class="bi bi-person-circle text-xl"></i>
                     </div>
-                    <span class="font-medium">Halo, <?= isset($_SESSION['user_name']) ? htmlspecialchars(explode(' ', trim($_SESSION['user_name']))[0]) : 'Tamu' ?></span>
-                    </div>
+                    <span class="font-medium">Halo, Tamu</span>
                 </div>
+                <?php endif; ?>
                 
                 <div class="border-l border-gray-300 pl-3 ml-1">
                     <a href="index.php?module=Auth&action=logout" class="flex items-center gap-1 text-red-500 hover:text-red-700 font-medium transition text-sm">
@@ -73,6 +81,17 @@
     </nav>
 
     <main class="max-w-7xl mx-auto p-6 space-y-10 py-10">
+        
+        <?php if(isset($_SESSION['user_id']) && isset($verification_status) && in_array($verification_status, ['unverified', 'rejected'])): ?>
+        <div class="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-xl shadow-sm flex items-start gap-3 mb-6" role="alert">
+            <i class="bi bi-exclamation-triangle-fill text-xl mt-0.5"></i>
+            <div>
+                <strong class="block mb-1 font-bold">Identitas Belum Lengkap!</strong>
+                <p class="text-sm">Identitas Anda belum lengkap atau ditolak. Silakan <a href="index.php?module=Profile&action=index" class="underline font-semibold hover:text-red-600">lengkapi di sini</a> untuk menyewa mobil.</p>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <header class="space-y-3">
             <h1 class="text-5xl font-bold tracking-tighter">Cari yang terbaik</h1>
             <p class="text-xl text-gray-600">Pilih mobil terbaik yang kami sediakan untukmu.</p>

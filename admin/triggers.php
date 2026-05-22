@@ -1,7 +1,7 @@
 <?php
 $actionType = isset($_GET['type']) ? $_GET['type'] : '';
 
-$deviceId = "DEVICE ID MD"; 
+$deviceId = "eb1cb6f7-feb6-4266-9e54-8937e3590b6d";
 
 $webhookIdentifier = "";
 $pesanSukses = "";
