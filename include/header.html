@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Header Sewa Mobil</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+
+        /* Membuat class khusus untuk font logo */
+        .logo-font {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            /* Tanda kutip ekstra di akhir sudah dihapus */
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            font-weight: 800;
+            /* Ditambahkan titik koma */
+        }
+
+        .logo-accent {
+            color: #003FB0;
+            /* Warna biru kustom kamu */
+        }
+
+        /* Membuat class khusus untuk tombol */
+        .btn-custom {
+            background-color: #003FB0;
+            /* Ganti dengan kode warna utamamu */
+            color: #ffffff;
+            /* Warna tulisan putih */
+            border: none;
+            transition: all 0.3s ease;
+            /* Membuat animasi perubahan warna lebih halus */
+        }
+
+        /* Efek saat kursor mouse diarahkan ke tombol (Hover) */
+        .btn-custom:hover {
+            background-color: #002870;
+            /* Warna yang sedikit lebih gelap untuk efek hover */
+            color: #ffffff;
+            transform: translateY(-2px);
+            /* Opsional: Efek tombol seolah sedikit terangkat */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top bg-light navbar-light">
+        <div class="container">
+            <a class="navbar-brand logo-font" href="#">
+                <span class="logo-accent">Sewa Mobil</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-mdb-collapse-init
+                data-mdb-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item ms-3">
+                        <a class="btn btn-rounded" href="#!">Login</a>
+                    </li>
+                    <li class="nav-item ms-3">
+                        <a class="btn btn-custom btn-rounded" href="#!">Register</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- Navbar -->
+</body>
+
+</html>

@@ -1,9 +1,40 @@
 .vscode/
 .idea/
+# Log files
 *.log
 error_log
+
+# Uploads and generated assets
 /assets/uploads*
+
+# Config
 /config/database.php
+.env
+
+# OS
 .DS_Store
 Thumbs.db
-.env
+
+# PHP dependencies
+/vendor/
+composer.phar
+
+# Node
+/node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# PHPUnit cache
+.phpunit.result.cache
+
+# Build artifacts
+/dist/
+/build/
+
+# Misc
+*.cache
+*.tmp
+
+db_config.php
+README_DB.md
+
