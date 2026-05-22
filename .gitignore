@@ -35,6 +35,5 @@ yarn-error.log*
 *.cache
 *.tmp
 
-db_config.php
-README_DB.md
 
+app/modules/TrackingDummy/TrackingController.php

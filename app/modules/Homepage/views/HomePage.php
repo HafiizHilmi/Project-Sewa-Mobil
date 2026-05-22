@@ -10,7 +10,6 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
 
-        /* Card layout: make all cards equal-height and keep button at bottom */
         .car-grid > div {
             display: flex;
             flex-direction: column;
@@ -22,9 +21,9 @@
             flex-direction: column;
             gap: 0.75rem;
             flex: 1 1 auto;
+
         }
 
-        /* Truncate long titles to max 2 lines with ellipsis and enforce height */
         .car-title {
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -32,7 +31,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             word-break: break-word;
-            min-height: 4rem; /* Forces 2 lines of text height (2rem line-height x 2) */
+            min-height: 4rem; 
         }
     </style>
 </head>
@@ -221,12 +220,11 @@
 
         filterButtons.forEach(button => {
             button.addEventListener("click", () => {
-                // Reset semua tombol ke gaya tidak aktif
+                
                 filterButtons.forEach(btn => {
                     btn.className = "bg-white text-gray-800 px-6 py-3 rounded-full font-medium hover:bg-gray-100 border border-gray-200 transition";
                 });
                 
-                // Ubah gaya tombol yang diklik menjadi aktif
                 button.className = "bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition";
 
                 const filterText = button.textContent.trim().toUpperCase();

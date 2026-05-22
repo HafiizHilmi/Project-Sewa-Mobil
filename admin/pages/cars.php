@@ -1,8 +1,6 @@
-<!-- ====================================================
-     PAGE: CAR MANAGEMENT
-     Berisi: Filter kategori, daftar mobil, detail mobil,
-             modal edit/tambah mobil
-===================================================== -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <div x-show="activePage === 'cars'"
      x-transition:enter="transition ease-out duration-200"
      x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
@@ -108,32 +106,52 @@
             </div>
 
             <!-- GPS Map Mock -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden relative" style="height:190px;">
-              <div class="absolute inset-0" style="background:#e8f0e8;background-image:linear-gradient(rgba(160,185,160,.45) 1px,transparent 1px),linear-gradient(90deg,rgba(160,185,160,.45) 1px,transparent 1px);background-size:36px 36px;">
-                <div class="absolute" style="left:0;right:0;top:38%;height:18px;background:rgba(255,255,255,.85)"></div>
-                <div class="absolute" style="left:0;right:0;top:68%;height:14px;background:rgba(255,255,255,.85)"></div>
-                <div class="absolute" style="top:0;bottom:0;left:33%;width:18px;background:rgba(255,255,255,.85)"></div>
-                <div class="absolute" style="top:0;bottom:0;left:63%;width:14px;background:rgba(255,255,255,.85)"></div>
-              </div>
-              <div class="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-white rounded-full px-3 py-1.5 shadow-sm border border-slate-100">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span class="text-xs font-semibold text-slate-700">GPS Aktif</span>
-              </div>
-              <div class="absolute inset-0 flex items-center justify-center z-10">
-                <div class="relative">
-                  <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shadow-xl border-[3px] border-white">
-                    <i class="fa-solid fa-car text-white text-xs"></i>
-                  </div>
-                  <div class="absolute -inset-2 rounded-full border-2 border-blue-400 opacity-30 animate-ping"></div>
+            <div class="space-y-4">
+              
+              <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden relative" style="height: 240px;">
+                <div class="w-full h-full"
+                     x-init="$nextTick(() => {
+                        let lat = selectedCar.latitude || -7.1186; 
+                        let lng = selectedCar.longitude || 112.4155;
+                        let map = L.map($el).setView([lat, lng], 15);
+                        
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            maxZoom: 19,
+                            attribution: '&copy; OSM'
+                        }).addTo(map);
+
+                        let carMarker = L.marker([lat, lng]).addTo(map);
+                        carMarker.bindPopup(`<b>${selectedCar.name}</b><br>${selectedCar.plate}`).openPopup();
+
+                        setTimeout(() => { map.invalidateSize(); }, 200);
+                     })">
+                </div>
+
+                <div class="absolute top-3 right-3 z-[1000] flex items-center gap-1.5 bg-white dark:bg-slate-800 rounded-full px-3 py-1.5 shadow-md border border-slate-100 dark:border-slate-700">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span class="text-[11px] font-bold text-slate-700 dark:text-slate-200">Telemetri GPS Aktif</span>
+                </div>
+              </div> <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4">
+                <div class="flex items-center gap-2 mb-3">
+                  <i class="fa-solid fa-satellite-dish text-blue-500 text-xs"></i>
+                  <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">Sistem Kontrol Jarak Jauh (IoT)</h4>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                  <a :href="'triggers.php?type=alarm&id=' + selectedCar.id"
+                     class="flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-4 py-3 rounded-xl transition-all shadow-sm active:scale-95">
+                    <i class="fa-solid fa-bell"></i> Bunyikan Alarm
+                  </a>
+
+                  <a :href="'triggers.php?type=mesin_mati&id=' + selectedCar.id"
+                     class="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-3 rounded-xl transition-all shadow-sm active:scale-95">
+                    <i class="fa-solid fa-power-off"></i> Matikan Mesin
+                  </a>
                 </div>
               </div>
-              <button class="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-sm">
-                <i class="fa-solid fa-rotate-right text-[10px]"></i>Refresh Lokasi
-              </button>
-            </div>
-          </div>
 
-          <div class="space-y-4">
+            </div>
+
             <!-- Spesifikasi -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5">
               <div class="flex items-center gap-2.5 mb-4">
