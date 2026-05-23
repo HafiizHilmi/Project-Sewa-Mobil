@@ -1,13 +1,8 @@
-<!-- ====================================================
-     PAGE: ORDERS
-     Berisi: Filter tab status, tabel pesanan, modal detail order
-===================================================== -->
 <div x-show="activePage === 'orders'"
      x-transition:enter="transition ease-out duration-200"
      x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
      class="absolute inset-0 overflow-y-auto px-5 lg:px-6 py-5">
 
-  <!-- Filter & Toolbar -->
   <div class="flex items-start sm:items-center justify-between flex-wrap gap-3 mb-5">
     <div class="flex items-center gap-2 flex-wrap">
       <template x-for="tab in ['All Orders','Pending','Confirmed','Completed']" :key="tab">
@@ -31,11 +26,9 @@
     </div>
   </div>
 
-  <!-- Tabel Pesanan -->
   <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
-    <!-- Header Tabel (Desktop) -->
     <div class="hidden md:grid px-5 py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-[11px] font-bold uppercase tracking-wider"
-         style="grid-template-columns: 115px 1fr 1fr 165px 110px 120px 48px; gap: 12px;">
+         style="grid-template-columns: 115px 1fr 1fr 165px 110px 120px 80px; gap: 12px;">
       <div>ID Order</div>
       <div>Pelanggan</div>
       <div>Detail Mobil</div>
@@ -50,10 +43,9 @@
         <div>
           <div x-show="idx > 0" class="border-t border-slate-100 dark:border-slate-700 mx-5"></div>
 
-          <div @click="openOrderModal(order)" class="order-row px-5 py-4 dark:hover:bg-slate-700/30">
+          <div @click="openOrderModal(order)" class="order-row px-5 py-4 dark:hover:bg-slate-700/30 cursor-pointer">
 
-            <!-- Desktop Row -->
-            <div class="hidden md:grid items-center" style="grid-template-columns: 115px 1fr 1fr 165px 110px 120px 48px; gap: 12px;">
+            <div class="hidden md:grid items-center" style="grid-template-columns: 115px 1fr 1fr 165px 110px 120px 80px; gap: 12px;">
               <div>
                 <p class="text-xs font-bold text-slate-800 dark:text-slate-100 leading-snug" x-text="order.idLine1"></p>
                 <p class="text-xs font-bold text-slate-800 dark:text-slate-100" x-text="order.idLine2"></p>
@@ -103,14 +95,17 @@
                       x-text="order.status">
                 </span>
               </div>
-              <div class="flex justify-end" @click.stop>
-                <button class="w-7 h-7 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-colors">
-                  <i class="fa-solid fa-ellipsis-vertical text-slate-400 text-sm"></i>
+              
+              <div class="flex justify-end items-center gap-1.5" @click.stop>
+                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
+                  <i class="fa-solid fa-pen text-[10px]"></i>
+                </button>
+                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
+                  <i class="fa-solid fa-trash text-[10px]"></i>
                 </button>
               </div>
             </div>
 
-            <!-- Mobile Row -->
             <div class="md:hidden flex items-start gap-3">
               <div class="w-12 h-10 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" :class="order.car.thumbBg">
                 <i class="fa-solid fa-car text-lg" :class="order.car.thumbColor"></i>
@@ -131,6 +126,15 @@
                   <p class="text-xs text-slate-500" x-text="order.startDate + ' – ' + order.endDate"></p>
                   <p class="text-xs font-bold text-slate-800 dark:text-white">Rp <span x-text="order.totalFormatted"></span></p>
                 </div>
+                
+                <div class="flex justify-end gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-700" @click.stop>
+                  <button class="w-8 h-8 rounded-lg flex items-center justify-center text-blue-500 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors">
+                    <i class="fa-solid fa-pen text-xs"></i>
+                  </button>
+                  <button class="w-8 h-8 rounded-lg flex items-center justify-center text-red-500 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-800 transition-colors">
+                    <i class="fa-solid fa-trash text-xs"></i>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -145,7 +149,6 @@
     </div>
   </div>
 
-  <!-- Footer Info -->
   <div class="flex items-center justify-between mt-4">
     <p class="text-xs text-slate-400">
       Menampilkan <span class="font-semibold text-slate-600 dark:text-slate-300" x-text="filteredOrders.length"></span>
@@ -154,7 +157,6 @@
   </div>
 </div>
 
-<!-- ── Modal Detail Order ── -->
 <div x-show="showOrderModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
   <div @click="showOrderModal = false" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" x-transition.opacity></div>
   <div class="modal-box relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md flex flex-col p-5">

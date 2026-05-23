@@ -134,7 +134,7 @@
               </div> <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4">
                 <div class="flex items-center gap-2 mb-3">
                   <i class="fa-solid fa-satellite-dish text-blue-500 text-xs"></i>
-                  <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">Sistem Kontrol Jarak Jauh (IoT)</h4>
+                  <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">Kontrol</h4>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-3">
