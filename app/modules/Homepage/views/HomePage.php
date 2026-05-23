@@ -52,9 +52,6 @@
                         <i class="bi bi-search"></i>    
                     </div>
                     <input type="text" name="search" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" placeholder="Cari mobil, ukuran, kategori..." class="w-full pl-10 pr-12 py-3 bg-gray-100 rounded-full border-none focus:ring-2 focus:ring-blue-100 placeholder:text-gray-500">
-                    <button type="submit" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700">
-                        <i class="bi bi-search"></i>
-                    </button>
                 </form>
             </div>
 
@@ -112,7 +109,7 @@
 
         <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 car-grid">
             <?php if (!empty($_GET['search'])): ?>
-                <div class="col-span-full rounded-2xl bg-blue-50 border border-blue-100 px-5 py-3 text-sm text-blue-700">
+                <div class="col-span-full rounded-xl bg-blue-50 border border-blue-100 px-5 py-3 text-sm text-blue-700">
                     Menampilkan <?= count($cars ?? []) ?> hasil untuk "<?= htmlspecialchars($_GET['search']) ?>".
                 </div>
             <?php endif; ?>
