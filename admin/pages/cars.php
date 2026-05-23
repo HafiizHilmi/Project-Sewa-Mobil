@@ -1,40 +1,108 @@
 <?php
-// Mengambil data dari database
 require_once '../Config/database.php';
 $checkStock = mysqli_query($conn, "SHOW COLUMNS FROM cars LIKE 'stock'");
 if (mysqli_num_rows($checkStock) === 0) {
     mysqli_query($conn, "ALTER TABLE cars ADD COLUMN stock INT NOT NULL DEFAULT 1");
 }
+
+$checkIsType = mysqli_query($conn, "SHOW COLUMNS FROM cars LIKE 'is_type'");
+if (mysqli_num_rows($checkIsType) === 0) {
+    mysqli_query($conn, "ALTER TABLE cars ADD COLUMN is_type TINYINT(1) NOT NULL DEFAULT 0");
+}
+
+$checkTypeKey = mysqli_query($conn, "SHOW COLUMNS FROM cars LIKE 'type_key'");
+if (mysqli_num_rows($checkTypeKey) === 0) {
+    mysqli_query($conn, "ALTER TABLE cars ADD COLUMN type_key VARCHAR(255) NULL");
+    mysqli_query($conn, "UPDATE cars SET type_key = CONCAT(make,'|',model,'|',year,'|',fuel_type,'|',engine_capacity,'|',seats,'|',transmission,'|',category,'|',price_per_day)");
+}
+
 $query = mysqli_query($conn, "SELECT * FROM cars ORDER BY id DESC");
-$cars_data = [];
 
+$types_map = [];
 while ($row = mysqli_fetch_assoc($query)) {
-    // Mengecek apakah kolom image ada isinya. Jika ada, arahkan ke folder public/assets/images/
-    $imagePath = !empty($row['image']) ? '../public/assets/images/' . $row['image'] : null;
+  $imagePath = !empty($row['image']) ? '../public/assets/images/' . $row['image'] : null;
 
-    $cars_data[] = [
-        'id'           => (int)$row['id'],
-        'name'         => $row['make'] . ' ' . $row['model'], 
-        'make'         => $row['make'], 
-        'plate'        => $row['number_plate'],
-        'chassis'      => $row['frame_number'],
-        'category'     => $row['category'],
-        'price'        => "Rp " . number_format($row['price_per_day'], 0, ',', '.'),
-        'price_raw'    => $row['price_per_day'],
-        'status'       => ($row['available'] == 1) ? 'Tersedia' : 'Tersewa',
-        'year'         => $row['year'],
-        'fuel'         => $row['fuel_type'],
-        'transmission' => $row['transmission'],
-        'passengers'   => $row['seats'],
-        'engine'       => $row['engine_capacity'],
-        'stock'        => isset($row['stock']) ? (int)$row['stock'] : 1,
-        'image'        => $imagePath, // <--- Data path gambar dikirim ke Alpine.js
-        'renter'       => '-', 
-        'rentalLeft'   => '0 Hari', 
-        'rentalPct'    => 0, 
-        'bgCls'        => $row['category'] == 'EV' ? 'bg-emerald-50 text-emerald-500' : 'bg-blue-50 text-blue-500',
-        'iconCls'      => $row['category'] == 'EV' ? 'text-emerald-500' : 'text-blue-500'
+  $type_key = !empty($row['type_key'])
+    ? $row['type_key']
+    : implode('|', [
+        $row['make'],
+        $row['model'],
+        $row['year'],
+        $row['fuel_type'],
+        $row['engine_capacity'],
+        $row['seats'],
+        $row['transmission'],
+        $row['category'],
+        $row['price_per_day']
+      ]);
+
+  if (!isset($types_map[$type_key])) {
+    $types_map[$type_key] = [
+      'type_key'   => $type_key,
+      'id'         => $row['id'],
+      'is_type'    => intval($row['is_type']),
+      'name'       => trim($row['make'] . ' ' . $row['model'] . ' ' . $row['year']),
+      'make'       => $row['make'],
+      'model'      => $row['model'],
+      'year'       => $row['year'],
+      'category'   => $row['category'],
+      'price'      => "Rp " . number_format($row['price_per_day'], 0, ',', '.'),
+      'price_raw'  => $row['price_per_day'],
+      'fuel'       => $row['fuel_type'],
+      'transmission'=> $row['transmission'],
+      'passengers' => $row['seats'],
+      'engine'     => $row['engine_capacity'],
+      'bgCls'      => $row['category'] == 'EV' ? 'bg-emerald-50 text-emerald-500' : 'bg-blue-50 text-blue-500',
+      'iconCls'    => $row['category'] == 'EV' ? 'text-emerald-500' : 'text-blue-500',
+      'image'      => $imagePath,
+      'children'   => []
     ];
+  } elseif (intval($row['is_type']) === 1) {
+    $types_map[$type_key]['id'] = $row['id'];
+    $types_map[$type_key]['is_type'] = 1;
+    $types_map[$type_key]['name'] = trim($row['make'] . ' ' . $row['model'] . ' ' . $row['year']);
+    $types_map[$type_key]['make'] = $row['make'];
+    $types_map[$type_key]['model'] = $row['model'];
+    $types_map[$type_key]['year'] = $row['year'];
+    $types_map[$type_key]['category'] = $row['category'];
+    $types_map[$type_key]['price'] = "Rp " . number_format($row['price_per_day'], 0, ',', '.');
+    $types_map[$type_key]['price_raw'] = $row['price_per_day'];
+    $types_map[$type_key]['fuel'] = $row['fuel_type'];
+    $types_map[$type_key]['transmission'] = $row['transmission'];
+    $types_map[$type_key]['passengers'] = $row['seats'];
+    $types_map[$type_key]['engine'] = $row['engine_capacity'];
+    $types_map[$type_key]['bgCls'] = $row['category'] == 'EV' ? 'bg-emerald-50 text-emerald-500' : 'bg-blue-50 text-blue-500';
+    $types_map[$type_key]['iconCls'] = $row['category'] == 'EV' ? 'text-emerald-500' : 'text-blue-500';
+    $types_map[$type_key]['image'] = $imagePath;
+  }
+
+  if (intval($row['is_type']) === 0) {
+    $child = [
+      'id'      => (int)$row['id'],
+      'plate'   => $row['number_plate'],
+      'chassis' => $row['frame_number'],
+      'status'  => ($row['available'] == 1) ? 'Tersedia' : 'Tersewa',
+      'image'   => $imagePath,
+      'latitude'=> $row['latitude'] ?? null,
+      'longitude'=> $row['longitude'] ?? null
+    ];
+
+    $types_map[$type_key]['children'][] = $child;
+  }
+}
+
+$types_data = array_values($types_map);
+
+$cars_data = [];
+foreach ($types_data as $t) {
+    $t['stock'] = count($t['children']);
+    $t['image'] = (!empty($t['children'][0]['image'])) ? $t['children'][0]['image'] : null;
+    $available = false;
+    foreach ($t['children'] as $c) {
+        if ($c['status'] === 'Tersedia') { $available = true; break; }
+    }
+    $t['status'] = $available ? 'Tersedia' : 'Tersewa';
+    $cars_data[] = $t;
 }
 ?>
 
@@ -63,8 +131,8 @@ while ($row = mysqli_fetch_assoc($query)) {
     </div>
 
     <div class="space-y-3">
-      <template x-for="car in filteredCars" :key="car.id">
-        <div class="car-row bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm px-4 py-3.5 flex items-center gap-3 sm:gap-4">
+      <template x-for="car in filteredCars" :key="car.type_key">
+        <div @click="viewCar(car)" class="car-row cursor-pointer bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm px-4 py-3.5 flex items-center gap-3 sm:gap-4">
 
           <div class="w-20 sm:w-24 h-14 sm:h-16 rounded-xl flex items-center justify-center flex-shrink-0 relative overflow-hidden" :class="car.bgCls">
             <template x-if="car.image">
@@ -77,7 +145,7 @@ while ($row = mysqli_fetch_assoc($query)) {
 
           <div class="flex-1 min-w-0">
             <p class="font-bold text-slate-800 dark:text-slate-100 text-sm leading-snug truncate" x-text="car.name"></p>
-            <p class="text-xs text-slate-400 mt-0.5" x-text="car.plate"></p>
+            <p class="text-xs text-slate-400 mt-0.5" x-text="car.stock + ' unit'" ></p>
             <div class="flex items-center gap-2 mt-1.5 sm:hidden">
               <span class="inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full" :class="carBadge(car.status)" x-text="car.status"></span>
               <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full" x-text="car.category"></span>
@@ -105,11 +173,14 @@ while ($row = mysqli_fetch_assoc($query)) {
           </div>
 
           <div class="flex flex-col gap-1.5 flex-shrink-0">
-            <button @click="viewCar(car)" class="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center transition-all hover:scale-105 shadow-sm">
+            <button @click.stop="viewCar(car)" class="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center transition-all hover:scale-105 shadow-sm">
               <i class="fa-solid fa-eye text-white text-xs"></i>
             </button>
-            <button @click="openEditCarModal(car)" class="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center transition-all hover:scale-105 shadow-sm">
+            <button @click.stop="openEditCarModal(car, true)" title="Edit Tipe" class="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center transition-all hover:scale-105 shadow-sm">
               <i class="fa-solid fa-pen text-white text-[10px]"></i>
+            </button>
+            <button @click.stop="openAddUnit(car)" title="Tambah Unit" class="w-8 h-8 rounded-full bg-emerald-500 hover:bg-emerald-600 flex items-center justify-center transition-all hover:scale-105 shadow-sm">
+              <i class="fa-solid fa-plus text-white text-[10px]"></i>
             </button>
           </div>
 
@@ -131,8 +202,28 @@ while ($row = mysqli_fetch_assoc($query)) {
     <template x-if="selectedCar">
       <div class="page-fade">
         <div class="mb-5">
-          <h2 class="text-2xl font-extrabold text-slate-800 dark:text-white leading-tight" x-text="selectedCar.name + ' ' + (selectedCar.year || '')"></h2>
-          <p class="text-sm text-slate-400 font-medium mt-1" x-text="selectedCar.plate"></p>
+          <h2 class="text-2xl font-extrabold text-slate-800 dark:text-white leading-tight" x-text="selectedCar.name"></h2>
+          <p class="text-sm text-slate-400 font-medium mt-1" x-text="selectedCar.plate || (selectedCar.children ? (selectedCar.children.length + ' unit') : '')"></p>
+
+          <template x-if="selectedCar.children && selectedCar.children.length > 0">
+            <div class="mt-3">
+              <h4 class="text-sm font-bold mb-2">Unit / Stok</h4>
+              <div class="space-y-2">
+                <template x-for="c in selectedCar.children" :key="c.id">
+                  <div class="flex items-center justify-between bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg px-3 py-2">
+                    <div>
+                      <div class="text-sm font-semibold" x-text="c.plate"></div>
+                      <div class="text-xs text-slate-400" x-text="c.status"></div>
+                    </div>
+                    <div class="flex gap-2">
+                      <button @click="viewChild(c, selectedCar)" class="text-xs px-3 py-1 bg-blue-600 text-white rounded">Lihat</button>
+                      <button @click="openEditCarModal({...c, make: selectedCar.make, model: selectedCar.model, year: selectedCar.year, category: selectedCar.category, price_raw: selectedCar.price_raw, fuel: selectedCar.fuel, engine: selectedCar.engine, passengers: selectedCar.passengers, transmission: selectedCar.transmission, type_key: selectedCar.type_key}, false)" class="text-xs px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded">Edit</button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-4">
@@ -150,13 +241,16 @@ while ($row = mysqli_fetch_assoc($query)) {
                     </div>
                 </template>
               </div>
+            <template x-if="selectedCar.is_type === 0">
               <div class="bg-slate-50 dark:bg-slate-700/50 border-t border-slate-100 dark:border-slate-700 px-5 py-2.5">
                 <p class="text-xs text-slate-500">Nomor Rangka:&nbsp;<span class="font-semibold text-slate-700 dark:text-slate-200" x-text="selectedCar.chassis"></span></p>
               </div>
+            </template>
             </div>
 
-            <div class="space-y-4">
-              <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden relative" style="height: 240px;">
+            <template x-if="selectedCar.is_type === 0">
+              <div class="space-y-4">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden relative" style="height: 240px;">
                 <div class="w-full h-full"
                      x-init="$nextTick(() => {
                         let lat = selectedCar.latitude || -7.1186; 
@@ -194,24 +288,7 @@ while ($row = mysqli_fetch_assoc($query)) {
                 </div>
               </div>
             </div>
-
-            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5">
-              <div class="flex items-center gap-2.5 mb-4">
-                <div class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
-                  <i class="fa-solid fa-circle-info text-blue-500 text-xs"></i>
-                </div>
-                <h3 class="text-sm font-bold text-slate-800 dark:text-white">Spesifikasi Kendaraan</h3>
-              </div>
-              <div class="grid grid-cols-2 gap-2 mb-4">
-                <div class="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3"><p class="text-[10px] font-semibold text-slate-400 uppercase mb-0.5">Tahun</p><p class="text-sm font-bold text-slate-800 dark:text-white" x-text="selectedCar.year"></p></div>
-                <div class="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3"><p class="text-[10px] font-semibold text-slate-400 uppercase mb-0.5">Bahan Bakar</p><p class="text-sm font-bold text-slate-800 dark:text-white" x-text="selectedCar.fuel"></p></div>
-                <div class="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3"><p class="text-[10px] font-semibold text-slate-400 uppercase mb-0.5">Transmisi</p><p class="text-sm font-bold text-slate-800 dark:text-white" x-text="selectedCar.transmission"></p></div>
-                <div class="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3"><p class="text-[10px] font-semibold text-slate-400 uppercase mb-0.5">Penumpang</p><p class="text-sm font-bold text-slate-800 dark:text-white" x-text="selectedCar.passengers"></p></div>
-              </div>
-              <div class="border-t border-slate-100 dark:border-slate-700 pt-3">
-                <p class="text-[10px] font-semibold text-slate-400 uppercase mb-0.5">Harga Sewa</p>
-                <p class="text-base font-extrabold text-blue-600" x-text="selectedCar.price + ' / hari'"></p>
-              </div>
+            </template>
             </div>
 
           </div>
@@ -226,6 +303,8 @@ while ($row = mysqli_fetch_assoc($query)) {
     <form x-ref="carForm" action="car_action.php" method="POST" enctype="multipart/form-data" class="modal-box relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden" style="max-height:92vh;">
       
       <input type="hidden" name="id" x-model="editForm.id">
+      <input type="hidden" name="is_type" x-bind:value="editForm.is_type ? 1 : 0" x-model="editForm.is_type">
+      <input type="hidden" name="type_key" x-model="editForm.type_key">
 
       <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-700">
         <h2 class="text-sm font-bold text-slate-800 dark:text-white" x-text="editModalTitle"></h2>
@@ -251,18 +330,19 @@ while ($row = mysqli_fetch_assoc($query)) {
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Merk Mobil</label><input type="text" name="make" x-model="editForm.name" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-blue-100"/></div>
-          <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Plat Nomor</label><input type="text" name="plate" x-model="editForm.plate" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
-          <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">No Rangka</label><input type="text" name="chassis" x-model="editForm.chassis" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
-          <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Kategori</label><select name="category" x-model="editForm.category" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"><option value="MPV">MPV</option><option value="SUV">SUV</option><option value="Sedan">Sedan</option><option value="EV">EV</option></select></div>
-          <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Harga Sewa / Hari</label><input type="number" name="price" x-model="editForm.price" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
-          <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Jenis BBM</label><input type="text" name="fuel" x-model="editForm.fuel" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
-          <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Kapasitas Mesin</label><input type="text" name="engine" x-model="editForm.engine" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
-          <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Kapasitas Penumpang</label><input type="number" name="passengers" x-model="editForm.passengers" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
-          <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Stok</label><input type="number" name="stock" x-model="editForm.stock" min="0" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
-        </div>
-        <div>
+          <div class="grid grid-cols-2 gap-3">
+            <div x-show="!editForm.onlyUnit"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Merk</label><input type="text" name="make" x-model="editForm.make" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-blue-100"/></div>
+            <div x-show="!editForm.onlyUnit"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Model</label><input type="text" name="model" x-model="editForm.model" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
+            <div x-show="!editForm.onlyUnit"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Tahun</label><input type="text" name="year" x-model="editForm.year" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
+            <div x-show="editForm.is_type === 0"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Plat Nomor</label><input type="text" name="plate" x-model="editForm.plate" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
+            <div x-show="editForm.is_type === 0"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">No Rangka</label><input type="text" name="chassis" x-model="editForm.chassis" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
+            <div x-show="!editForm.onlyUnit"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Kategori</label><select name="category" x-model="editForm.category" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"><option value="MPV">MPV</option><option value="SUV">SUV</option><option value="Sedan">Sedan</option><option value="EV">EV</option></select></div>
+            <div x-show="!editForm.onlyUnit"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Harga Sewa / Hari</label><input type="number" name="price" x-model="editForm.price" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
+            <div x-show="!editForm.onlyUnit"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Jenis BBM</label><input type="text" name="fuel" x-model="editForm.fuel" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
+            <div x-show="!editForm.onlyUnit"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Kapasitas Mesin</label><input type="text" name="engine" x-model="editForm.engine" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
+            <div x-show="!editForm.onlyUnit"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Kapasitas Penumpang</label><input type="number" name="passengers" x-model="editForm.passengers" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
+          </div>
+        <div x-show="!editForm.onlyUnit">
           <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2">Transmisi</label>
           <div class="flex gap-4">
             <label class="flex items-center gap-2"><input type="radio" name="transmission" x-model="editForm.transmission" value="Manual" class="accent-blue-600"> <span class="text-xs">Manual</span></label>
@@ -293,18 +373,29 @@ document.addEventListener('alpine:init', () => {
         editModalTitle: '',
         carFilter: 'All',
         selectedCar: null,
-        imagePreview: null, // <--- Variabel baru untuk menampung pratinjau gambar
+        imagePreview: null, 
         
         cars: <?php echo json_encode($cars_data); ?>,
         
-        editForm: { id: '', name: '', plate: '', chassis: '', category: 'MPV', price: '', fuel: '', engine: '', passengers: '', stock: 1, transmission: 'Manual' },
+        editForm: { id: '', is_type: 0, type_key: '', make: '', model: '', year: '', plate: '', chassis: '', category: 'MPV', price: '', fuel: '', engine: '', passengers: '', stock: 1, transmission: 'Manual', onlyUnit: false },
 
         init() {
             if (sessionStorage.getItem('carActionSuccess')) {
                 let msg = sessionStorage.getItem('carActionSuccess');
-                this.activePage = 'cars'; 
+                this.$root.activePage = 'cars';
                 setTimeout(() => { alert(msg); }, 300);
                 sessionStorage.removeItem('carActionSuccess');
+            }
+            const params = new URLSearchParams(window.location.search);
+            const typeKey = params.get('open_type_key');
+            if (typeKey) {
+                this.$root.activePage = 'cars';
+                const found = this.cars.find(c => c.type_key === typeKey);
+                if (found) {
+                    this.selectedCar = found;
+                    this.showCarDetail = true;
+                }
+                history.replaceState(null, '', window.location.pathname);
             }
         },
 
@@ -318,20 +409,67 @@ document.addEventListener('alpine:init', () => {
             this.showCarDetail = true;
         },
 
-        openEditCarModal(car = null) {
-            if (car) {
-                this.editForm = { ...car, name: car.make, price: car.price_raw, stock: car.stock ?? 1 };
-                this.editModalTitle = 'Edit Data Kendaraan';
-                this.imagePreview = car.image; // Jika edit, tampilkan foto lama dari database
-            } else {
-                this.editForm = { id: '', name: '', plate: '', chassis: '', category: 'MPV', price: '', fuel: '', engine: '', passengers: '', stock: 1, transmission: 'Manual' };
-                this.editModalTitle = 'Tambah Kendaraan Baru';
-                this.imagePreview = null; // Jika tambah baru, kosongkan foto
-            }
-            this.showEditModal = true;
+        openEditCarModal(car = null, isType = false) {
+            if (car && isType) {
+            this.editForm = {
+              id: car.id || '',
+              is_type: 1,
+              type_key: car.type_key || '',
+              make: car.make || '',
+              model: car.model || '',
+              year: car.year || '',
+              plate: '',
+              chassis: '',
+              category: car.category || 'MPV',
+              price: car.price_raw || '',
+              fuel: car.fuel || '',
+              engine: car.engine || '',
+              passengers: car.passengers || '',
+              stock: car.stock || 0,
+              transmission: car.transmission || 'Manual'
+            };
+            this.editModalTitle = 'Edit Tipe Mobil';
+            this.imagePreview = car.image || null;
+            this.editForm.onlyUnit = false;
+          } else if (car) {
+            // Edit individual unit (child)
+            this.editForm = { id: car.id, is_type: 0, type_key: car.type_key || '', make: car.make || '', model: car.model || '', year: car.year || '', plate: car.plate || '', chassis: car.chassis || '', category: car.category || 'MPV', price: car.price_raw || '', fuel: car.fuel || '', engine: car.engine || '', passengers: car.passengers || '', stock: car.stock || 1, transmission: car.transmission || 'Manual', onlyUnit: true };
+            this.editModalTitle = 'Edit Unit Kendaraan';
+            this.imagePreview = car.image || null;
+          } else {
+            this.editForm = { id: '', is_type: 1, type_key: '', make: '', model: '', year: '', plate: '', chassis: '', category: 'MPV', price: '', fuel: '', engine: '', passengers: '', stock: 0, transmission: 'Manual', onlyUnit: false };
+            this.editModalTitle = 'Tambah Tipe Mobil Baru';
+            this.imagePreview = null; // Jika tambah baru, kosongkan foto
+          }
+          this.showEditModal = true;
         },
 
-        // Fungsi ini membaca file gambar dari perangkatmu lalu menampilkannya di form
+        openAddUnit(type) {
+          this.editForm = { id: '', is_type: 0, type_key: type.type_key || '', make: type.make || '', model: type.model || '', year: type.year || '', plate: '', chassis: '', category: type.category || 'MPV', price: type.price_raw || '', fuel: type.fuel || '', engine: type.engine || '', passengers: type.passengers || '', stock: 1, transmission: type.transmission || 'Manual', onlyUnit: true };
+          this.editModalTitle = 'Tambah Unit untuk ' + (type.name || 'Tipe Mobil');
+          this.imagePreview = null;
+          this.showEditModal = true;
+        },
+
+        viewChild(child, parent) {
+          this.selectedCar = {
+            ...child,
+            is_type: 0,
+            name: `${parent?.make || child.make || ''} ${parent?.model || child.model || ''}`.trim(),
+            make: parent?.make || child.make || '',
+            model: parent?.model || child.model || '',
+            year: parent?.year || child.year || '',
+            category: parent?.category || child.category || 'MPV',
+            price_raw: parent?.price_raw || child.price_raw || '',
+            fuel: parent?.fuel || child.fuel || '',
+            engine: parent?.engine || child.engine || '',
+            passengers: parent?.passengers || child.passengers || '',
+            transmission: parent?.transmission || child.transmission || 'Manual',
+            type_key: parent?.type_key || child.type_key || ''
+          };
+          this.showCarDetail = true;
+        },
+
         fileChosen(event) {
             let file = event.target.files[0];
             if (file) {
@@ -349,10 +487,18 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        deleteCar(id) {
-            if (confirm('Apakah Anda yakin mau menghapus kendaraan ini? Data yang dihapus tidak dapat dikembalikan.')) {
+        deleteCar(id, typeKey = '', isType = 0) {
+            let confirmMsg = 'Apakah Anda yakin mau menghapus kendaraan ini? Data yang dihapus tidak dapat dikembalikan.';
+            if (isType == 1 && typeKey) {
+                confirmMsg = 'Anda akan menghapus tipe parent ini beserta semua unit child-nya. Lanjutkan?';
+            }
+            if (confirm(confirmMsg)) {
                 sessionStorage.setItem('carActionSuccess', 'Kendaraan berhasil dihapus!');
-                window.location.href = 'car_action.php?delete_id=' + id; 
+                let url = 'car_action.php?delete_id=' + id;
+                if (isType == 1 && typeKey) {
+                    url += '&delete_is_type=1&delete_type_key=' + encodeURIComponent(typeKey);
+                }
+                window.location.href = url;
             }
         },
         

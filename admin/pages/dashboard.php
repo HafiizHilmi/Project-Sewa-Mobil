@@ -1,5 +1,5 @@
 <?php
-$stockStmt = $pdo->query("SELECT COUNT(*) AS total_cars, IFNULL(SUM(stock), 0) AS total_stock, IFNULL(SUM(CASE WHEN available = 1 THEN stock ELSE 0 END), 0) AS available_stock FROM cars");
+$stockStmt = $pdo->query("SELECT IFNULL(SUM(CASE WHEN IFNULL(is_type,0)=0 THEN 1 ELSE 0 END), 0) AS total_cars, IFNULL(SUM(CASE WHEN IFNULL(is_type,0)=0 THEN stock ELSE 0 END), 0) AS total_stock, IFNULL(SUM(CASE WHEN available = 1 AND IFNULL(is_type,0)=0 THEN stock ELSE 0 END), 0) AS available_stock FROM cars");
 $stockStats = $stockStmt->fetch(PDO::FETCH_ASSOC);
 $totalStock = $stockStats['total_stock'] ?? 0;
 $totalCars = $stockStats['total_cars'] ?? 0;

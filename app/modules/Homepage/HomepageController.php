@@ -25,15 +25,16 @@ class HomepageController {
         $search = trim($_GET['search'] ?? '');
 
         if ($search !== '') {
-            $stmt = $pdo->prepare("SELECT *, COALESCE(stock, 0) AS stock FROM cars WHERE available = 1 AND stock > 0 AND (make LIKE :search1 OR model LIKE :search2 OR category LIKE :search3 OR fuel_type LIKE :search4) ORDER BY id DESC");
+            $stmt = $pdo->prepare("SELECT type_key, make, model, year, category, fuel_type, engine_capacity, seats, price_per_day, MAX(image) AS image, SUM(stock) AS stock, GROUP_CONCAT(DISTINCT transmission SEPARATOR ', ') AS transmission FROM cars WHERE available = 1 AND is_type = 0 AND stock > 0 AND (make LIKE :search1 OR model LIKE :search2 OR category LIKE :search3 OR fuel_type LIKE :search4 OR year LIKE :search5) GROUP BY type_key ORDER BY MAX(id) DESC");
             $stmt->execute([
                 'search1' => "%$search%",
                 'search2' => "%$search%",
                 'search3' => "%$search%",
                 'search4' => "%$search%",
+                'search5' => "%$search%",
             ]);
         } else {
-            $stmt = $pdo->query("SELECT *, COALESCE(stock, 0) AS stock FROM cars WHERE available = 1 AND stock > 0 ORDER BY id DESC");
+            $stmt = $pdo->query("SELECT type_key, make, model, year, category, fuel_type, engine_capacity, seats, price_per_day, MAX(image) AS image, SUM(stock) AS stock, GROUP_CONCAT(DISTINCT transmission SEPARATOR ', ') AS transmission FROM cars WHERE available = 1 AND is_type = 0 AND stock > 0 GROUP BY type_key ORDER BY MAX(id) DESC");
         }
 
         $cars = $stmt->fetchAll(PDO::FETCH_ASSOC);
