@@ -36,6 +36,7 @@
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
+    <?php $cars = $cars ?? []; ?>
 
     <nav class="bg-white border-b sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -44,13 +45,17 @@
             </div>
             
             <div class="relative w-full max-w-xl">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                    <i class="bi bi-search"></i>
-                </div>
-                <input type="text" placeholder="Cari mobil, lokasi..." class="w-full pl-10 pr-12 py-3 bg-gray-100 rounded-full border-none focus:ring-2 focus:ring-blue-100 placeholder:text-gray-500">
-                <div class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-gray-500 hover:text-gray-700">
-                    <i class="bi bi-sliders h-5 w-5"></i>
-                </div>
+                <form action="index.php" method="GET" class="relative">
+                    <input type="hidden" name="module" value="Homepage">
+                    <input type="hidden" name="action" value="index">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                        <i class="bi bi-search"></i>    
+                    </div>
+                    <input type="text" name="search" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" placeholder="Cari mobil, ukuran, kategori..." class="w-full pl-10 pr-12 py-3 bg-gray-100 rounded-full border-none focus:ring-2 focus:ring-blue-100 placeholder:text-gray-500">
+                    <button type="submit" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
             </div>
 
             <div class="flex items-center gap-3">
@@ -71,7 +76,7 @@
                 <?php endif; ?>
                 
                 <div class="border-l border-gray-300 pl-3 ml-1">
-                    <a href="index.php?module=Auth&action=logout" class="flex items-center gap-1 text-red-500 hover:text-red-700 font-medium transition text-sm">
+                    <a href="index.php?module=Auth&action=logout" class="flex items-center gap-1 text-red-500 hover:text-red-700 font-medium transition text-sm no-underline">
                         <i class="bi bi-box-arrow-right text-lg"></i> 
                         <span class="hidden md:inline">Keluar</span>
                     </a>
@@ -106,127 +111,45 @@
         </section>
 
         <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 car-grid">
-            
-            <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300 car-card">
-                <img src="https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop" alt="Toyota Avanza" class="w-full h-48 object-cover rounded-2xl mb-5">
-                <div class="card-body">
-                    <div class="flex items-start justify-between gap-2 mb-2">
-                        <div>
-                            <h3 class="text-2xl font-bold tracking-tight car-title">Toyota Avanza 2024</h3>
-                            <p class="text-gray-500 font-medium">MPV</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-xl font-bold text-blue-700">Rp350.000 <span class="text-sm font-normal text-gray-500">/hari</span></p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2 mb-6">
-                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Bensin</span>
-                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">7 Penumpang</span>
-                    </div>
+            <?php if (!empty($_GET['search'])): ?>
+                <div class="col-span-full rounded-2xl bg-blue-50 border border-blue-100 px-5 py-3 text-sm text-blue-700">
+                    Menampilkan <?= count($cars ?? []) ?> hasil untuk "<?= htmlspecialchars($_GET['search']) ?>".
                 </div>
-                <a href="index.php?module=Booking&action=checkout" class="block w-full text-center bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition">Sewa Sekarang</a>
-            </div>
-
-            <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300 car-card">
-                <img src="https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop" alt="Toyota Avanza" class="w-full h-48 object-cover rounded-2xl mb-5">
-                <div class="card-body">
-                    <div class="flex items-start justify-between gap-2 mb-2">
-                        <div>
-                            <h3 class="text-2xl font-bold tracking-tight car-title">Toyota Avanza 2024</h3>
-                            <p class="text-gray-500 font-medium">MPV</p>
+            <?php endif; ?>
+            <?php if (!empty($cars)): ?>
+                <?php foreach ($cars as $car): ?>
+                    <?php $carName = htmlspecialchars(trim($car['make'] . ' ' . $car['model'] . ' ' . $car['year'])); ?>
+                    <?php $carCategory = htmlspecialchars($car['category'] ?: 'Lainnya'); ?>
+                    <?php $carFuel = htmlspecialchars($car['fuel_type'] ?: '-'); ?>
+                    <?php $carSeats = htmlspecialchars($car['seats'] ?: '-'); ?>
+                    <?php $carPrice = number_format($car['price_per_day'], 0, ',', '.'); ?>
+                    <?php $carImage = htmlspecialchars($car['image'] ?: 'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop'); ?>
+                    <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300 car-card">
+                        <img src="<?= $carImage ?>" alt="<?= $carName ?>" class="w-full h-48 object-cover rounded-2xl mb-5">
+                        <div class="card-body">
+                            <div class="flex items-start justify-between gap-2 mb-2">
+                                <div>
+                                    <h3 class="text-2xl font-bold tracking-tight car-title"><?= $carName ?></h3>
+                                    <p class="text-gray-500 font-medium"><?= $carCategory ?></p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xl font-bold text-blue-700">Rp<?= $carPrice ?> <span class="text-sm font-normal text-gray-500">/hari</span></p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 mb-6">
+                                <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium"><?= $carFuel ?></span>
+                                <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium"><?= $carSeats ?> Penumpang</span>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <p class="text-xl font-bold text-blue-700">Rp350.000 <span class="text-sm font-normal text-gray-500">/hari</span></p>
-                        </div>
+                        <a href="index.php?module=Booking&action=checkout" class="block w-full text-center bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition no-underline">Sewa Sekarang</a>
                     </div>
-                    <div class="flex items-center gap-2 mb-6">
-                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Bensin</span>
-                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">7 Penumpang</span>
-                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="col-span-full p-12 bg-white rounded-3xl border border-gray-200 text-center">
+                    <p class="text-xl font-semibold mb-2">Tidak ada mobil yang ditemukan.</p>
+                    <p class="text-gray-500">Coba kata kunci lain atau hapus teks pencarian.</p>
                 </div>
-                <button class="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition">Sewa Sekarang</button>
-            </div>
-
-            <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300 car-card">
-                <img src="https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop" alt="Toyota Avanza" class="w-full h-48 object-cover rounded-2xl mb-5">
-                <div class="card-body">
-                    <div class="flex items-start justify-between gap-2 mb-2">
-                        <div>
-                            <h3 class="text-2xl font-bold tracking-tight car-title">Hyundai Ioniq</h3>
-                            <p class="text-gray-500 font-medium">SUV</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-xl font-bold text-blue-700">Rp450.000 <span class="text-sm font-normal text-gray-500">/hari</span></p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2 mb-6">
-                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Listrik</span>
-                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">4 Penumpang</span>
-                    </div>
-                </div>
-                <button class="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition">Sewa Sekarang</button>
-            </div>
-
-            <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300 car-card">
-                <img src="https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop" alt="Toyota Avanza" class="w-full h-48 object-cover rounded-2xl mb-5">
-                <div class="card-body">
-                    <div class="flex items-start justify-between gap-2 mb-2">
-                        <div>
-                            <h3 class="text-2xl font-bold tracking-tight car-title">Toyota Avanza 2024</h3>
-                            <p class="text-gray-500 font-medium">MPV</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-xl font-bold text-blue-700">Rp350.000 <span class="text-sm font-normal text-gray-500">/hari</span></p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2 mb-6">
-                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Bensin</span>
-                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">7 Penumpang</span>
-                    </div>
-                </div>
-                <button class="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition">Sewa Sekarang</button>
-            </div>
-
-            <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300 car-card">
-                <img src="https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop" alt="Toyota Avanza" class="w-full h-48 object-cover rounded-2xl mb-5">
-                <div class="card-body">
-                    <div class="flex items-start justify-between gap-2 mb-2">
-                        <div>
-                            <h3 class="text-2xl font-bold tracking-tight car-title">Toyota Avanza 2024</h3>
-                            <p class="text-gray-500 font-medium">MPV</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-xl font-bold text-blue-700">Rp350.000 <span class="text-sm font-normal text-gray-500">/hari</span></p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2 mb-6">
-                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Bensin</span>
-                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">7 Penumpang</span>
-                    </div>
-                </div>
-                <button class="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition">Sewa Sekarang</button>
-            </div>
-
-            <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-gray-200 transition-all duration-300 car-card">
-                <img src="https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop" alt="Toyota Avanza" class="w-full h-48 object-cover rounded-2xl mb-5">
-                <div class="card-body">
-                    <div class="flex items-start justify-between gap-2 mb-2">
-                        <div>
-                            <h3 class="text-2xl font-bold tracking-tight car-title">Toyota Avanza 2024</h3>
-                            <p class="text-gray-500 font-medium">MPV</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-xl font-bold text-blue-700">Rp350.000 <span class="text-sm font-normal text-gray-500">/hari</span></p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2 mb-6">
-                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Bensin</span>
-                        <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">7 Penumpang</span>
-                    </div>
-                </div>
-                <button class="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition">Sewa Sekarang</button>
-            </div>
-
+            <?php endif; ?>
         </section>
     </main>
 

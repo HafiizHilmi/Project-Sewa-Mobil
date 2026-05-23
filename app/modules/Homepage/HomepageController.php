@@ -22,8 +22,20 @@ class HomepageController {
             }
         }
 
-        // Ambil semua data mobil dari database
-        $stmt = $pdo->query("SELECT * FROM cars ORDER BY id DESC");
+        $search = trim($_GET['search'] ?? '');
+
+        if ($search !== '') {
+            $stmt = $pdo->prepare("SELECT * FROM cars WHERE available = 1 AND (make LIKE :search1 OR model LIKE :search2 OR category LIKE :search3 OR fuel_type LIKE :search4) ORDER BY id DESC");
+            $stmt->execute([
+                'search1' => "%$search%",
+                'search2' => "%$search%",
+                'search3' => "%$search%",
+                'search4' => "%$search%",
+            ]);
+        } else {
+            $stmt = $pdo->query("SELECT * FROM cars WHERE available = 1 ORDER BY id DESC");
+        }
+
         $cars = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Kirim data $cars ke view HomePage.php

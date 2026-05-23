@@ -14,10 +14,10 @@
 <body class="bg-gray-50 text-gray-800">
     <nav class="bg-white border-b sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="index.php?module=Homepage&action=index" class="text-blue-700 font-extrabold text-2xl tracking-tight">Sewa<span class="text-gray-900">Mobil</span></a>
-            <div class="flex items-center gap-4">
-                <a href="index.php?module=Homepage&action=index" class="text-gray-600 hover:text-blue-600 font-medium transition">Beranda</a>
-                <a href="index.php?module=Auth&action=logout" class="text-red-500 hover:text-red-700 font-medium transition">Keluar</a>
+            <a href="index.php?module=Homepage&action=index" class="text-blue-700 font-extrabold text-2xl tracking-tight no-underline">Sewa<span class="text-gray-900">Mobil</span></a>
+            <div class="flex items-center gap-4">   
+                <a href="index.php?module=Homepage&action=index" class="text-gray-600 hover:text-blue-600 font-medium transition no-underline">Beranda</a>
+                <a href="index.php?module=Auth&action=logout" class="text-red-500 hover:text-red-700 font-medium transition no-underline">Keluar</a>
             </div>
         </div>
     </nav>
@@ -214,7 +214,7 @@
                             <p class="text-gray-500 text-sm mb-8">Yuk, cari armada terbaikmu dan mulai perjalanan!</p>
 
                             <?php if ($status === 'verified'): ?>
-                                <a href="index.php?module=Homepage&action=index" class="inline-block bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-700 transition">
+                                <a href="index.php?module=Homepage&action=index" class="inline-block bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-700 transition no-underline">
                                     Cari & Sewa Mobil
                                 </a>
                             <?php else: ?>
