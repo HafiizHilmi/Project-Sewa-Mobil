@@ -2,7 +2,7 @@
 $host= "localhost";
 $user= "root";
 $password= "";
-$database= "db_rental_mobil";
+$database= "project_sewa_mobil";
 
 // membuat koneksi
 $conn = mysqli_connect($host, $user, $password, $database);
