@@ -6,12 +6,23 @@
     <title>SewaMobil - Profil</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        /* Tailwind handles font */
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="bg-gray-50 text-gray-800 font-sans">
     <nav class="bg-white border-b sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <a href="index.php?module=Homepage&action=index" class="text-blue-700 font-extrabold text-2xl tracking-tight no-underline">Sewa<span class="text-gray-900">Mobil</span></a>
@@ -52,19 +63,19 @@
 
         <!-- Banners -->
         <?php if ($status === 'pending'): ?>
-            <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg flex items-center gap-3">
-                <i class="bi bi-info-circle-fill text-yellow-500"></i>
-                <p class="text-sm font-medium">Akun Anda sedang diverifikasi oleh admin, silakan tunggu. Pengecekan biasanya memakan waktu maksimal 1x24 jam.</p>
+            <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-lg flex items-center gap-3 w-full">
+                <i class="bi bi-info-circle-fill text-yellow-500 text-lg flex-shrink-0"></i>
+                <div class="text-sm font-medium m-0">Akun Anda sedang diverifikasi oleh admin, silakan tunggu. Pengecekan biasanya memakan waktu maksimal 1x24 jam.</div>
             </div>
         <?php elseif ($status === 'verified'): ?>
-            <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center gap-3">
-                <i class="bi bi-check-circle-fill text-green-500"></i>
-                <p class="text-sm font-medium">🎉 Akun Anda Telah Terverifikasi! Seluruh fitur sewa mobil kini aktif dan siap digunakan.</p>
+            <div class="bg-green-50 border border-green-200 text-green-800 p-4 rounded-lg flex items-center gap-3 w-full">
+                <i class="bi bi-check-circle-fill text-green-500 text-lg flex-shrink-0"></i>
+                <div class="text-sm font-medium m-0">Akun Anda Telah Terverifikasi! Seluruh fitur sewa mobil kini aktif dan siap digunakan.</div>
             </div>
         <?php elseif ($status === 'rejected'): ?>
-            <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center gap-3">
-                <i class="bi bi-x-circle-fill text-red-500"></i>
-                <p class="text-sm font-medium">❌ Verifikasi ditolak. Dokumen tidak valid atau kurang jelas. Mohon unggah ulang KTP dan SIM Anda.</p>
+            <div class="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg flex items-center gap-3 w-full">
+                <i class="bi bi-x-circle-fill text-red-500 text-lg flex-shrink-0"></i>
+                <div class="text-sm font-medium m-0">Verifikasi ditolak. Dokumen tidak valid atau kurang jelas. Mohon unggah ulang KTP dan SIM Anda.</div>
             </div>
         <?php endif; ?>
 
@@ -73,8 +84,8 @@
             <!-- Left Column: User Info -->
             <div class="col-span-1 space-y-6">
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                    <h2 class="text-xs font-bold text-gray-400 tracking-wider mb-6 flex items-center gap-2">
-                        <i class="bi bi-person-fill"></i> INFORMASI AKUN
+                    <h2 class="text-sm font-bold text-gray-700 mb-6 flex items-center gap-2">
+                        <i class="bi bi-person-fill text-blue-500"></i> Informasi Akun
                     </h2>
                     
                     <div class="flex items-center gap-4 mb-6">
@@ -113,17 +124,31 @@
                 <!-- Resubmit Form for Rejected Status -->
                 <?php if ($status === 'rejected'): ?>
                 <div class="bg-red-50 rounded-2xl p-6 shadow-sm border border-red-100">
-                    <h2 class="text-xs font-bold text-red-600 tracking-wider mb-4 flex items-center gap-2">
-                        <i class="bi bi-arrow-repeat"></i> UNGGAH ULANG DOKUMEN
+                    <h2 class="text-sm font-bold text-red-600 mb-4 flex items-center gap-2">
+                        <i class="bi bi-arrow-repeat"></i> Unggah Ulang Dokumen
                     </h2>
                     <form action="index.php?module=Profile&action=upload" method="POST" enctype="multipart/form-data" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-800 mb-1">Foto KTP <span class="text-red-500">*</span></label>
-                            <input type="file" name="ktp_file" accept=".jpg,.jpeg,.png" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-white file:text-red-700 hover:file:bg-red-50 border border-red-200 rounded-lg p-1 bg-white cursor-pointer">
+                        <div class="space-y-1">
+                            <label class="block text-sm font-semibold text-gray-800">Foto KTP <span class="text-red-500">*</span></label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 hover:bg-gray-50 transition text-center relative cursor-pointer overflow-hidden group bg-white">
+                                <input type="file" name="ktp_file" accept=".jpg,.jpeg,.png" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="previewImage(this, 'ktp_resubmit_preview', 'ktp_resubmit_text', 'ktp_resubmit_icon')">
+                                <div class="relative z-0 pointer-events-none">
+                                    <i id="ktp_resubmit_icon" class="bi bi-person-vcard text-2xl text-gray-400 mb-1 block"></i>
+                                    <span id="ktp_resubmit_text" class="text-xs text-gray-600 font-medium block">Klik/seret KTP ke sini</span>
+                                    <img id="ktp_resubmit_preview" class="hidden mt-2 mx-auto max-h-20 object-contain rounded-md shadow-sm">
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-800 mb-1">Foto SIM <span class="text-red-500">*</span></label>
-                            <input type="file" name="sim_file" accept=".jpg,.jpeg,.png" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-white file:text-red-700 hover:file:bg-red-50 border border-red-200 rounded-lg p-1 bg-white cursor-pointer">
+                        <div class="space-y-1">
+                            <label class="block text-sm font-semibold text-gray-800">Foto SIM <span class="text-red-500">*</span></label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 hover:bg-gray-50 transition text-center relative cursor-pointer overflow-hidden group bg-white">
+                                <input type="file" name="sim_file" accept=".jpg,.jpeg,.png" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="previewImage(this, 'sim_resubmit_preview', 'sim_resubmit_text', 'sim_resubmit_icon')">
+                                <div class="relative z-0 pointer-events-none">
+                                    <i id="sim_resubmit_icon" class="bi bi-card-heading text-2xl text-gray-400 mb-1 block"></i>
+                                    <span id="sim_resubmit_text" class="text-xs text-gray-600 font-medium block">Klik/seret SIM ke sini</span>
+                                    <img id="sim_resubmit_preview" class="hidden mt-2 mx-auto max-h-20 object-contain rounded-md shadow-sm">
+                                </div>
+                            </div>
                         </div>
                         <button type="submit" class="w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition mt-2">
                             Kirim Ulang
@@ -138,8 +163,8 @@
                 
                 <?php if ($status === 'unverified'): ?>
                     <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 h-full">
-                        <h2 class="text-xs font-bold text-gray-400 tracking-wider mb-6 flex items-center gap-2">
-                            <i class="bi bi-shield-lock-fill"></i> VERIFIKASI IDENTITAS
+                        <h2 class="text-sm font-bold text-gray-700 mb-6 flex items-center gap-2">
+                            <i class="bi bi-shield-lock-fill text-blue-500"></i> Verifikasi Identitas
                         </h2>
                         
                         <div class="mb-8">
@@ -181,8 +206,8 @@
                 <?php else: ?>
                     <!-- Pending, Verified, Rejected will show Dokumen and Riwayat Penyewaan -->
                     <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-8">
-                        <h2 class="text-xs font-bold text-gray-400 tracking-wider mb-6 flex items-center gap-2">
-                            <i class="bi bi-person-vcard"></i> DOKUMEN IDENTITAS SAYA
+                        <h2 class="text-sm font-bold text-gray-700 mb-6 flex items-center gap-2">
+                            <i class="bi bi-person-vcard text-blue-500"></i> Dokumen Identitas Saya
                         </h2>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -201,9 +226,17 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 h-full">
-                        <h2 class="text-xs font-bold text-gray-400 tracking-wider mb-6 flex items-center gap-2">
-                            <i class="bi bi-clock-history"></i> RIWAYAT PENYEWAAN MOBIL
+                    <?php
+                        $historyCardStyle = 'bg-white border border-gray-100';
+                        if ($status === 'pending') {
+                            $historyCardStyle = 'bg-amber-50/30 border-2 border-amber-400 transition-all duration-300';
+                        } elseif ($status === 'rejected') {
+                            $historyCardStyle = 'bg-red-50/30 border-2 border-red-500 transition-all duration-300';
+                        }
+                    ?>
+                    <div class="<?= $historyCardStyle ?> rounded-2xl p-8 shadow-sm h-full">
+                        <h2 class="text-sm font-bold text-gray-700 mb-6 flex items-center gap-2">
+                            <i class="bi bi-clock-history text-blue-500"></i> Riwayat Penyewaan Mobil
                         </h2>
                         
                         <div class="text-center py-10">
