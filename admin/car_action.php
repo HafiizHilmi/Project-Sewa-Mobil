@@ -15,6 +15,10 @@ if (isset($_POST['save_car'])) {
     $fuel         = $_POST['fuel'];
     $engine       = $_POST['engine'];
     $passengers   = $_POST['passengers'];
+    $stock        = isset($_POST['stock']) ? intval($_POST['stock']) : 1;
+    if ($stock < 0) {
+        $stock = 0;
+    }
     $transmission = $_POST['transmission'];
     
     // Variabel untuk menampung nama file gambar
@@ -36,19 +40,19 @@ if (isset($_POST['save_car'])) {
     if (empty($id)) {
         // [ MODE TAMBAH DATA BARU ]
         // Jika tidak ada gambar yang diupload, imageName akan kosong
-        $sql = "INSERT INTO cars (make, model, number_plate, frame_number, category, price_per_day, fuel_type, engine_capacity, seats, transmission, image) 
-                VALUES ('$make', '', '$plate', '$chassis', '$category', '$price', '$fuel', '$engine', '$passengers', '$transmission', '$imageName')";
+        $sql = "INSERT INTO cars (make, model, number_plate, frame_number, category, price_per_day, fuel_type, engine_capacity, seats, stock, transmission, image) 
+                VALUES ('$make', '', '$plate', '$chassis', '$category', '$price', '$fuel', '$engine', '$passengers', '$stock', '$transmission', '$imageName')";
     } else {
         // [ MODE EDIT DATA ]
         if ($imageName != "") {
             // Jika user mengupload foto BARU saat edit
             $sql = "UPDATE cars SET make='$make', number_plate='$plate', frame_number='$chassis', category='$category', 
-                    price_per_day='$price', fuel_type='$fuel', engine_capacity='$engine', seats='$passengers', 
+                    price_per_day='$price', fuel_type='$fuel', engine_capacity='$engine', seats='$passengers', stock='$stock', 
                     transmission='$transmission', image='$imageName' WHERE id='$id'";
         } else {
             // Jika user TIDAK mengganti foto (hanya edit teks)
             $sql = "UPDATE cars SET make='$make', number_plate='$plate', frame_number='$chassis', category='$category', 
-                    price_per_day='$price', fuel_type='$fuel', engine_capacity='$engine', seats='$passengers', 
+                    price_per_day='$price', fuel_type='$fuel', engine_capacity='$engine', seats='$passengers', stock='$stock', 
                     transmission='$transmission' WHERE id='$id'";
         }
     }

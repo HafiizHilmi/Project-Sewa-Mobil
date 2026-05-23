@@ -136,6 +136,7 @@
                             <div class="flex items-center gap-2 mb-6">
                                 <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium"><?= $carFuel ?></span>
                                 <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium"><?= $carSeats ?> Penumpang</span>
+                                <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Stok <?= htmlspecialchars($car['stock'] ?? 0) ?></span>
                             </div>
                         </div>
                         <a href="index.php?module=Booking&action=checkout" class="block w-full text-center bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition no-underline">Sewa Sekarang</a>

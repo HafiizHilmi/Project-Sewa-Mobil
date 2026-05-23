@@ -39,6 +39,17 @@ try {
     }
 }
 
+try {
+    if (isset($GLOBALS['pdo'])) {
+        $stmt = $GLOBALS['pdo']->query("SHOW COLUMNS FROM cars LIKE 'stock'");
+        if ($stmt && $stmt->rowCount() === 0) {
+            $GLOBALS['pdo']->exec("ALTER TABLE cars ADD COLUMN stock INT NOT NULL DEFAULT 1");
+        }
+    }
+} catch (PDOException $e) {
+    // ignore if the cars table does not exist yet or schema migration cannot run now
+}
+
 function getPDO() {
     return $GLOBALS['pdo'] ?? null;
 }

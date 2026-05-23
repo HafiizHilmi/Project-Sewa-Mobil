@@ -30,6 +30,7 @@ CREATE TABLE
     `category` VARCHAR(50) NULL,
     `fuel_type` VARCHAR(50) NULL,
     `seats` INT NULL,
+    `stock` INT NOT NULL DEFAULT 1,
     `price_per_day` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     `image` VARCHAR(255) NULL,
     `available` TINYINT (1) NOT NULL DEFAULT 1,
@@ -68,6 +69,7 @@ INSERT IGNORE INTO `cars` (
   `category`,
   `fuel_type`,
   `seats`,
+  `stock`,
   `price_per_day`,
   `image`,
   `available`
@@ -81,6 +83,7 @@ VALUES
     'MPV',
     'Bensin',
     7,
+    1,
     350000.00,
     'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop',
     1
@@ -93,6 +96,7 @@ VALUES
     'SUV',
     'Diesel',
     7,
+    1,
     750000.00,
     'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop',
     1
@@ -105,6 +109,7 @@ VALUES
     'Sedan',
     'Bensin',
     5,
+    1,
     500000.00,
     'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop',
     1
@@ -117,6 +122,7 @@ VALUES
     'EV',
     'Listrik',
     5,
+    1,
     900000.00,
     'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop',
     1
@@ -129,6 +135,7 @@ VALUES
     'MPV',
     'Bensin',
     7,
+    1,
     300000.00,
     'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop',
     1
@@ -141,6 +148,7 @@ VALUES
     'SUV',
     'Diesel',
     7,
+    1,
     800000.00,
     'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop',
     1

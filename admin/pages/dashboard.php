@@ -1,3 +1,10 @@
+<?php
+$stockStmt = $pdo->query("SELECT COUNT(*) AS total_cars, IFNULL(SUM(stock), 0) AS total_stock, IFNULL(SUM(CASE WHEN available = 1 THEN stock ELSE 0 END), 0) AS available_stock FROM cars");
+$stockStats = $stockStmt->fetch(PDO::FETCH_ASSOC);
+$totalStock = $stockStats['total_stock'] ?? 0;
+$totalCars = $stockStats['total_cars'] ?? 0;
+$availableStock = $stockStats['available_stock'] ?? 0;
+?>
 <!-- ====================================================
      PAGE: DASHBOARD
      Berisi: Stat cards, chart rental trends, recent alerts
@@ -12,16 +19,17 @@
     <div class="stat-card bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5">
       <div class="flex items-start justify-between mb-4">
         <div>
-          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Total Mobil</p>
-          <p class="text-4xl font-extrabold text-slate-800 dark:text-white">15</p>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Total Stok Mobil</p>
+          <p class="text-4xl font-extrabold text-slate-800 dark:text-white"><?= number_format($totalStock, 0, ',', '.') ?></p>
         </div>
         <div class="w-11 h-11 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
           <i class="fa-solid fa-car text-blue-500 text-lg"></i>
         </div>
       </div>
       <div class="flex items-center gap-1.5 pt-3 border-t border-slate-50 dark:border-slate-700">
-        <span class="inline-flex items-center gap-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 text-xs font-semibold px-2 py-0.5 rounded-full"><i class="fa-solid fa-arrow-up text-[9px]"></i>+1</span>
-        <span class="text-xs text-slate-400">this month</span>
+        <span class="inline-flex items-center gap-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 text-xs font-semibold px-2 py-0.5 rounded-full">
+          <i class="fa-solid fa-warehouse text-[9px]"></i> Total unit: <?= number_format($totalCars, 0, ',', '.') ?>
+        </span>
       </div>
     </div>
     <div class="stat-card bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5">

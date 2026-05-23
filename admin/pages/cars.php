@@ -1,6 +1,10 @@
 <?php
 // Mengambil data dari database
 require_once '../Config/database.php';
+$checkStock = mysqli_query($conn, "SHOW COLUMNS FROM cars LIKE 'stock'");
+if (mysqli_num_rows($checkStock) === 0) {
+    mysqli_query($conn, "ALTER TABLE cars ADD COLUMN stock INT NOT NULL DEFAULT 1");
+}
 $query = mysqli_query($conn, "SELECT * FROM cars ORDER BY id DESC");
 $cars_data = [];
 
@@ -23,6 +27,7 @@ while ($row = mysqli_fetch_assoc($query)) {
         'transmission' => $row['transmission'],
         'passengers'   => $row['seats'],
         'engine'       => $row['engine_capacity'],
+        'stock'        => isset($row['stock']) ? (int)$row['stock'] : 1,
         'image'        => $imagePath, // <--- Data path gambar dikirim ke Alpine.js
         'renter'       => '-', 
         'rentalLeft'   => '0 Hari', 
@@ -76,6 +81,7 @@ while ($row = mysqli_fetch_assoc($query)) {
             <div class="flex items-center gap-2 mt-1.5 sm:hidden">
               <span class="inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full" :class="carBadge(car.status)" x-text="car.status"></span>
               <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full" x-text="car.category"></span>
+              <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">Stok <span x-text="car.stock"></span></span>
             </div>
           </div>
 
@@ -89,6 +95,10 @@ while ($row = mysqli_fetch_assoc($query)) {
             <p class="text-xs font-bold text-slate-700 dark:text-slate-200" x-text="car.category"></p>
           </div>
 
+          <div class="hidden sm:block flex-shrink-0 w-16">
+            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wide mb-1">Stok</p>
+            <p class="text-xs font-bold text-slate-700 dark:text-slate-200" x-text="car.stock"></p>
+          </div>
           <div class="hidden md:block flex-shrink-0 w-32">
             <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wide mb-1">Harga/Hari</p>
             <p class="text-xs font-bold text-slate-700 dark:text-slate-200" x-text="car.price"></p>
@@ -250,6 +260,7 @@ while ($row = mysqli_fetch_assoc($query)) {
           <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Jenis BBM</label><input type="text" name="fuel" x-model="editForm.fuel" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
           <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Kapasitas Mesin</label><input type="text" name="engine" x-model="editForm.engine" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
           <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Kapasitas Penumpang</label><input type="number" name="passengers" x-model="editForm.passengers" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
+          <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Stok</label><input type="number" name="stock" x-model="editForm.stock" min="0" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2">Transmisi</label>
@@ -286,7 +297,7 @@ document.addEventListener('alpine:init', () => {
         
         cars: <?php echo json_encode($cars_data); ?>,
         
-        editForm: { id: '', name: '', plate: '', chassis: '', category: 'MPV', price: '', fuel: '', engine: '', passengers: '', transmission: 'Manual' },
+        editForm: { id: '', name: '', plate: '', chassis: '', category: 'MPV', price: '', fuel: '', engine: '', passengers: '', stock: 1, transmission: 'Manual' },
 
         init() {
             if (sessionStorage.getItem('carActionSuccess')) {
@@ -309,11 +320,11 @@ document.addEventListener('alpine:init', () => {
 
         openEditCarModal(car = null) {
             if (car) {
-                this.editForm = { ...car, name: car.make, price: car.price_raw };
+                this.editForm = { ...car, name: car.make, price: car.price_raw, stock: car.stock ?? 1 };
                 this.editModalTitle = 'Edit Data Kendaraan';
                 this.imagePreview = car.image; // Jika edit, tampilkan foto lama dari database
             } else {
-                this.editForm = { id: '', name: '', plate: '', chassis: '', category: 'MPV', price: '', fuel: '', engine: '', passengers: '', transmission: 'Manual' };
+                this.editForm = { id: '', name: '', plate: '', chassis: '', category: 'MPV', price: '', fuel: '', engine: '', passengers: '', stock: 1, transmission: 'Manual' };
                 this.editModalTitle = 'Tambah Kendaraan Baru';
                 this.imagePreview = null; // Jika tambah baru, kosongkan foto
             }
