@@ -80,7 +80,7 @@ while ($row = mysqli_fetch_assoc($query)) {
     $child = [
       'id'      => (int)$row['id'],
       'plate'   => $row['number_plate'],
-      'chassis' => $row['frame_number'],
+      'chassis' => $row['chassis_number'],
       'status'  => ($row['available'] == 1) ? 'Tersedia' : 'Tersewa',
       'image'   => $imagePath,
       'latitude'=> $row['latitude'] ?? null,
