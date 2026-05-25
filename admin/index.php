@@ -1,5 +1,14 @@
 <?php
 session_start();
+
+// --- WAJIB ADA: Pelindung Halaman & Pengecekan Role ---
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: login.php");
+    exit();
+}
+$role = $_SESSION['admin_role'] ?? 'staff';
+// ------------------------------------------------------
+
 require_once __DIR__ . '/../include/db_config.php';
 $pdo = getPDO();
 
