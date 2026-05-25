@@ -19,6 +19,36 @@ class ProfileController {
         $stmt->execute(['id' => $_SESSION['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        // Ambil riwayat pemesanan/penyewaan untuk user ini
+        $stmtBookings = $pdo->prepare("
+            SELECT 
+                b.id,
+                b.pickup_location,
+                b.return_location,
+                b.start_date,
+                b.end_date,
+                b.total_price,
+                b.status,
+                b.created_at,
+                b.additional_cost,
+                b.damage_image,
+                b.damage_description,
+                c.make,
+                c.model,
+                c.category,
+                c.fuel_type,
+                c.price_per_day,
+                COALESCE((SELECT p.image FROM cars p WHERE p.type_key = c.type_key AND p.is_type = 1 AND p.image != '' LIMIT 1), c.image) AS image,
+                ac.number_plate AS assigned_plate
+            FROM bookings b
+            JOIN cars c ON b.car_id = c.id
+            LEFT JOIN cars ac ON b.assigned_car_id = ac.id
+            WHERE b.user_id = :user_id
+            ORDER BY b.id DESC
+        ");
+        $stmtBookings->execute(['user_id' => $_SESSION['user_id']]);
+        $bookings = $stmtBookings->fetchAll(PDO::FETCH_ASSOC);
+
         require_once __DIR__ . '/views/index.php';
     }
 

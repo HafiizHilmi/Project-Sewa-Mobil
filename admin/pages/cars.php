@@ -394,7 +394,7 @@ foreach ($types_data as $t) {
                   <i class="fa-solid fa-satellite-dish text-blue-500 text-xs"></i>
                   <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">Kontrol</h4>
                 </div>
-                
+                  
                 <!-- Telemetri Real-Time -->
                 <div class="grid grid-cols-2 gap-3 mb-4 text-left">
                   <div class="bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100/50 dark:border-slate-700/50 p-3 rounded-xl">
