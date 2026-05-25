@@ -28,6 +28,19 @@ class BookingController {
             exit;
         }
 
+        $car_id = intval($_GET['car_id'] ?? 1);
+        $stmtCar = $pdo->prepare("SELECT * FROM cars WHERE id = :id AND available = 1");
+        $stmtCar->execute(['id' => $car_id]);
+        $car = $stmtCar->fetch(PDO::FETCH_ASSOC);
+
+        if (!$car) {
+            $stmtCarDefault = $pdo->query("SELECT * FROM cars WHERE available = 1 LIMIT 1");
+            $car = $stmtCarDefault->fetch(PDO::FETCH_ASSOC);
+            if (!$car) {
+                die("Tidak ada mobil yang tersedia untuk disewa.");
+            }
+        }
+
         require_once __DIR__ . '/views/booking.php';
     }
 
@@ -57,20 +70,20 @@ class BookingController {
 
         if ($pickup_location === '' || $full_name === '' || $email === '' || $phone === '' || $address === '' || $start_date === '' || $end_date === '' || $total_price <= 0) {
             $_SESSION['flash'] = "Lengkapi semua data booking terlebih dahulu. Debug: pickup=$pickup_location, name=$full_name, email=$email, phone=$phone, address=$address, start=$start_date, end=$end_date, total=$total_price";
-            header('Location: index.php?module=Booking&action=checkout');
+            header('Location: index.php?module=Booking&action=checkout&car_id=' . $car_id);
             exit;
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $_SESSION['flash'] = 'Email tidak valid.';
-            header('Location: index.php?module=Booking&action=checkout');
+            header('Location: index.php?module=Booking&action=checkout&car_id=' . $car_id);
             exit;
         }
 
         $pdo = getPDO();
         if (!$pdo) {
             $_SESSION['flash'] = 'Database connection error.';
-            header('Location: index.php?module=Booking&action=checkout');
+            header('Location: index.php?module=Booking&action=checkout&car_id=' . $car_id);
             exit;
         }
 

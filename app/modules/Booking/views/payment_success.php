@@ -3,6 +3,18 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 $booking = $_SESSION['booking_success'] ?? null;
+
+$car = null;
+if ($booking && isset($booking['car_id'])) {
+    require_once __DIR__ . '/../../../../include/db_config.php';
+    $pdo = getPDO();
+    if ($pdo) {
+        $stmtCar = $pdo->prepare("SELECT * FROM cars WHERE id = :id");
+        $stmtCar->execute(['id' => $booking['car_id']]);
+        $car = $stmtCar->fetch(PDO::FETCH_ASSOC);
+    }
+}
+
 if ($booking) {
     unset($_SESSION['booking_success']);
 }
@@ -93,12 +105,12 @@ $taxAmount = round($totalPrice - $baseSubtotal);
             </div>
 
             <div class="h-36 w-full mb-5 rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center">
-                <img src="https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop" alt="Toyota Avanza" class="w-full h-full object-cover">
+                <img src="<?= htmlspecialchars(($car && $car['image']) ? $car['image'] : 'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop') ?>" alt="<?= htmlspecialchars($car ? ($car['make'] . ' ' . $car['model']) : 'Toyota Avanza') ?>" class="w-full h-full object-cover">
             </div>
 
             <div class="mb-4">
-                <h3 class="text-lg font-bold text-gray-900">Toyota Avanza 2024</h3>
-                <p class="text-xs text-gray-500 mt-0.5">MPV • Bensin • 7 Penumpang</p>
+                <h3 class="text-lg font-bold text-gray-900"><?= htmlspecialchars($car ? ($car['make'] . ' ' . $car['model'] . ' ' . $car['year']) : 'Toyota Avanza 2024') ?></h3>
+                <p class="text-xs text-gray-500 mt-0.5"><?= htmlspecialchars($car ? $car['category'] : 'MPV') ?> • <?= htmlspecialchars($car ? $car['fuel_type'] : 'Bensin') ?> • <?= htmlspecialchars($car ? $car['seats'] : '7') ?> Penumpang</p>
             </div>
 
             <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-4">
