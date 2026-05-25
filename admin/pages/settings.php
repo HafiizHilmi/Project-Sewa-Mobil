@@ -1,5 +1,18 @@
 <div x-show="activePage === 'settings'"
      x-data="{ showEditAdmin: false, showChangePass: false, editForm: {id:'', nama:'', email:'', role:''} }"
+     x-init="
+        const setDefaultTab = () => {
+            if ('<?= $role ?>' === 'superuser') activeTab = 'admin';
+            else activeTab = 'preferences';
+        };
+        // Set tab saat halaman pertama dimuat
+        if (activePage === 'settings') setDefaultTab();
+        
+        // Pantau jika user berpindah menu dari sidebar
+        $watch('activePage', value => { 
+            if (value === 'settings') setDefaultTab(); 
+        });
+     "
      x-transition:enter="transition ease-out duration-200"
      x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
      class="absolute inset-0 overflow-y-auto px-5 lg:px-6 py-5">
@@ -262,5 +275,3 @@
   </div>
 
 </div>
-
-...

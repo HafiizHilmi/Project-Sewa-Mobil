@@ -118,7 +118,20 @@ $customers = $stmtCustomers->fetchAll(PDO::FETCH_ASSOC);
   <link rel="stylesheet" href="assets/css/style.css"/>
 </head>
 
-<body x-data="appData()" x-cloak class="font-sans antialiased bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-200">
+<body x-data="appData()" 
+      x-init="const p = new URLSearchParams(window.location.search); if(p.has('page')) activePage = p.get('page');" 
+      x-cloak 
+      class="font-sans antialiased bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-200">
+
+      <?php if (isset($_SESSION['flash_msg'])): ?>
+    <script>
+        // Gunakan setTimeout agar alert muncul mulus setelah UI selesai dimuat
+        setTimeout(() => {
+            alert("<?= $_SESSION['flash_msg'] ?>");
+        }, 150);
+    </script>
+    <?php unset($_SESSION['flash_msg']); // Hapus pesan setelah ditampilkan ?>
+<?php endif; ?>
 
 <div class="flex h-screen overflow-hidden">
 

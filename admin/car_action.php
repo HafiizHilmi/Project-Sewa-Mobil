@@ -104,7 +104,7 @@ if (isset($_POST['save_car'])) {
     if (!empty($type_key)) {
         header("Location: index.php?open_type_key=" . urlencode($type_key));
     } else {
-        header("Location: index.php");
+        header("Location: index.php?page=cars");
     }
     exit();
 }
