@@ -101,7 +101,7 @@
                     <a href="#" class="btn btn-brand rounded-pill px-4 py-2 fw-semibold">Lihat Katalog</a>
                 </div>
                 <div class="col-lg-6">
-                    <img src="../public/assets/images/avanza_b1242_dfr.jpeg" alt="Avanza" class="img-fluid rounded-4 shadow-sm w-100 object-fit-cover" style="height: 350px;">
+                    <img src="../public/assets/images/5-Essential-Car-Rental-Tips-for-a-Smooth-Business-Travel-Experience-1024x544.jpg" alt="Avanza" class="img-fluid rounded-4 shadow-sm w-100 object-fit-cover" style="height: 350px;">
                 </div>
             </div>
         </div>
@@ -135,7 +135,7 @@
                                 <span class="badge badge-custom rounded-pill">7 Penumpang</span>
                             </div>
                             
-                            <a href="#" class="btn btn-brand w-100 rounded-3 fw-semibold">Sewa Sekarang</a>
+                            <a href="<../Auth/views/login.php" class="btn btn-brand w-100 rounded-3 fw-semibold">Sewa Sekarang</a>
                         </div>
                     </div>
                 </div>
