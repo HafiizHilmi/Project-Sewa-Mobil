@@ -29,12 +29,12 @@ class BookingController {
         }
 
         $car_id = intval($_GET['car_id'] ?? 1);
-        $stmtCar = $pdo->prepare("SELECT * FROM cars WHERE id = :id AND available = 1");
+        $stmtCar = $pdo->prepare("SELECT c.*, COALESCE((SELECT p.image FROM cars p WHERE p.type_key = c.type_key AND p.is_type = 1 AND p.image != '' LIMIT 1), c.image) AS image FROM cars c WHERE c.id = :id AND c.available = 1");
         $stmtCar->execute(['id' => $car_id]);
         $car = $stmtCar->fetch(PDO::FETCH_ASSOC);
 
         if (!$car) {
-            $stmtCarDefault = $pdo->query("SELECT * FROM cars WHERE available = 1 LIMIT 1");
+            $stmtCarDefault = $pdo->query("SELECT c.*, COALESCE((SELECT p.image FROM cars p WHERE p.type_key = c.type_key AND p.is_type = 1 AND p.image != '' LIMIT 1), c.image) AS image FROM cars c WHERE c.available = 1 LIMIT 1");
             $car = $stmtCarDefault->fetch(PDO::FETCH_ASSOC);
             if (!$car) {
                 die("Tidak ada mobil yang tersedia untuk disewa.");

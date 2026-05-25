@@ -9,7 +9,7 @@ if ($booking && isset($booking['car_id'])) {
     require_once __DIR__ . '/../../../../include/db_config.php';
     $pdo = getPDO();
     if ($pdo) {
-        $stmtCar = $pdo->prepare("SELECT * FROM cars WHERE id = :id");
+        $stmtCar = $pdo->prepare("SELECT c.*, COALESCE((SELECT p.image FROM cars p WHERE p.type_key = c.type_key AND p.is_type = 1 AND p.image != '' LIMIT 1), c.image) AS image FROM cars c WHERE c.id = :id");
         $stmtCar->execute(['id' => $booking['car_id']]);
         $car = $stmtCar->fetch(PDO::FETCH_ASSOC);
     }

@@ -241,7 +241,7 @@
           <p class="text-base font-extrabold" x-text="'Rp ' + selectedOrder.totalFormatted"></p>
         </div>
 
-        <!-- Laporan kerusakan jika ada -->
+        <!-- Laporan kerusakan kalo ada -->
         <template x-if="selectedOrder.status === 'Completed' && (selectedOrder.additionalCost > 0 || selectedOrder.damageDescription)">
           <div class="bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 rounded-xl p-4 mb-4 text-rose-800 dark:text-rose-300">
             <p class="text-[10px] font-bold uppercase mb-2">Laporan Pengembalian (Kerusakan/Denda)</p>
@@ -265,7 +265,7 @@
   </div>
 </div>
 
-<!-- Modal Selesaikan Sewa (Success) -->
+<!-- (Success) -->
 <div x-show="showCompleteModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
   <div @click="showCompleteModal = false" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" x-transition.opacity></div>
   <div class="modal-box relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md flex flex-col p-6 overflow-hidden" style="max-height: 90vh;" x-transition>
@@ -279,7 +279,7 @@
     </div>
 
     <form action="order_action.php" method="POST" enctype="multipart/form-data" class="space-y-4 overflow-y-auto flex-1 pr-1">
-      <input type="hidden" name="booking_id" :value="completingOrder ? completingOrder.id : ''">
+      <input type="hidden" name="booking_id" :value="completingOrder ? completingOrder.id : ' '">
       <input type="hidden" name="action" value="complete">
 
       <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 text-xs text-blue-700 dark:text-blue-300">

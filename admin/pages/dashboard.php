@@ -4,11 +4,20 @@ $stockStats = $stockStmt->fetch(PDO::FETCH_ASSOC);
 $totalStock = $stockStats['total_stock'] ?? 0;
 $totalCars = $stockStats['total_cars'] ?? 0;
 $availableStock = $stockStats['available_stock'] ?? 0;
+
+$statsStmt = $pdo->query("
+    SELECT 
+        (SELECT COUNT(*) FROM users WHERE role = 'user') AS total_cust,
+        (SELECT IFNULL(SUM(total_price + IFNULL(additional_cost, 0)), 0) FROM bookings WHERE status = 'completed') AS total_revenue
+");
+$stats = $statsStmt->fetch(PDO::FETCH_ASSOC);
+$totalCust = $stats['total_cust'] ?? 0;
+$totalRevenue = $stats['total_revenue'] ?? 0;
 ?>
 <!-- ====================================================
      PAGE: DASHBOARD
      Berisi: Stat cards, chart rental trends, recent alerts
-===================================================== -->
+ ===================================================== -->
 <div x-show="activePage === 'dashboard'"
      x-transition:enter="transition ease-out duration-200"
      x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
@@ -36,30 +45,28 @@ $availableStock = $stockStats['available_stock'] ?? 0;
       <div class="flex items-start justify-between mb-4">
         <div>
           <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Pelanggan Aktif</p>
-          <p class="text-4xl font-extrabold text-slate-800 dark:text-white">223</p>
+          <p class="text-4xl font-extrabold text-slate-800 dark:text-white"><?= number_format($totalCust, 0, ',', '.') ?></p>
         </div>
         <div class="w-11 h-11 rounded-2xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center">
           <i class="fa-solid fa-user-group text-orange-400 text-lg"></i>
         </div>
       </div>
       <div class="flex items-center gap-1.5 pt-3 border-t border-slate-50 dark:border-slate-700">
-        <span class="inline-flex items-center gap-1 bg-amber-50 dark:bg-amber-900/20 text-amber-600 text-xs font-semibold px-2 py-0.5 rounded-full"><i class="fa-solid fa-arrow-trend-up text-[9px]"></i>+8.4%</span>
-        <span class="text-xs text-slate-400">vs last week</span>
+        <span class="inline-flex items-center gap-1 bg-amber-50 dark:bg-amber-900/20 text-amber-600 text-xs font-semibold px-2 py-0.5 rounded-full"><i class="fa-solid fa-users text-[9px]"></i> Total Pelanggan</span>
       </div>
     </div>
     <div class="stat-card bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 sm:col-span-2 xl:col-span-1">
       <div class="flex items-start justify-between mb-4">
         <div>
-          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Total Keuntungan</p>
-          <p class="text-2xl font-extrabold text-slate-800 dark:text-white">Rp 32.000.000</p>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Total Pendapatan</p>
+          <p class="text-2xl font-extrabold text-slate-800 dark:text-white">Rp <?= number_format($totalRevenue, 0, ',', '.') ?></p>
         </div>
         <div class="w-11 h-11 rounded-2xl bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center">
           <i class="fa-solid fa-wallet text-yellow-500 text-lg"></i>
         </div>
       </div>
       <div class="flex items-center gap-1.5 pt-3 border-t border-slate-50 dark:border-slate-700">
-        <span class="inline-flex items-center gap-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 text-xs font-semibold px-2 py-0.5 rounded-full"><i class="fa-solid fa-arrow-trend-up text-[9px]"></i>+14.2%</span>
-        <span class="text-xs text-slate-400">Year on Year</span>
+        <span class="inline-flex items-center gap-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 text-xs font-semibold px-2 py-0.5 rounded-full"><i class="fa-solid fa-file-invoice-dollar text-[9px]"></i> Total Omzet</span>
       </div>
     </div>
   </div>

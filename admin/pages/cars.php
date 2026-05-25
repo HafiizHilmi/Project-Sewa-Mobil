@@ -31,7 +31,7 @@ $query = mysqli_query($conn, "
 
 $types_map = [];
 while ($row = mysqli_fetch_assoc($query)) {
-  $imagePath = !empty($row['image']) ? '../public/assets/images/' . $row['image'] : null;
+  $imagePath = !empty($row['image']) ? (filter_var($row['image'], FILTER_VALIDATE_URL) ? $row['image'] : '../public/assets/images/' . $row['image']) : null;
 
   $type_key = !empty($row['type_key'])
     ? $row['type_key']
@@ -118,7 +118,7 @@ foreach ($types_data as $t) {
         }
     }
     $t['stock'] = $available_count;
-    $t['image'] = (!empty($t['children'][0]['image'])) ? $t['children'][0]['image'] : null;
+    $t['image'] = (!empty($t['image'])) ? $t['image'] : ((!empty($t['children'][0]['image'])) ? $t['children'][0]['image'] : null);
     $available = ($available_count > 0);
     $t['status'] = $available ? 'Tersedia' : 'Tersewa';
     $t['is_type'] = 1;
@@ -225,25 +225,6 @@ foreach ($types_data as $t) {
           <h2 class="text-2xl font-extrabold text-slate-800 dark:text-white leading-tight" x-text="selectedCar.name"></h2>
           <p class="text-sm text-slate-400 font-medium mt-1" x-text="selectedCar.plate || (selectedCar.children ? (selectedCar.children.length + ' unit') : '')"></p>
 
-          <template x-if="selectedCar.children && selectedCar.children.length > 0">
-            <div class="mt-3">
-              <h4 class="text-sm font-bold mb-2">Unit / Stok</h4>
-              <div class="space-y-2">
-                <template x-for="c in selectedCar.children" :key="c.id">
-                  <div class="flex items-center justify-between bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg px-3 py-2">
-                    <div>
-                      <div class="text-sm font-semibold" x-text="c.plate"></div>
-                      <div class="text-xs text-slate-400" x-text="c.status"></div>
-                    </div>
-                    <div class="flex gap-2">
-                      <button @click="viewChild(c, selectedCar)" class="text-xs px-3 py-1 bg-blue-600 text-white rounded">Lihat</button>
-                      <button @click="openEditCarModal({...c, make: selectedCar.make, model: selectedCar.model, year: selectedCar.year, category: selectedCar.category, price_raw: selectedCar.price_raw, fuel: selectedCar.fuel, engine: selectedCar.engine, passengers: selectedCar.passengers, transmission: selectedCar.transmission, type_key: selectedCar.type_key}, false)" class="text-xs px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded">Edit</button>
-                    </div>
-                  </div>
-                </template>
-              </div>
-            </div>
-          </template>
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-4">
@@ -276,24 +257,113 @@ foreach ($types_data as $t) {
               </div>
             </template>
 
-            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
-              <div class="h-[210px] flex flex-col items-center justify-center gap-3 relative" :class="selectedCar.bgCls">
-                <template x-if="selectedCar.image">
-                    <img :src="selectedCar.image" class="absolute inset-0 w-full h-full object-cover">
-                </template>
-                <template x-if="!selectedCar.image">
-                    <div class="flex flex-col items-center">
-                        <i class="fa-solid fa-car text-[76px] opacity-60" :class="selectedCar.iconCls"></i>
-                        <span class="text-xs font-semibold opacity-75 mt-2" :class="selectedCar.iconCls" x-text="selectedCar.name"></span>
-                    </div>
-                </template>
-              </div>
+            <!-- Child Unit -->
             <template x-if="selectedCar.is_type === 0">
-              <div class="bg-slate-50 dark:bg-slate-700/50 border-t border-slate-100 dark:border-slate-700 px-5 py-2.5">
-                <p class="text-xs text-slate-500">Nomor Rangka:&nbsp;<span class="font-semibold text-slate-700 dark:text-slate-200" x-text="selectedCar.chassis"></span></p>
+              <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+                <div class="h-[210px] flex flex-col items-center justify-center gap-3 relative" :class="selectedCar.bgCls">
+                  <template x-if="selectedCar.image">
+                      <img :src="selectedCar.image" class="absolute inset-0 w-full h-full object-cover">
+                  </template>
+                  <template x-if="!selectedCar.image">
+                      <div class="flex flex-col items-center">
+                          <i class="fa-solid fa-car text-[76px] opacity-60" :class="selectedCar.iconCls"></i>
+                          <span class="text-xs font-semibold opacity-75 mt-2" :class="selectedCar.iconCls" x-text="selectedCar.name"></span>
+                      </div>
+                  </template>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-700/50 border-t border-slate-100 dark:border-slate-700 px-5 py-2.5">
+                  <p class="text-xs text-slate-500">Nomor Rangka:&nbsp;<span class="font-semibold text-slate-700 dark:text-slate-200" x-text="selectedCar.chassis"></span></p>
+                </div>
               </div>
             </template>
-            </div>
+
+            <!-- Parent Tipe Mobil -->
+            <template x-if="selectedCar.is_type === 1">
+              <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 space-y-6">
+                <!-- Header -->
+                <div class="flex items-center justify-between border-b dark:border-slate-700 pb-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-3xs">
+                      <i class="fa-solid fa-images text-lg"></i>
+                    </div>
+                    <div>
+                      <h3 class="text-sm font-bold text-slate-800 dark:text-white">Detail Unit Mobil</h3>
+                      <p class="text-[11px] text-slate-400 font-medium mt-0.5">Semua unit untuk tipe kendaraan ini</p>
+                    </div>
+                  </div>
+                  <span class="text-xs font-bold px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-100/50 dark:border-blue-900/30" x-text="selectedCar.children ? (selectedCar.children.length + ' Unit') : '0 Unit'"></span>
+                </div>
+
+                <!-- Grid Foto -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                  <template x-for="(c, index) in selectedCar.children" :key="c.id">
+                    <div class="relative group bg-slate-50/50 dark:bg-slate-900/20 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-700/80 hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex flex-col">
+                      
+                      <!-- Foto Unit -->
+                      <div class="h-36 w-full relative overflow-hidden bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
+                        <template x-if="c.image">
+                          <img :src="c.image" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        </template>
+                        <template x-if="!c.image">
+                          <div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 p-4">
+                            <i class="fa-solid fa-car text-4xl mb-2 opacity-50"></i>
+                            <span class="text-[10px] font-bold tracking-wider uppercase opacity-65">Tanpa Foto</span>
+                          </div>
+                        </template>
+                        
+                        <!-- Status -->
+                        <div class="absolute top-2.5 right-2.5">
+                          <span class="text-[9px] font-extrabold px-2.5 py-0.5 rounded-full shadow-3xs uppercase tracking-wide border" 
+                                :class="c.status === 'Tersedia' 
+                                  ? 'bg-emerald-500 text-white border-emerald-400' 
+                                  : 'bg-orange-500 text-white border-orange-400'" 
+                                x-text="c.status"></span>
+                        </div>
+                      </div>
+
+                      <!-- Detail Unit -->
+                      <div class="p-4 flex-1 flex flex-col justify-between bg-white dark:bg-slate-800">
+                        <div>
+                          <!-- Plat -->
+                          <div class="flex justify-between items-center gap-2 mb-2">
+                            <span class="text-xs font-extrabold text-slate-800 dark:text-slate-100 bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-md font-mono tracking-wider uppercase border border-slate-200/50 dark:border-slate-600 shadow-3xs" x-text="c.plate"></span>
+                          </div>
+                          
+                          <!-- Rangka -->
+                          <p class="text-[10px] text-slate-400 font-medium" x-show="c.chassis">
+                            No. Rangka: <span class="font-mono text-slate-600 dark:text-slate-300 font-semibold" x-text="c.chassis.substring(0, 10) + '...'"></span>
+                          </p>
+
+                          <!-- Info Sewa -->
+                          <template x-if="c.status === 'Tersewa' && c.renter">
+                            <div class="mt-3 text-[10px] text-slate-600 dark:text-slate-300 bg-orange-50/40 dark:bg-orange-950/10 border border-orange-100/50 dark:border-orange-900/30 rounded-xl p-2.5 space-y-1">
+                              <div class="flex justify-between items-center">
+                                <span class="text-slate-400 font-medium">Penyewa:</span>
+                                <span class="font-bold text-slate-700 dark:text-slate-200 truncate max-w-[100px]" x-text="c.renter"></span>
+                              </div>
+                              <div class="flex justify-between items-center">
+                                <span class="text-slate-400 font-medium">Durasi Sewa:</span>
+                                <span class="font-semibold text-slate-700 dark:text-slate-200 text-[9.5px]" x-text="c.start_date + ' - ' + c.end_date"></span>
+                              </div>
+                            </div>
+                          </template>
+                        </div>
+
+                        <!-- Action -->
+                        <div class="flex gap-2 mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/80">
+                          <button type="button" @click="viewChild(c, selectedCar)" class="flex-1 text-[10.5px] font-bold py-2 px-3 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30 rounded-xl transition duration-200 text-center flex items-center justify-center gap-1.5 active:scale-97">
+                            <i class="fa-solid fa-satellite-dish text-[10px]"></i> Detail & Map
+                          </button>
+                          <button type="button" @click="openEditCarModal({...c, make: selectedCar.make, model: selectedCar.model, year: selectedCar.year, category: selectedCar.category, price_raw: selectedCar.price_raw, fuel: selectedCar.fuel, engine: selectedCar.engine, passengers: selectedCar.passengers, transmission: selectedCar.transmission, type_key: selectedCar.type_key}, false)" class="text-[10.5px] font-bold py-2 px-3 bg-slate-50 hover:bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 rounded-xl transition duration-200 flex items-center justify-center gap-1 active:scale-97">
+                            <i class="fa-solid fa-pen text-[9px]"></i> Edit
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
 
             <template x-if="selectedCar.is_type === 0">
               <div class="space-y-4">
@@ -315,7 +385,7 @@ foreach ($types_data as $t) {
 
                 <div class="absolute top-3 right-3 z-[1000] flex items-center gap-1.5 bg-white dark:bg-slate-800 rounded-full px-3 py-1.5 shadow-md border border-slate-100 dark:border-slate-700">
                   <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span class="text-[11px] font-bold text-slate-700 dark:text-slate-200">Telemetri GPS Aktif</span>
+                  <span class="text-[11px] font-bold text-slate-700 dark:text-slate-200">GPS Aktif</span>
                 </div>
               </div> 
               
@@ -325,6 +395,26 @@ foreach ($types_data as $t) {
                   <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">Kontrol</h4>
                 </div>
                 
+                <!-- Telemetri Real-Time -->
+                <div class="grid grid-cols-2 gap-3 mb-4 text-left">
+                  <div class="bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100/50 dark:border-slate-700/50 p-3 rounded-xl">
+                    <span class="text-slate-400 font-semibold block text-[10px] uppercase">Status Mobil</span>
+                    <span class="font-bold text-xs text-slate-700 dark:text-slate-200 block mt-0.5">N/A</span>
+                  </div>
+                  <div class="bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100/50 dark:border-slate-700/50 p-3 rounded-xl">
+                    <span class="text-slate-400 font-semibold block text-[10px] uppercase">Kecepatan</span>
+                    <span class="font-bold text-xs text-slate-700 dark:text-slate-200 block mt-0.5">N/A</span>
+                  </div>
+                  <div class="bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100/50 dark:border-slate-700/50 p-3 rounded-xl col-span-2">
+                    <span class="text-slate-400 font-semibold block text-[10px] uppercase">GPS Terakhir Diperbarui</span>
+                    <span class="font-bold text-xs text-slate-700 dark:text-slate-200 block mt-0.5">N/A</span>
+                  </div>
+                  <div class="bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100/50 dark:border-slate-700/50 p-3 rounded-xl col-span-2">
+                    <span class="text-slate-400 font-semibold block text-[10px] uppercase">Odometer</span>
+                    <span class="font-bold text-xs text-slate-700 dark:text-slate-200 block mt-0.5">N/A</span>
+                  </div>
+                </div>
+
                 <div class="grid grid-cols-2 gap-3">
                   <a :href="'triggers.php?type=alarm&id=' + selectedCar.id" class="flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-4 py-3 rounded-xl transition-all shadow-sm active:scale-95">
                     <i class="fa-solid fa-bell"></i> Bunyikan Alarm

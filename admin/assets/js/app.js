@@ -12,6 +12,11 @@ function appData() {
       this.$watch('darkMode', val => {
         document.documentElement.classList.toggle('dark', val);
       });
+      const urlParams = new URLSearchParams(window.location.search);
+      const page = urlParams.get('page');
+      if (page && ['dashboard', 'verifications', 'cars', 'orders', 'customers', 'settings'].includes(page)) {
+        this.activePage = page;
+      }
     },
 
     /* ── Navigation ── */
@@ -55,11 +60,47 @@ function appData() {
     custStatus: 'Semua',
     selectedCustomer: null,
     showCustomerDetail: false,
-    customers: [
-      { id:1, name:'Sucipto Haryono', email:'sucipto12@gmail.com', phone:'081234567890', city:'Surabaya', status:'Aktif', totalOrders:12, lastOrder:'2025-04-27', avatarColor:'#3b82f6', address:'Jl. Basuki Rahmat No. 12, Surabaya' },
-      { id:2, name:'Dewi Rahmawati', email:'dewi.rahma@gmail.com', phone:'082345678901', city:'Surabaya', status:'Baru', totalOrders:2, lastOrder:'2025-04-27', avatarColor:'#8b5cf6', address:'Jl. Pemuda No. 88, Surabaya' },
-      { id:3, name:'Budi Santoso', email:'budi.s89@gmail.com', phone:'083456789012', city:'Gresik', status:'Nonaktif', totalOrders:7, lastOrder:'2025-04-27', avatarColor:'#64748b', address:'Jl. Pahlawan No. 5, Gresik' },
-    ],
+    customers: (window.SERVER_CUSTOMERS || []).map(o => {
+      const statusMap = {
+        'verified': 'Aktif',
+        'pending': 'Baru',
+        'unverified': 'Nonaktif',
+        'rejected': 'Suspended'
+      };
+      const status = statusMap[o.verification_status] || 'Nonaktif';
+
+      const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#ef4444'];
+      const index = o.name ? (o.name.charCodeAt(0) % colors.length) : 0;
+      const avatarColor = colors[index];
+
+      const formatDate = (dateStr) => {
+        if (!dateStr) return '-';
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+        return d.toLocaleDateString('id-ID', options);
+      };
+
+      return {
+        id: o.id,
+        name: o.name,
+        email: o.email,
+        phone: o.phone || '-',
+        city: 'Surabaya',
+        status: status,
+        totalOrders: parseInt(o.total_orders || 0),
+        lastOrder: formatDate(o.last_order),
+        avatarColor: avatarColor,
+        address: o.address || 'Belum ada transaksi (alamat belum terekam)',
+        totalSpent: parseFloat(o.total_spent || 0),
+        totalSpentFormatted: new Intl.NumberFormat('id-ID').format(parseFloat(o.total_spent || 0)),
+        totalDamaged: parseInt(o.total_damaged || 0),
+        rentedCars: (o.rented_cars || '').split('|').filter(Boolean).map(str => {
+          const parts = str.split('::');
+          return { name: parts[0] || 'Unknown', plate: parts[1] || 'Pending' };
+        })
+      };
+    }),
     get filteredCustomers() {
       return this.customers.filter(c => {
         const mSrch = !this.custSearch || c.name.toLowerCase().includes(this.custSearch.toLowerCase());
@@ -70,6 +111,26 @@ function appData() {
     openCustomerDetail(c) {
       this.selectedCustomer = c;
       this.showCustomerDetail = true;
+    },
+    showEditCustModal: false,
+    editingCust: null,
+    openEditCustModal(c) {
+      this.editingCust = c;
+      this.showEditCustModal = true;
+    },
+    selectedCustIds: [],
+    get allCustSelected() {
+      if (this.filteredCustomers.length === 0) return false;
+      return this.filteredCustomers.every(c => this.selectedCustIds.includes(c.id));
+    },
+    toggleSelectAllCust() {
+      if (this.allCustSelected) {
+        const filteredIds = this.filteredCustomers.map(c => c.id);
+        this.selectedCustIds = this.selectedCustIds.filter(id => !filteredIds.includes(id));
+      } else {
+        const filteredIds = this.filteredCustomers.map(c => c.id);
+        this.selectedCustIds = [...new Set([...this.selectedCustIds, ...filteredIds])];
+      }
     },
 
     /* ── Verifications ── */

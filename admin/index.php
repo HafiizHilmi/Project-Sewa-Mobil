@@ -54,6 +54,31 @@ $stmtOrders = $pdo->query("
     ORDER BY b.id DESC
 ");
 $orders = $stmtOrders->fetchAll(PDO::FETCH_ASSOC);
+
+// Ambil data pelanggan (customers)
+$stmtCustomers = $pdo->query("
+    SELECT 
+        u.id,
+        u.name,
+        u.email,
+        u.phone,
+        u.verification_status,
+        u.created_at,
+        COUNT(b.id) AS total_orders,
+        MAX(b.start_date) AS last_order,
+        MAX(b.address) AS address,
+        COALESCE(SUM(COALESCE(b.total_price, 0) + COALESCE(b.additional_cost, 0)), 0) AS total_spent,
+        COALESCE(SUM(CASE WHEN b.additional_cost > 0 OR b.damage_image IS NOT NULL OR (b.damage_description IS NOT NULL AND b.damage_description != '') THEN 1 ELSE 0 END), 0) AS total_damaged,
+        GROUP_CONCAT(DISTINCT CONCAT(c.make, ' ', c.model, '::', COALESCE(ac.number_plate, 'Pending')) SEPARATOR '|') AS rented_cars
+    FROM users u
+    LEFT JOIN bookings b ON u.id = b.user_id
+    LEFT JOIN cars c ON b.car_id = c.id
+    LEFT JOIN cars ac ON b.assigned_car_id = ac.id
+    WHERE u.role = 'user'
+    GROUP BY u.id
+    ORDER BY u.id DESC
+");
+$customers = $stmtCustomers->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -119,6 +144,7 @@ $orders = $stmtOrders->fetchAll(PDO::FETCH_ASSOC);
 <script>
   window.SERVER_VERIFICATIONS = <?= json_encode($verifications) ?>;
   window.SERVER_ORDERS = <?= json_encode($orders) ?>;
+  window.SERVER_CUSTOMERS = <?= json_encode($customers) ?>;
 </script>
 <script src="assets/js/app.js"></script>
 

@@ -366,11 +366,26 @@
             
             document.getElementById('current-month-year').textContent = monthNames[month] + " " + year;
             
+            // Disable prev-month button if we are in the current month or earlier
+            const prevMonthBtn = document.getElementById('prev-month');
+            const todayDate = new Date();
+            const currentRealMonth = todayDate.getMonth();
+            const currentRealYear = todayDate.getFullYear();
+            
+            if (year < currentRealYear || (year === currentRealYear && month <= currentRealMonth)) {
+                prevMonthBtn.classList.add('opacity-20', 'pointer-events-none');
+            } else {
+                prevMonthBtn.classList.remove('opacity-20', 'pointer-events-none');
+            }
+            
             for (let i = 0; i < firstDayOfMonth; i++) {
                 const emptyCell = document.createElement('div');
                 emptyCell.className = 'date-cell empty-cell';
                 calendarGrid.appendChild(emptyCell);
             }
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
             
             for (let i = 1; i <= daysInMonth; i++) {
                 const dateCell = document.createElement('div');
@@ -383,7 +398,12 @@
                 dateCell.setAttribute('data-date', fullDateStr);
                 dateCell.textContent = i;
                 
-                dateCell.addEventListener('click', handleDateClick);
+                const cellDate = new Date(year, month, i);
+                if (cellDate < today) {
+                    dateCell.classList.add('text-gray-350', 'cursor-not-allowed', 'opacity-30', 'pointer-events-none');
+                } else {
+                    dateCell.addEventListener('click', handleDateClick);
+                }
                 calendarGrid.appendChild(dateCell);
             }
             renderCalendar(); 
