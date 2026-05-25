@@ -135,7 +135,7 @@
                                 <span class="badge badge-custom rounded-pill">7 Penumpang</span>
                             </div>
                             
-                            <a href="<../Auth/views/login.php" class="btn btn-brand w-100 rounded-3 fw-semibold">Sewa Sekarang</a>
+                            <a href="#" class="btn btn-brand w-100 rounded-3 fw-semibold">Sewa Sekarang</a>
                         </div>
                     </div>
                 </div>

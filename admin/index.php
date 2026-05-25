@@ -3,9 +3,57 @@ session_start();
 require_once __DIR__ . '/../include/db_config.php';
 $pdo = getPDO();
 
+// Ensure assigned_car_id column exists in bookings table
+$checkAssigned = $pdo->query("SHOW COLUMNS FROM bookings LIKE 'assigned_car_id'");
+if ($checkAssigned->rowCount() === 0) {
+    $pdo->exec("ALTER TABLE bookings ADD COLUMN assigned_car_id INT UNSIGNED NULL");
+}
+
+// Ensure additional columns exist in bookings table
+$checkAdditional = $pdo->query("SHOW COLUMNS FROM bookings LIKE 'additional_cost'");
+if ($checkAdditional->rowCount() === 0) {
+    $pdo->exec("ALTER TABLE bookings ADD COLUMN additional_cost DECIMAL(12, 2) DEFAULT 0.00");
+}
+$checkDamageImg = $pdo->query("SHOW COLUMNS FROM bookings LIKE 'damage_image'");
+if ($checkDamageImg->rowCount() === 0) {
+    $pdo->exec("ALTER TABLE bookings ADD COLUMN damage_image VARCHAR(255) NULL");
+}
+$checkDamageDesc = $pdo->query("SHOW COLUMNS FROM bookings LIKE 'damage_description'");
+if ($checkDamageDesc->rowCount() === 0) {
+    $pdo->exec("ALTER TABLE bookings ADD COLUMN damage_description TEXT NULL");
+}
+
 // Ambil data user yang memiliki status verifikasi selain unverified (pending, verified, rejected)
 $stmt = $pdo->query("SELECT id, name, email, verification_status, ktp_file, sim_file, created_at FROM users WHERE verification_status != 'unverified' ORDER BY FIELD(verification_status, 'pending') DESC, id DESC");
 $verifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Ambil data bookings/orders
+$stmtOrders = $pdo->query("
+    SELECT 
+        b.id,
+        b.full_name,
+        b.email,
+        b.phone,
+        b.start_date,
+        b.end_date,
+        b.total_price,
+        b.status,
+        b.created_at,
+        b.assigned_car_id,
+        b.additional_cost,
+        b.damage_image,
+        b.damage_description,
+        c.make,
+        c.model,
+        c.category,
+        c.fuel_type,
+        ac.number_plate AS assigned_plate
+    FROM bookings b
+    JOIN cars c ON b.car_id = c.id
+    LEFT JOIN cars ac ON b.assigned_car_id = ac.id
+    ORDER BY b.id DESC
+");
+$orders = $stmtOrders->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -70,6 +118,7 @@ $verifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <script>
   window.SERVER_VERIFICATIONS = <?= json_encode($verifications) ?>;
+  window.SERVER_ORDERS = <?= json_encode($orders) ?>;
 </script>
 <script src="assets/js/app.js"></script>
 

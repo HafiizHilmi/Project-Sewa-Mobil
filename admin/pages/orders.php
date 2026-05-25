@@ -69,6 +69,11 @@
                   <p class="text-[10px] text-slate-400 mt-0.5 flex items-center gap-0.5">
                     <span x-text="order.car.category"></span><span class="mx-0.5">•</span><span x-text="order.car.fuel"></span>
                   </p>
+                  <template x-if="order.assignedPlate">
+                    <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">
+                      Plat: <span class="bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800" x-text="order.assignedPlate"></span>
+                    </p>
+                  </template>
                 </div>
               </div>
               <div class="space-y-2">
@@ -97,12 +102,41 @@
               </div>
               
               <div class="flex justify-end items-center gap-1.5" @click.stop>
-                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
-                  <i class="fa-solid fa-pen text-[10px]"></i>
-                </button>
-                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
-                  <i class="fa-solid fa-trash text-[10px]"></i>
-                </button>
+                <template x-if="order.status === 'Pending'">
+                  <div class="flex items-center gap-1.5">
+                    <form action="order_action.php" method="POST" class="m-0 p-0 flex">
+                      <input type="hidden" name="booking_id" :value="order.id">
+                      <input type="hidden" name="action" value="accept">
+                      <button type="submit" title="Terima Pesanan" class="w-7 h-7 rounded-lg flex items-center justify-center text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30 transition-colors">
+                        <i class="fa-solid fa-check text-xs"></i>
+                      </button>
+                    </form>
+                    <form action="order_action.php" method="POST" class="m-0 p-0 flex">
+                      <input type="hidden" name="booking_id" :value="order.id">
+                      <input type="hidden" name="action" value="reject">
+                      <button type="submit" title="Tolak Pesanan" class="w-7 h-7 rounded-lg flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:hover:bg-rose-900/30 transition-colors">
+                        <i class="fa-solid fa-xmark text-xs"></i>
+                      </button>
+                    </form>
+                  </div>
+                </template>
+                <template x-if="order.status === 'Confirmed'">
+                  <div class="flex items-center gap-1.5">
+                    <button type="button" @click="openCompleteModal(order)" title="Selesaikan Transaksi (Success)" class="w-7 h-7 rounded-lg flex items-center justify-center text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30 transition-colors">
+                      <i class="fa-solid fa-circle-check text-xs"></i>
+                    </button>
+                    <form action="order_action.php" method="POST" class="m-0 p-0 flex">
+                      <input type="hidden" name="booking_id" :value="order.id">
+                      <input type="hidden" name="action" value="reject">
+                      <button type="submit" title="Batalkan/Tolak Pesanan" class="w-7 h-7 rounded-lg flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:hover:bg-rose-900/30 transition-colors">
+                        <i class="fa-solid fa-xmark text-xs"></i>
+                      </button>
+                    </form>
+                  </div>
+                </template>
+                <template x-if="order.status !== 'Pending' && order.status !== 'Confirmed'">
+                  <span class="text-[10px] text-slate-400 font-semibold uppercase px-2">Selesai</span>
+                </template>
               </div>
             </div>
 
@@ -122,18 +156,52 @@
                 </div>
                 <p class="text-sm font-bold text-slate-800 dark:text-white" x-text="order.customer.name"></p>
                 <p class="text-xs text-slate-400 mt-0.5" x-text="order.car.name + ' · ' + order.car.category"></p>
+                <template x-if="order.assignedPlate">
+                  <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">
+                    Plat: <span class="bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800" x-text="order.assignedPlate"></span>
+                  </p>
+                </template>
                 <div class="flex items-center justify-between mt-1.5">
                   <p class="text-xs text-slate-500" x-text="order.startDate + ' – ' + order.endDate"></p>
                   <p class="text-xs font-bold text-slate-800 dark:text-white">Rp <span x-text="order.totalFormatted"></span></p>
                 </div>
                 
                 <div class="flex justify-end gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-700" @click.stop>
-                  <button class="w-8 h-8 rounded-lg flex items-center justify-center text-blue-500 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors">
-                    <i class="fa-solid fa-pen text-xs"></i>
-                  </button>
-                  <button class="w-8 h-8 rounded-lg flex items-center justify-center text-red-500 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-800 transition-colors">
-                    <i class="fa-solid fa-trash text-xs"></i>
-                  </button>
+                  <template x-if="order.status === 'Pending'">
+                    <div class="flex items-center gap-2">
+                      <form action="order_action.php" method="POST" class="m-0 p-0">
+                        <input type="hidden" name="booking_id" :value="order.id">
+                        <input type="hidden" name="action" value="accept">
+                        <button type="submit" class="px-3 py-1 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg flex items-center gap-1">
+                          <i class="fa-solid fa-check"></i> Terima
+                        </button>
+                      </form>
+                      <form action="order_action.php" method="POST" class="m-0 p-0">
+                        <input type="hidden" name="booking_id" :value="order.id">
+                        <input type="hidden" name="action" value="reject">
+                        <button type="submit" class="px-3 py-1 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg flex items-center gap-1">
+                          <i class="fa-solid fa-xmark"></i> Tolak
+                        </button>
+                      </form>
+                    </div>
+                  </template>
+                  <template x-if="order.status === 'Confirmed'">
+                    <div class="flex items-center gap-2">
+                      <button type="button" @click="openCompleteModal(order)" class="px-3 py-1 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg flex items-center gap-1">
+                        <i class="fa-solid fa-circle-check"></i> Selesai
+                      </button>
+                      <form action="order_action.php" method="POST" class="m-0 p-0">
+                        <input type="hidden" name="booking_id" :value="order.id">
+                        <input type="hidden" name="action" value="reject">
+                        <button type="submit" class="px-3 py-1 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg flex items-center gap-1">
+                          <i class="fa-solid fa-xmark"></i> Batalkan
+                        </button>
+                      </form>
+                    </div>
+                  </template>
+                  <template x-if="order.status !== 'Pending' && order.status !== 'Confirmed'">
+                    <span class="text-xs text-slate-400 font-semibold uppercase py-1">Selesai</span>
+                  </template>
                 </div>
               </div>
             </div>
@@ -168,12 +236,84 @@
           <p class="text-sm font-bold text-slate-800 dark:text-white" x-text="selectedOrder.customer.name"></p>
           <p class="text-xs text-slate-500 mt-1" x-text="selectedOrder.car.name"></p>
         </div>
-        <div class="bg-blue-600 rounded-xl p-4 flex justify-between items-center text-white">
+        <div class="bg-blue-600 rounded-xl p-4 flex justify-between items-center text-white mb-4">
           <p class="text-sm font-semibold">Total Pembayaran</p>
           <p class="text-base font-extrabold" x-text="'Rp ' + selectedOrder.totalFormatted"></p>
         </div>
-        <button @click="showOrderModal = false" class="w-full mt-4 bg-slate-200 dark:bg-slate-700 py-2.5 rounded-xl font-semibold dark:text-white text-sm">Tutup</button>
+
+        <!-- Laporan kerusakan jika ada -->
+        <template x-if="selectedOrder.status === 'Completed' && (selectedOrder.additionalCost > 0 || selectedOrder.damageDescription)">
+          <div class="bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 rounded-xl p-4 mb-4 text-rose-800 dark:text-rose-300">
+            <p class="text-[10px] font-bold uppercase mb-2">Laporan Pengembalian (Kerusakan/Denda)</p>
+            <template x-if="selectedOrder.additionalCost > 0">
+              <p class="text-xs font-semibold">Biaya Tambahan: Rp <span x-text="new Intl.NumberFormat('id-ID').format(selectedOrder.additionalCost)"></span></p>
+            </template>
+            <template x-if="selectedOrder.damageDescription">
+              <p class="text-xs mt-1.5"><span class="font-semibold">Deskripsi:</span> <span x-text="selectedOrder.damageDescription"></span></p>
+            </template>
+            <template x-if="selectedOrder.damageImage">
+              <div class="mt-2.5 rounded-lg overflow-hidden border border-rose-200 dark:border-rose-800">
+                <img :src="'../public/assets/images/damages/' + selectedOrder.damageImage" class="w-full h-auto object-cover">
+              </div>
+            </template>
+          </div>
+        </template>
+
+        <button @click="showOrderModal = false" class="w-full bg-slate-200 dark:bg-slate-700 py-2.5 rounded-xl font-semibold dark:text-white text-sm">Tutup</button>
       </div>
     </template>
+  </div>
+</div>
+
+<!-- Modal Selesaikan Sewa (Success) -->
+<div x-show="showCompleteModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+  <div @click="showCompleteModal = false" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" x-transition.opacity></div>
+  <div class="modal-box relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md flex flex-col p-6 overflow-hidden" style="max-height: 90vh;" x-transition>
+    <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700 mb-4">
+      <h3 class="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">
+        <i class="fa-solid fa-circle-check text-emerald-500"></i> Selesaikan Transaksi Sewa
+      </h3>
+      <button @click="showCompleteModal = false" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 flex items-center justify-center">
+        <i class="fa-solid fa-xmark text-slate-500 dark:text-slate-400 text-xs"></i>
+      </button>
+    </div>
+
+    <form action="order_action.php" method="POST" enctype="multipart/form-data" class="space-y-4 overflow-y-auto flex-1 pr-1">
+      <input type="hidden" name="booking_id" :value="completingOrder ? completingOrder.id : ''">
+      <input type="hidden" name="action" value="complete">
+
+      <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 text-xs text-blue-700 dark:text-blue-300">
+        <span class="font-bold">Info Pesanan:</span>
+        <p class="mt-1" x-text="completingOrder ? ('Customer: ' + completingOrder.customer.name + ' (' + completingOrder.car.name + ')') : ''"></p>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Tambahan Biaya (Denda/Kerusakan)</label>
+        <div class="relative">
+          <span class="absolute left-3 top-2 text-xs text-slate-400 font-bold">Rp</span>
+          <input type="number" name="additional_cost" placeholder="0" class="w-full border border-slate-200 dark:border-slate-700 dark:bg-slate-700 dark:text-white rounded-lg pl-9 pr-3 py-2 text-xs outline-none focus:border-blue-500">
+        </div>
+        <p class="text-[10px] text-slate-400 mt-1">Isi jika ada denda keterlambatan atau biaya kerusakan.</p>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Foto Kerusakan (Optional)</label>
+        <input type="file" name="foto_kerusakan" accept="image/*" class="w-full border border-slate-200 dark:border-slate-700 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-xs outline-none focus:border-blue-500">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Detail Kerusakan / Catatan</label>
+        <textarea name="damage_description" placeholder="Deskripsikan kerusakan jika ada..." rows="3" class="w-full border border-slate-200 dark:border-slate-700 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-2 text-xs outline-none focus:border-blue-500 resize-none"></textarea>
+      </div>
+
+      <div class="flex flex-col gap-2 pt-4 border-t border-slate-100 dark:border-slate-700">
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+           Simpan & Selesaikan
+        </button>
+        <button type="button" @click="skipComplete(completingOrder.id)" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-white py-2.5 rounded-xl font-semibold text-xs transition-colors flex items-center justify-center gap-1.5">
+           Lewati
+        </button>
+      </div>
+    </form>
   </div>
 </div>

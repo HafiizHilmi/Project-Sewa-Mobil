@@ -16,7 +16,18 @@ if (mysqli_num_rows($checkTypeKey) === 0) {
     mysqli_query($conn, "UPDATE cars SET type_key = CONCAT(make,'|',model,'|',year,'|',fuel_type,'|',engine_capacity,'|',seats,'|',transmission,'|',category,'|',price_per_day)");
 }
 
-$query = mysqli_query($conn, "SELECT * FROM cars ORDER BY id DESC");
+$query = mysqli_query($conn, "
+    SELECT 
+        c.*, 
+        b.full_name AS renter_name,
+        b.start_date,
+        b.end_date,
+        b.pickup_location,
+        b.return_location
+    FROM cars c
+    LEFT JOIN bookings b ON c.id = b.assigned_car_id AND b.status = 'confirmed'
+    ORDER BY c.id DESC
+");
 
 $types_map = [];
 while ($row = mysqli_fetch_assoc($query)) {
@@ -84,7 +95,12 @@ while ($row = mysqli_fetch_assoc($query)) {
       'status'  => ($row['available'] == 1) ? 'Tersedia' : 'Tersewa',
       'image'   => $imagePath,
       'latitude'=> $row['latitude'] ?? null,
-      'longitude'=> $row['longitude'] ?? null
+      'longitude'=> $row['longitude'] ?? null,
+      'renter'  => $row['renter_name'] ?? null,
+      'start_date' => $row['start_date'] ? date('j M Y', strtotime($row['start_date'])) : null,
+      'end_date'   => $row['end_date'] ? date('j M Y', strtotime($row['end_date'])) : null,
+      'pickup'     => $row['pickup_location'] ?? null,
+      'return'     => $row['return_location'] ?? null
     ];
 
     $types_map[$type_key]['children'][] = $child;
@@ -95,13 +111,17 @@ $types_data = array_values($types_map);
 
 $cars_data = [];
 foreach ($types_data as $t) {
-    $t['stock'] = count($t['children']);
-    $t['image'] = (!empty($t['children'][0]['image'])) ? $t['children'][0]['image'] : null;
-    $available = false;
+    $available_count = 0;
     foreach ($t['children'] as $c) {
-        if ($c['status'] === 'Tersedia') { $available = true; break; }
+        if ($c['status'] === 'Tersedia') {
+            $available_count++;
+        }
     }
+    $t['stock'] = $available_count;
+    $t['image'] = (!empty($t['children'][0]['image'])) ? $t['children'][0]['image'] : null;
+    $available = ($available_count > 0);
     $t['status'] = $available ? 'Tersedia' : 'Tersewa';
+    $t['is_type'] = 1;
     $cars_data[] = $t;
 }
 ?>
@@ -229,6 +249,33 @@ foreach ($types_data as $t) {
         <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-4">
           <div class="space-y-4">
             
+            <!-- Rental Info Block -->
+            <template x-if="selectedCar.status === 'Tersewa' && selectedCar.is_type === 0 && selectedCar.renter">
+              <div class="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 rounded-2xl p-4 space-y-3">
+                <div class="flex items-center gap-2 pb-2 border-b border-blue-100 dark:border-blue-900/50">
+                  <h4 class="text-xs font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wide">Informasi Sewa</h4>
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <span class="text-slate-400 font-semibold block text-[10px] uppercase">Penyewa</span>
+                    <span class="font-bold text-slate-800 dark:text-white" x-text="selectedCar.renter"></span>
+                  </div>
+                  <div>
+                    <span class="text-slate-400 font-semibold block text-[10px] uppercase">Durasi Sewa</span>
+                    <span class="font-bold text-slate-800 dark:text-white" x-text="selectedCar.start_date + ' s/d ' + selectedCar.end_date"></span>
+                  </div>
+                  <div>
+                    <span class="text-slate-400 font-semibold block text-[10px] uppercase">Lokasi Pengambilan</span>
+                    <span class="font-bold text-slate-800 dark:text-white" x-text="selectedCar.pickup"></span>
+                  </div>
+                  <div>
+                    <span class="text-slate-400 font-semibold block text-[10px] uppercase">Lokasi Pengembalian</span>
+                    <span class="font-bold text-slate-800 dark:text-white" x-text="selectedCar.return || 'Sama dengan lokasi pengambilan'"></span>
+                  </div>
+                </div>
+              </div>
+            </template>
+
             <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
               <div class="h-[210px] flex flex-col items-center justify-center gap-3 relative" :class="selectedCar.bgCls">
                 <template x-if="selectedCar.image">

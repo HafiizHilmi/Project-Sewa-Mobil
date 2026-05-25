@@ -163,12 +163,69 @@ function appData() {
     orderFilter: 'All Orders',
     showOrderModal: false,
     selectedOrder: null,
-    orders: [
-      { idLine1:'#202604', idLine2:'278301', customer:{ name:'Sucipto', email:'sucipto12@gmail.com', phone:'081234567890' }, car:{ name:'Toyota Avanza', category:'MPV', fuel:'Bensin', thumbBg:'bg-blue-50 dark:bg-blue-900/30', thumbColor:'text-blue-400' }, startDate:'Apr 27, 10.00 WIB', endDate:'Apr 30, 10.00 WIB', totalFormatted:'1.050.000', status:'Confirmed' },
-      { idLine1:'#202604', idLine2:'278302', customer:{ name:'Budi Santoso', email:'budi.s@gmail.com', phone:'082345678901' }, car:{ name:'Toyota Kijang Innova', category:'MPV', fuel:'Bensin', thumbBg:'bg-indigo-50 dark:bg-indigo-900/30', thumbColor:'text-indigo-400' }, startDate:'Apr 27, 09.00 WIB', endDate:'Apr 30, 09.00 WIB', totalFormatted:'2.750.000', status:'Pending' },
-      { idLine1:'#202604', idLine2:'278303', customer:{ name:'Dewi Rahma', email:'dewi.r@gmail.com', phone:'083456789012' }, car:{ name:'Toyota Fortuner VRZ', category:'SUV', fuel:'Solar', thumbBg:'bg-emerald-50 dark:bg-emerald-900/30', thumbColor:'text-emerald-400' }, startDate:'Apr 28, 08.00 WIB', endDate:'May 2, 08.00 WIB', totalFormatted:'3.500.000', status:'Completed' },
-      { idLine1:'#202604', idLine2:'278304', customer:{ name:'Ahmad Fauzi', email:'ahmad.f@gmail.com', phone:'084567890123' }, car:{ name:'BYD M6', category:'EV', fuel:'Listrik', thumbBg:'bg-teal-50 dark:bg-teal-900/30', thumbColor:'text-teal-400' }, startDate:'Apr 29, 10.00 WIB', endDate:'May 1, 10.00 WIB', totalFormatted:'1.100.000', status:'Completed' },
-    ],
+    orders: (window.SERVER_ORDERS || []).map(o => {
+      let thumbBg = 'bg-blue-50 dark:bg-blue-900/30';
+      let thumbColor = 'text-blue-400';
+      const cat = (o.category || '').toUpperCase();
+      if (cat === 'SUV') {
+        thumbBg = 'bg-emerald-50 dark:bg-emerald-900/30';
+        thumbColor = 'text-emerald-400';
+      } else if (cat === 'MPV') {
+        thumbBg = 'bg-blue-50 dark:bg-blue-900/30';
+        thumbColor = 'text-blue-400';
+      } else if (cat === 'SEDAN') {
+        thumbBg = 'bg-slate-100 dark:bg-slate-700/50';
+        thumbColor = 'text-slate-400';
+      } else if (cat === 'EV') {
+        thumbBg = 'bg-teal-50 dark:bg-teal-900/30';
+        thumbColor = 'text-teal-400';
+      }
+
+      const formatDate = (dateStr) => {
+        if (!dateStr) return '-';
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        const options = { month: 'short', day: 'numeric' };
+        return d.toLocaleDateString('en-US', options) + ', 10.00 WIB';
+      };
+
+      const rawStatus = o.status || 'pending';
+      const status = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1);
+
+      const createdDate = new Date(o.created_at || Date.now());
+      const year = createdDate.getFullYear();
+      const month = String(createdDate.getMonth() + 1).padStart(2, '0');
+      const idLine1 = `#${year}${month}`;
+      const idLine2 = String(o.id).padStart(6, '0');
+
+      const totalFormatted = new Intl.NumberFormat('id-ID').format(o.total_price);
+
+      return {
+        id: o.id,
+        idLine1: idLine1,
+        idLine2: idLine2,
+        customer: {
+          name: o.full_name,
+          email: o.email,
+          phone: o.phone
+        },
+        car: {
+          name: `${o.make} ${o.model}`,
+          category: o.category,
+          fuel: o.fuel_type,
+          thumbBg: thumbBg,
+          thumbColor: thumbColor
+        },
+        startDate: formatDate(o.start_date),
+        endDate: formatDate(o.end_date),
+        totalFormatted: totalFormatted,
+        status: status,
+        assignedPlate: o.assigned_plate || null,
+        additionalCost: o.additional_cost ? parseFloat(o.additional_cost) : 0,
+        damageImage: o.damage_image || null,
+        damageDescription: o.damage_description || null
+      };
+    }),
     get filteredOrders() {
       if (this.orderFilter === 'All Orders') return this.orders;
       return this.orders.filter(o => o.status === this.orderFilter);
@@ -176,6 +233,40 @@ function appData() {
     openOrderModal(order) {
       this.selectedOrder = order;
       this.showOrderModal = true;
+    },
+    showCompleteModal: false,
+    completingOrder: null,
+    openCompleteModal(order) {
+      this.completingOrder = order;
+      this.showCompleteModal = true;
+    },
+    skipComplete(id) {
+      if (confirm('Selesaikan sewa kendaraan ini tanpa biaya tambahan atau kerusakan?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'order_action.php';
+        
+        const bookingIdInput = document.createElement('input');
+        bookingIdInput.type = 'hidden';
+        bookingIdInput.name = 'booking_id';
+        bookingIdInput.value = id;
+        
+        const actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'action';
+        actionInput.value = 'complete';
+
+        const skipInput = document.createElement('input');
+        skipInput.type = 'hidden';
+        skipInput.name = 'skip_damage';
+        skipInput.value = '1';
+        
+        form.appendChild(bookingIdInput);
+        form.appendChild(actionInput);
+        form.appendChild(skipInput);
+        document.body.appendChild(form);
+        form.submit();
+      }
     }
 
   };
