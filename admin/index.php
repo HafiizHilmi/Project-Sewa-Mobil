@@ -1,13 +1,13 @@
 <?php
 session_start();
 
-// --- WAJIB ADA: Pelindung Halaman & Pengecekan Role ---
+// --- KUNCI HALAMAN UTAMA ADMIN ---
 if (!isset($_SESSION['admin_id'])) {
     header("Location: login.php");
     exit();
 }
-$role = $_SESSION['admin_role'] ?? 'staff';
-// ------------------------------------------------------
+$role = $_SESSION['admin_role'] ?? 'staff'; // Ambil role hak akses
+// ---------------------------------
 
 require_once __DIR__ . '/../include/db_config.php';
 $pdo = getPDO();
