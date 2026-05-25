@@ -123,7 +123,7 @@
                         <img src="../public/assets/images/avanza_b1242_dfr.jpeg" class="card-img-top rounded-3 mb-3 object-fit-cover" alt="Avanza" style="height: 180px;">
                         <div class="card-body p-0">
                             <div class="d-flex justify-content-between align-items-start mb-1">
-                                <h6 class="fw-bold mb-0">Toyota Avanza 2024</h6>
+                                <h6 class="fw-bold mb-0">Toyota Avanza</h6>
                                 <div class="text-end">
                                     <span class="fw-bold mb-0 d-block">Rp350.000 <span class="text-muted fw-normal" style="font-size: 0.75rem;">/hari</span></span>
                                 </div>
@@ -141,19 +141,19 @@
                 </div>
                 <div class="col-md-4">
                     <div class="card card-custom p-3 h-100">
-                        <img src="../public/assets/images/avanza_b1242_dfr.jpeg" class="card-img-top rounded-3 mb-3 object-fit-cover" alt="Avanza" style="height: 180px;">
+                        <img src="../public/assets/images/mercy.avif" class="card-img-top rounded-3 mb-3 object-fit-cover" alt="Mercedes Benz S600" style="height: 180px;">
                         <div class="card-body p-0">
                             <div class="d-flex justify-content-between align-items-start mb-1">
-                                <h6 class="fw-bold mb-0">Toyota Avanza 2024</h6>
+                                <h6 class="fw-bold mb-0">Mercedes Benz S500</h6>
                                 <div class="text-end">
-                                    <span class="fw-bold mb-0 d-block">Rp350.000 <span class="text-muted fw-normal" style="font-size: 0.75rem;">/hari</span></span>
+                                    <span class="fw-bold mb-0 d-block">Rp2.350.000 <span class="text-muted fw-normal" style="font-size: 0.75rem;">/hari</span></span>
                                 </div>
                             </div>
-                            <p class="text-muted-custom" style="font-size: 0.75rem;">MPV</p>
+                            <p class="text-muted-custom" style="font-size: 0.75rem;">Sedan</p>
                             
                             <div class="mb-4">
                                 <span class="badge badge-custom rounded-pill me-1">Bensin</span>
-                                <span class="badge badge-custom rounded-pill">7 Penumpang</span>
+                                <span class="badge badge-custom rounded-pill">5 Penumpang</span>
                             </div>
                             
                             <a href="#" class="btn btn-brand w-100 rounded-3 fw-semibold">Sewa Sekarang</a>
@@ -162,19 +162,19 @@
                 </div>
                 <div class="col-md-4">
                     <div class="card card-custom p-3 h-100">
-                        <img src="../public/assets/images/avanza_b1242_dfr.jpeg" class="card-img-top rounded-3 mb-3 object-fit-cover" alt="Avanza" style="height: 180px;">
+                        <img src="../public/assets/images/zigi-6770e685dc131-hyundai-ioniq-5-bekas_665_374.webp" class="card-img-top rounded-3 mb-3 object-fit-cover" alt="Avanza" style="height: 180px;">
                         <div class="card-body p-0">
                             <div class="d-flex justify-content-between align-items-start mb-1">
-                                <h6 class="fw-bold mb-0">Toyota Avanza 2024</h6>
+                                <h6 class="fw-bold mb-0">Hyundai IONIQ 5</h6>
                                 <div class="text-end">
-                                    <span class="fw-bold mb-0 d-block">Rp350.000 <span class="text-muted fw-normal" style="font-size: 0.75rem;">/hari</span></span>
+                                    <span class="fw-bold mb-0 d-block">Rp550.000 <span class="text-muted fw-normal" style="font-size: 0.75rem;">/hari</span></span>
                                 </div>
                             </div>
-                            <p class="text-muted-custom" style="font-size: 0.75rem;">MPV</p>
+                            <p class="text-muted-custom" style="font-size: 0.75rem;">Listrik</p>
                             
                             <div class="mb-4">
-                                <span class="badge badge-custom rounded-pill me-1">Bensin</span>
-                                <span class="badge badge-custom rounded-pill">7 Penumpang</span>
+                                <span class="badge badge-custom rounded-pill me-1">Listrik</span>
+                                <span class="badge badge-custom rounded-pill">5 Penumpang</span>
                             </div>
                             
                             <a href="#" class="btn btn-brand w-100 rounded-3 fw-semibold">Sewa Sekarang</a>
