@@ -4,7 +4,9 @@ require_once __DIR__ . '/../include/db_config.php';
 $pdo = getPDO();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die("Akses ditolak.");
+    $_SESSION['flash_msg'] = "Akses ditolak.";
+    header("Location: index.php?page=orders");
+    exit();
 }
 
 $booking_id = $_POST['booking_id'] ?? null;
@@ -126,24 +128,19 @@ if ($booking_id && in_array($action, ['accept', 'reject', 'complete'])) {
 
         $pdo->commit();
 
-        echo "<script>
-                alert('Berhasil: Status pesanan berhasil diubah.');
-                window.location.href = 'index.php';
-              </script>";
-        exit;
+        // MENGGUNAKAN FLASH MESSAGE AGAR TIDAK BLANK
+        $_SESSION['flash_msg'] = "Berhasil: Status pesanan berhasil diubah.";
+        header("Location: index.php?page=orders");
+        exit();
 
     } catch (Exception $e) {
         $pdo->rollBack();
-        echo "<script>
-                alert('Terjadi kesalahan: " . addslashes($e->getMessage()) . "');
-                window.history.back();
-              </script>";
-        exit;
+        $_SESSION['flash_msg'] = "Terjadi kesalahan: " . addslashes($e->getMessage());
+        header("Location: index.php?page=orders");
+        exit();
     }
 } else {
-    echo "<script>
-            alert('Data tidak valid.');
-            window.history.back();
-          </script>";
-    exit;
+    $_SESSION['flash_msg'] = "Data tidak valid.";
+    header("Location: index.php?page=orders");
+    exit();
 }
