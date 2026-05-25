@@ -227,12 +227,12 @@
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
                     <div class="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop" alt="Car" class="w-full h-full object-cover">
+                        <img src="<?= htmlspecialchars($car['image'] ?: 'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop') ?>" alt="<?= htmlspecialchars($car['make'] . ' ' . $car['model']) ?>" class="w-full h-full object-cover">
                     </div>
                     
                     <div class="p-6">
-                        <h3 class="font-bold text-xl mb-1">Toyota Avanza 2024</h3>
-                        <p class="text-sm text-gray-500 mb-6">MPV • Bensin • 7 Penumpang</p>
+                        <h3 class="font-bold text-xl mb-1"><?= htmlspecialchars($car['make'] . ' ' . $car['model'] . ' ' . $car['year']) ?></h3>
+                        <p class="text-sm text-gray-500 mb-6"><?= htmlspecialchars($car['category'] ?: 'Lainnya') ?> • <?= htmlspecialchars($car['fuel_type'] ?: '-') ?> • <?= htmlspecialchars($car['seats'] ?: '-') ?> Penumpang</p>
                         
                         <div class="space-y-4 mb-6">
                             <div class="flex gap-4">
@@ -273,7 +273,7 @@
                         </div>
                         
                         <form action="index.php?module=Booking&action=process" method="POST" id="booking-form">
-                            <input type="hidden" name="car_id" value="1">
+                            <input type="hidden" name="car_id" value="<?= htmlspecialchars($car['id']) ?>">
                             <input type="hidden" name="addon_driver" id="addon-driver-input" value="0">
                             <input type="hidden" name="start_date" id="start-date-input" value="">
                             <input type="hidden" name="end_date" id="end-date-input" value="">
@@ -291,7 +291,7 @@
     </main>
 
     <script>
-        const CAR_BASE_PRICE = 350000; 
+        const CAR_BASE_PRICE = <?= intval($car['price_per_day']) ?>; 
         let driverPrice = 0;
         let totalDays = 0;
 

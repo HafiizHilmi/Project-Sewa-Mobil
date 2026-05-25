@@ -139,7 +139,7 @@
                                 <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-sm font-medium">Stok <?= htmlspecialchars($car['stock'] ?? 0) ?></span>
                             </div>
                         </div>
-                        <a href="index.php?module=Booking&action=checkout" class="block w-full text-center bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition no-underline">Sewa Sekarang</a>
+                        <a href="index.php?module=Booking&action=checkout&car_id=<?= htmlspecialchars($car['id']) ?>" class="block w-full text-center bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition no-underline">Sewa Sekarang</a>
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
