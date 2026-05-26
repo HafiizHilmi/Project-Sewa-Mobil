@@ -49,6 +49,8 @@ class ProfileController {
         $stmtBookings->execute(['user_id' => $_SESSION['user_id']]);
         $bookings = $stmtBookings->fetchAll(PDO::FETCH_ASSOC);
 
+        $docsUnlocked = isset($_SESSION['docs_unlocked']) && $_SESSION['docs_unlocked'] === true;
+
         require_once __DIR__ . '/views/index.php';
     }
 
@@ -130,6 +132,40 @@ class ProfileController {
         }
 
         header('Location: index.php?module=Profile&action=index');
+        exit;
+    }
+
+    public function verifyDocsPassword() {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: index.php?module=Auth&action=login');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php?module=Profile&action=index');
+            exit;
+        }
+
+        require_once __DIR__ . '/../../../include/db_config.php';
+        $pdo = getPDO();
+
+        $stmt = $pdo->prepare("SELECT password FROM users WHERE id = :id");
+        $stmt->execute(['id' => $_SESSION['user_id']]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $password = $_POST['password'] ?? '';
+        if ($user && password_verify($password, $user['password'])) {
+            $_SESSION['docs_unlocked'] = true;
+            $_SESSION['flash_success'] = "Dokumen identitas berhasil dibuka.";
+        } else {
+            $_SESSION['flash_error'] = "Password salah! Tidak dapat mengakses dokumen.";
+        }
+
+        header('Location: index.php?module=Profile&action=index#dokumen');
         exit;
     }
 }
