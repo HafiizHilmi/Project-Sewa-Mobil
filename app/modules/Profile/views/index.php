@@ -204,27 +204,6 @@
                     </div>
                 
                 <?php else: ?>
-                    <!-- Pending, Verified, Rejected will show Dokumen and Riwayat Penyewaan -->
-                    <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-8">
-                        <h2 class="text-sm font-bold text-gray-700 mb-6 flex items-center gap-2">
-                            <i class="bi bi-person-vcard text-blue-500"></i> Dokumen Identitas Saya
-                        </h2>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <p class="text-sm font-semibold text-gray-700 mb-2">Foto KTP</p>
-                                <div class="border rounded-xl p-2 bg-gray-50 aspect-video flex items-center justify-center overflow-hidden shadow-inner">
-                                    <img src="../admin/serve_file.php?file=<?= htmlspecialchars($user['ktp_file'] ?? '') ?>" class="max-w-full max-h-full object-contain" alt="KTP">
-                                </div>
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-700 mb-2">Foto SIM</p>
-                                <div class="border rounded-xl p-2 bg-gray-50 aspect-video flex items-center justify-center overflow-hidden shadow-inner">
-                                    <img src="../admin/serve_file.php?file=<?= htmlspecialchars($user['sim_file'] ?? '') ?>" class="max-w-full max-h-full object-contain" alt="SIM">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <?php
                         $historyCardStyle = 'bg-white border border-gray-100';
