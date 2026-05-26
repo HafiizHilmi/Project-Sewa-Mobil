@@ -87,5 +87,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         header("Location: index.php?page=settings");
         exit();
     }
+
+    // -------------------------------------------------------------------
+    // FITUR BLACKLIST AREA
+    // -------------------------------------------------------------------
+    if ($_POST['action'] === 'add_blacklist') {
+        if (!isset($_SESSION['admin_role']) || $_SESSION['admin_role'] !== 'superuser') die("Akses Ditolak!");
+        
+        $location_name = trim($_POST['location_name']);
+        
+        $stmt = $pdo->prepare("INSERT INTO blacklisted_locations (location_name) VALUES (?)");
+        if ($stmt->execute([$location_name])) {
+            $_SESSION['flash_msg'] = "Daerah berhasil dimasukkan ke daftar Blacklist!";
+        } else {
+            $_SESSION['flash_msg'] = "Gagal menambah data.";
+        }
+        header("Location: index.php?page=settings");
+        exit();
+    }
+
+    if ($_POST['action'] === 'delete_blacklist') {
+        if (!isset($_SESSION['admin_role']) || $_SESSION['admin_role'] !== 'superuser') die("Akses Ditolak!");
+        
+        $id = $_POST['id'];
+        $stmt = $pdo->prepare("DELETE FROM blacklisted_locations WHERE id = ?");
+        if ($stmt->execute([$id])) {
+            $_SESSION['flash_msg'] = "Daerah dihapus dari daftar Blacklist!";
+        }
+        header("Location: index.php?page=settings");
+        exit();
+    }
 }
 ?>

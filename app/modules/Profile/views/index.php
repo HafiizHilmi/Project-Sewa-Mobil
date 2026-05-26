@@ -454,6 +454,7 @@
                         <?php endforeach; ?>
                     </div>
                 <?php else: ?>
+
                     <div class="py-12 text-center">
                         <i class="bi bi-car-front text-slate-300 dark:text-slate-600 text-5xl block mb-3"></i>
                         <p class="text-slate-500 dark:text-slate-400 text-sm">Belum ada riwayat penyewaan.</p>
@@ -917,6 +918,7 @@
                                     </button>
                                 </form>
                             </div>
+
                         </div>
                     </div>
                             </div>

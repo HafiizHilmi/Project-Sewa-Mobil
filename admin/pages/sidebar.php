@@ -98,5 +98,3 @@
     <p class="text-[10px] text-blue-400 mt-0.5">v2.0.0 · 2026</p>
   </div>
 </aside>
-
-...

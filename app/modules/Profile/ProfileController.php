@@ -50,7 +50,6 @@ class ProfileController {
         $bookings = $stmtBookings->fetchAll(PDO::FETCH_ASSOC);
 
         $docsUnlocked = isset($_SESSION['docs_unlocked']) && $_SESSION['docs_unlocked'] === true;
-
         require_once __DIR__ . '/views/index.php';
     }
 

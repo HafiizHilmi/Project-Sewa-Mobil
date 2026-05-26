@@ -1,10 +1,28 @@
 <?php
 $actionType = isset($_GET['type']) ? $_GET['type'] : '';
+$carId = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
-$deviceId = "DEVICE ID MD";
-
+$deviceId = "";
 $webhookIdentifier = "";
 $pesanSukses = "";
+
+if ($carId > 0) {
+    require_once __DIR__ . '/../include/db_config.php';
+    $pdo = getPDO();
+    if ($pdo) {
+        $stmt = $pdo->prepare("SELECT chassis_number FROM cars WHERE id = :id LIMIT 1");
+        $stmt->execute([':id' => $carId]);
+        $car = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($car && !empty($car['chassis_number'])) {
+            $deviceId = trim($car['chassis_number']);
+        }
+    }
+}
+
+// Fallback jika tidak ditemukan di DB
+if (empty($deviceId)) {
+    $deviceId = "DEVICE_ID_MD"; 
+}
 
 if ($actionType === 'alarm') {
     $webhookIdentifier = "nyalakan_alarm";
@@ -15,7 +33,9 @@ if ($actionType === 'alarm') {
 }
 
 if ($webhookIdentifier !== "") {
-    $url = "https://trigger.macrodroid.com/{$deviceId}/{$webhookIdentifier}";
+    // Gunakan urlencode agar mencegah error malformed input jika ada spasi pada ID
+    $encodedDevice = urlencode($deviceId);
+    $url = "https://trigger.macrodroid.com/{$encodedDevice}/{$webhookIdentifier}";
     
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);

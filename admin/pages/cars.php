@@ -394,7 +394,7 @@ foreach ($types_data as $t) {
                   <i class="fa-solid fa-satellite-dish text-blue-500 text-xs"></i>
                   <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">Kontrol</h4>
                 </div>
-                  
+                
                 <!-- Telemetri Real-Time -->
                 <div class="grid grid-cols-2 gap-3 mb-4 text-left">
                   <div class="bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100/50 dark:border-slate-700/50 p-3 rounded-xl">
@@ -490,7 +490,7 @@ foreach ($types_data as $t) {
       </div>
 
       <div class="flex items-center justify-between px-5 py-3 border-t dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-        <button type="button" @click="deleteCar(editForm.id)" x-show="editForm.id" class="text-red-600 text-xs font-bold px-3 py-2 bg-red-50 rounded-lg">Hapus Kendaraan</button>
+        <button type="button" @click="deleteCar(editForm.id, editForm.type_key, editForm.is_type)" x-show="editForm.id" class="text-red-600 text-xs font-bold px-3 py-2 bg-red-50 rounded-lg">Hapus Kendaraan</button>
         <div x-show="!editForm.id"></div>
 
         <div class="flex gap-2">
@@ -617,24 +617,85 @@ document.addEventListener('alpine:init', () => {
         submitForm() {
             let isEdit = this.editForm.id !== '';
             let confirmMsg = isEdit ? 'Apakah Anda yakin mau menyimpan perubahan pada kendaraan ini?' : 'Apakah Anda yakin mau menambahkan kendaraan baru ini?';
+            
             if (confirm(confirmMsg)) {
-                let successMsg = isEdit ? 'Kendaraan berhasil diperbarui!' : 'Kendaraan baru berhasil ditambahkan!';
-                sessionStorage.setItem('carActionSuccess', successMsg);
-                this.$refs.carForm.submit(); 
+                // 1. Ubah tombol jadi mode loading agar user tidak klik 2 kali
+                let submitBtn = this.$refs.carForm.querySelector('button.bg-blue-600');
+                if (submitBtn) {
+                    submitBtn.innerText = "Memproses...";
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add("opacity-70", "cursor-wait");
+                }
+
+                // 2. Ambil seluruh data input & file foto
+                let formData = new FormData(this.$refs.carForm);
+                
+                // 3. Kirim data via jalur belakang (AJAX) agar layar tidak blank
+                fetch('car_action.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(() => {
+                    // Munculkan notif sukses
+                    alert(isEdit ? 'Data kendaraan berhasil diperbarui!' : 'Kendaraan baru berhasil ditambahkan!');
+                    // Muat ulang halaman secara halus
+                    window.location.href = 'index.php?page=cars';
+                })
+                .catch(() => {
+                    alert('Terjadi kesalahan saat memproses data!');
+                    // Kembalikan tombol ke semula jika gagal
+                    if (submitBtn) {
+                        submitBtn.innerText = "Simpan";
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove("opacity-70", "cursor-wait");
+                    }
+                });
             }
         },
 
+        // Ganti kedua fungsi deleteCar lama dengan fungsi tunggal ini di dalam Alpine.data
         deleteCar(id, typeKey = '', isType = 0) {
             let confirmMsg = 'Apakah Anda yakin mau menghapus kendaraan ini? Data yang dihapus tidak dapat dikembalikan.';
             if (isType == 1 && typeKey) {
-                confirmMsg = 'Anda akan menghapus tipe parent ini beserta semua unit child-nya. Lanjutkan?';
+                confirmMsg = 'PERINGATAN: Anda akan menghapus Tipe Induk ini BESERTA SEMUA UNIT MOBIL di dalamnya. Lanjutkan?';
             }
+            
             if (confirm(confirmMsg)) {
-                sessionStorage.setItem('carActionSuccess', 'Kendaraan berhasil dihapus!');
+                // Tampilkan indikator loading agar user tahu proses sedang berjalan
+                document.body.style.cursor = 'wait';
+                
                 let url = 'car_action.php?delete_id=' + id;
                 if (isType == 1 && typeKey) {
                     url += '&delete_is_type=1&delete_type_key=' + encodeURIComponent(typeKey);
                 }
+                
+                // Kirim permintaan hapus ke server
+                fetch(url)
+                .then(response => {
+                    document.body.style.cursor = 'default';
+                    // Paksa pemuatan ulang halaman setelah penghapusan berhasil
+                    window.location.href = 'index.php?page=cars';
+                })
+                .catch(error => {
+                    document.body.style.cursor = 'default';
+                    alert('Terjadi kesalahan saat menghapus data.');
+                });
+            }
+        },
+
+        // INI FUNGSI DELETE YANG SUDAH DIPERBAIKI (Tunggal & Efektif)
+        deleteCar(id, typeKey = '', isType = 0) {
+            let confirmMsg = 'Apakah Anda yakin mau menghapus kendaraan ini? Data yang dihapus tidak dapat dikembalikan.';
+            if (isType == 1 && typeKey) {
+                confirmMsg = 'PERINGATAN: Anda akan menghapus Tipe Induk ini BESERTA SEMUA UNIT MOBIL di dalamnya. Lanjutkan?';
+            }
+            
+            if (confirm(confirmMsg)) {
+                let url = 'car_action.php?delete_id=' + id;
+                if (isType == 1 && typeKey) {
+                    url += '&delete_is_type=1&delete_type_key=' + encodeURIComponent(typeKey);
+                }
+                // Langsung redirect untuk refresh halaman
                 window.location.href = url;
             }
         },

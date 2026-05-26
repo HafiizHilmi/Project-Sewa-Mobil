@@ -19,13 +19,17 @@
 
   <div class="flex items-center border-b border-slate-200 dark:border-slate-700 mb-6 gap-1">
     
-    <?php if (isset($_SESSION['admin_role']) && $_SESSION['admin_role'] === 'superuser'): ?>
+    <?php if (isset($role) && $role === 'superuser'): ?>
       <button @click="activeTab = 'admin'" :class="activeTab === 'admin' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-slate-500 dark:text-slate-400 font-medium hover:text-slate-700 dark:hover:text-slate-200 border-b-2 border-transparent'" class="pb-3 px-1 mr-5 text-sm transition-all whitespace-nowrap">
         Admin Management
       </button>
 
       <button @click="activeTab = 'business'" :class="activeTab === 'business' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-slate-500 dark:text-slate-400 font-medium hover:text-slate-700 dark:hover:text-slate-200 border-b-2 border-transparent'" class="pb-3 px-1 mr-5 text-sm transition-all whitespace-nowrap">
         Business Settings
+      </button>
+
+      <button @click="activeTab = 'blacklist'" :class="activeTab === 'blacklist' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-slate-500 dark:text-slate-400 font-medium hover:text-slate-700 dark:hover:text-slate-200 border-b-2 border-transparent'" class="pb-3 px-1 mr-5 text-sm transition-all whitespace-nowrap">
+        Blacklist Area
       </button>
     <?php endif; ?>
 
@@ -133,6 +137,79 @@
       <button class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
         <i class="fa-solid fa-floppy-disk text-xs"></i>Save Changes
       </button>
+    </div>
+  </div>
+
+  <div x-show="activeTab === 'blacklist'" class="page-fade">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="text-sm font-bold text-slate-800 dark:text-white">Daftar Lokasi Blacklist</h2>
+        <p class="text-xs text-slate-400 mt-0.5">Blokir penyewaan dari/ke daerah rawan</p>
+      </div>
+      <button @click="$refs.blacklistModal.classList.remove('hidden')" class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition-colors">
+        <i class="fa-solid fa-plus text-xs"></i>Tambah Blacklist
+      </button>
+    </div>
+
+    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+      <div class="hidden sm:grid px-5 py-3.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-[11px] font-bold uppercase tracking-wider" style="grid-template-columns: 50px 1fr 150px 80px; gap: 12px;">
+        <div>No</div><div>Nama Daerah / Kota</div><div>Ditambahkan Pada</div><div class="text-right">Aksi</div>
+      </div>
+      
+      <?php
+      // Buat tabel blacklist otomatis jika belum ada
+      $pdo->exec("CREATE TABLE IF NOT EXISTS blacklisted_locations (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          location_name VARCHAR(150) NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )");
+
+      $stmtBL = $pdo->query("SELECT * FROM blacklisted_locations ORDER BY id DESC");
+      $blacklists = $stmtBL->fetchAll(PDO::FETCH_ASSOC);
+      
+      if (count($blacklists) > 0):
+          $idx = 0;
+          foreach ($blacklists as $bl): $idx++;
+      ?>
+          <div class="tbl-row hidden sm:grid px-5 py-4 items-center border-t border-slate-100 dark:border-slate-700 dark:hover:bg-slate-700/30" style="grid-template-columns: 50px 1fr 150px 80px; gap: 12px;">
+            <div class="text-sm font-bold text-slate-500"><?= $idx ?></div>
+            <div class="text-sm font-bold text-slate-800 dark:text-slate-100"><i class="fa-solid fa-location-dot text-red-500 mr-2"></i> <?= htmlspecialchars($bl['location_name']) ?></div>
+            <div class="text-xs text-slate-400 font-medium"><?= date('d M Y', strtotime($bl['created_at'])) ?></div>
+            <div class="flex justify-end gap-1.5">
+              <form action="admin_action.php" method="POST" class="m-0 p-0" onsubmit="return confirm('Hapus daerah ini dari blacklist?');">
+                  <input type="hidden" name="action" value="delete_blacklist">
+                  <input type="hidden" name="id" value="<?= $bl['id'] ?>">
+                  <button type="submit" title="Hapus Blacklist" class="w-7 h-7 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                    <i class="fa-solid fa-trash-can text-[11px]"></i>
+                  </button>
+              </form>
+            </div>
+          </div>
+      <?php 
+          endforeach;
+      else: 
+      ?>
+          <div class="p-8 text-center text-slate-400 text-sm">Belum ada lokasi yang di-blacklist.</div>
+      <?php endif; ?>
+    </div>
+  </div>
+
+  <div x-ref="blacklistModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div @click="$refs.blacklistModal.classList.add('hidden')" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+    <div class="modal-box relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm flex flex-col p-5">
+      <h2 class="text-sm font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i class="fa-solid fa-ban text-red-500"></i> Tambah Daerah Blacklist</h2>
+      <form action="admin_action.php" method="POST">
+          <input type="hidden" name="action" value="add_blacklist">
+          <div class="mb-5">
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Nama Daerah / Kota</label>
+            <input type="text" name="location_name" placeholder="Cth: Madura, Bangkalan, Pati" required class="w-full border dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-700 dark:text-white outline-none focus:border-red-500"/>
+            <p class="text-[10px] text-slate-400 mt-1">Jika ada kata ini di alamat asal, tujuan, atau ambil mobil, pesanan akan diblokir otomatis.</p>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" @click="$refs.blacklistModal.classList.add('hidden')" class="flex-1 text-xs font-semibold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700 border dark:border-slate-600 px-4 py-2.5 rounded-xl transition-colors hover:bg-slate-50">Batal</button>
+            <button type="submit" class="flex-1 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-4 py-2.5 rounded-xl transition-colors">Blacklist Area</button>
+          </div>
+      </form>
     </div>
   </div>
 
