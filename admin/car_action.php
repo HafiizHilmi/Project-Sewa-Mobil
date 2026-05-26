@@ -100,10 +100,11 @@ if (isset($_POST['save_car'])) {
     // Eksekusi query
     mysqli_query($conn, $sql);
     
-    // Kembali ke halaman index dan buka parent jika type_key tersedia
+    session_start();
+    $_SESSION['flash_msg'] = "Data kendaraan berhasil disimpan!";
+
+    // KUNCI PERBAIKAN EDIT: Tambahkan page=cars SEBELUM open_type_key
     if (!empty($type_key)) {
-        header("Location: index.php?open_type_key=" . urlencode($type_key));
-    } else {
         header("Location: index.php?page=cars");
     }
     exit();
@@ -113,23 +114,57 @@ if (isset($_POST['save_car'])) {
 // [ PROSES HAPUS KENDARAAN ]
 // ==========================================
 if (isset($_GET['delete_id'])) {
-    $id = $_GET['delete_id'];
+    $id = mysqli_real_escape_string($conn, $_GET['delete_id']);
+    $delete_is_type = isset($_GET['delete_is_type']) ? intval($_GET['delete_is_type']) : 0;
+    $delete_type_key = isset($_GET['delete_type_key']) ? mysqli_real_escape_string($conn, $_GET['delete_type_key']) : '';
     
-    // (Opsional) Hapus file gambar fisik dari folder agar tidak menumpuk
-    $query = mysqli_query($conn, "SELECT image FROM cars WHERE id='$id'");
-    if($row = mysqli_fetch_assoc($query)) {
-        if(!empty($row['image'])) {
-            $imgPath = "../public/assets/images/" . $row['image'];
-            if(file_exists($imgPath)) {
-                unlink($imgPath); // Menghapus file gambar
+    session_start();
+
+    // JIKA YANG DIHAPUS ADALAH PARENT (Beserta semua anaknya)
+    if ($delete_is_type === 1 && !empty($delete_type_key)) {
+        
+        // 1. Hapus semua file gambar fisik (milik parent maupun child)
+        $queryImg = mysqli_query($conn, "SELECT image FROM cars WHERE type_key='$delete_type_key'");
+        while($row = mysqli_fetch_assoc($queryImg)) {
+            if(!empty($row['image'])) {
+                $imgPath = "../public/assets/images/" . $row['image'];
+                if(file_exists($imgPath)) { unlink($imgPath); }
             }
+        }
+        
+        // 2. Hapus SEMUA mobil yang memiliki type_key tersebut dari database
+        $hapus_berhasil = mysqli_query($conn, "DELETE FROM cars WHERE type_key='$delete_type_key'");
+        
+        if ($hapus_berhasil) {
+            $_SESSION['flash_msg'] = "Tipe mobil beserta seluruh unitnya berhasil dihapus!";
+        } else {
+            $_SESSION['flash_msg'] = "Gagal menghapus: Pastikan mobil ini tidak sedang terikat dengan pesanan aktif.";
+        }
+
+    } 
+    // JIKA YANG DIHAPUS HANYA SATU UNIT SAJA (Child)
+    else {
+        
+        // Hapus file gambar fisiknya saja
+        $queryImg = mysqli_query($conn, "SELECT image FROM cars WHERE id='$id'");
+        if($row = mysqli_fetch_assoc($queryImg)) {
+            if(!empty($row['image'])) {
+                $imgPath = "../public/assets/images/" . $row['image'];
+                if(file_exists($imgPath)) { unlink($imgPath); }
+            }
+        }
+
+        // Hapus spesifik 1 data dari database
+        $hapus_berhasil = mysqli_query($conn, "DELETE FROM cars WHERE id='$id'");
+        
+        if ($hapus_berhasil) {
+            $_SESSION['flash_msg'] = "Unit kendaraan berhasil dihapus!";
+        } else {
+            $_SESSION['flash_msg'] = "Gagal menghapus: Mobil ini mungkin sedang digunakan dalam transaksi.";
         }
     }
 
-    // Hapus data dari database
-    mysqli_query($conn, "DELETE FROM cars WHERE id='$id'");
-    
-    header("Location: index.php");
+    header("Location: index.php?page=cars");
     exit();
 }
 ?>
