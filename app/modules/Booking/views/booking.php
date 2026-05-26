@@ -121,7 +121,6 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             <div class="lg:col-span-2 space-y-6">
-                
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-lg">
@@ -227,7 +226,12 @@
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
                     <div class="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
-                        <img src="<?= htmlspecialchars($car['image'] ?: 'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop') ?>" alt="<?= htmlspecialchars($car['make'] . ' ' . $car['model']) ?>" class="w-full h-full object-cover">
+                        <?php 
+                            // Perbaikan Logika Path Gambar
+                            $rawImg = $car['image'] ?? '';
+                            $carImage = !empty($rawImg) ? (filter_var($rawImg, FILTER_VALIDATE_URL) ? $rawImg : 'assets/images/' . $rawImg) : 'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop';
+                        ?>
+                        <img src="<?= htmlspecialchars($carImage) ?>" alt="<?= htmlspecialchars($car['make'] . ' ' . $car['model']) ?>" class="w-full h-full object-cover">
                     </div>
                     
                     <div class="p-6">
