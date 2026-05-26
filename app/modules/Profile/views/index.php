@@ -239,129 +239,27 @@
                             <i class="bi bi-clock-history text-blue-500"></i> Riwayat Penyewaan Mobil
                         </h2>
                         
-                        <?php if (!empty($bookings)): ?>
-                            <div class="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-                                <?php foreach ($bookings as $booking): ?>
-                                    <?php 
-                                        $carName = htmlspecialchars(trim($booking['make'] . ' ' . $booking['model']));
-                                        $start = date('d M Y', strtotime($booking['start_date']));
-                                        $end = date('d M Y', strtotime($booking['end_date']));
-                                        $total = number_format($booking['total_price'], 0, ',', '.');
-                                        $statusVal = $booking['status'];
-                                        $image = htmlspecialchars($booking['image'] ?: 'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop');
-                                        
-                                        // Status mapping
-                                        $statusLabel = 'Menunggu Persetujuan';
-                                        $statusClass = 'bg-yellow-50 text-yellow-700 border-yellow-200';
-                                        if ($statusVal === 'confirmed') {
-                                            $statusLabel = 'Disetujui & Aktif';
-                                            $statusClass = 'bg-blue-50 text-blue-700 border-blue-200';
-                                        } elseif ($statusVal === 'completed') {
-                                            $statusLabel = 'Selesai';
-                                            $statusClass = 'bg-green-50 text-green-700 border-green-200';
-                                        } elseif ($statusVal === 'cancelled') {
-                                            $statusLabel = 'Dibatalkan';
-                                            $statusClass = 'bg-red-50 text-red-700 border-red-200';
-                                        }
-                                    ?>
-                                    <div class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col sm:flex-row gap-4">
-                                        <!-- Car Thumbnail -->
-                                        <div class="w-full sm:w-32 h-20 rounded-xl bg-gray-50 flex items-center justify-center overflow-hidden shrink-0">
-                                            <img src="<?= $image ?>" alt="<?= $carName ?>" class="w-full h-full object-cover">
-                                        </div>
-
-                                        <!-- Info Details -->
-                                        <div class="flex-1 space-y-1.5">
-                                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                                <h3 class="font-bold text-gray-800 text-base leading-tight"><?= $carName ?></h3>
-                                                <span class="inline-block px-2.5 py-0.5 text-[10.5px] font-bold rounded-full border <?= $statusClass ?>">
-                                                    <?= $statusLabel ?>
-                                                </span>
-                                            </div>
-
-                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-0.5 text-xs text-gray-500">
-                                                <div>
-                                                    <span class="text-gray-400 font-semibold block text-[10px] uppercase">Durasi Sewa</span>
-                                                    <span class="font-semibold text-gray-700"><i class="bi bi-calendar-range text-blue-500"></i> <?= $start ?> - <?= $end ?></span>
-                                                </div>
-                                                <div>
-                                                    <span class="text-gray-400 font-semibold block text-[10px] uppercase">Lokasi Pengambilan</span>
-                                                    <span class="font-semibold text-gray-700 truncate block max-w-[200px]" title="<?= htmlspecialchars($booking['pickup_location']) ?>"><i class="bi bi-geo-alt-fill text-red-500"></i> <?= htmlspecialchars($booking['pickup_location']) ?></span>
-                                                </div>
-                                                <?php if (!empty($booking['return_location'])): ?>
-                                                    <div class="mt-0.5">
-                                                        <span class="text-gray-400 font-semibold block text-[10px] uppercase">Lokasi Pengembalian</span>
-                                                        <span class="font-semibold text-gray-700 truncate block max-w-[200px]" title="<?= htmlspecialchars($booking['return_location']) ?>"><i class="bi bi-arrow-left-right text-blue-500"></i> <?= htmlspecialchars($booking['return_location']) ?></span>
-                                                    </div>
-                                                <?php endif; ?>
-                                                <?php if (!empty($booking['assigned_plate'])): ?>
-                                                    <div class="mt-0.5">
-                                                        <span class="text-gray-400 font-semibold block text-[10px] uppercase">Plat Nomor Unit</span>
-                                                        <span class="inline-block bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-[10.5px] font-bold text-slate-800 tracking-wider font-mono uppercase mt-0.5"><?= htmlspecialchars($booking['assigned_plate']) ?></span>
-                                                    </div>
-                                                <?php endif; ?>
-                                            </div>
-
-                                            <!-- Additional Cost Section (if completed and has damages) -->
-                                            <?php if ($statusVal === 'completed' && ($booking['additional_cost'] > 0 || !empty($booking['damage_description']))): ?>
-                                                <div class="mt-2 bg-red-50/40 border border-red-100 rounded-xl p-2.5 space-y-1">
-                                                    <div class="flex items-center gap-1.5 text-[10px] font-bold text-red-700 uppercase tracking-wide">
-                                                        <i class="bi bi-exclamation-octagon-fill"></i> Detail Kerusakan / Biaya Tambahan
-                                                    </div>
-                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px]">
-                                                        <div>
-                                                            <?php if ($booking['additional_cost'] > 0): ?>
-                                                                <p class="mb-0.5 text-gray-600">Denda Tambahan: <span class="font-bold text-red-600">Rp<?= number_format($booking['additional_cost'], 0, ',', '.') ?></span></p>
-                                                            <?php endif; ?>
-                                                            <?php if (!empty($booking['damage_description'])): ?>
-                                                                <p class="text-gray-750 font-medium font-semibold text-gray-700">Keterangan: <span class="italic text-gray-600 font-normal"><?= htmlspecialchars($booking['damage_description']) ?></span></p>
-                                                            <?php endif; ?>
-                                                        </div>
-                                                        <?php if (!empty($booking['damage_image'])): ?>
-                                                            <div class="flex items-center">
-                                                                <a href="assets/images/damages/<?= htmlspecialchars($booking['damage_image']) ?>" target="_blank" class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:underline">
-                                                                    <i class="bi bi-image"></i> Lihat Bukti Foto
-                                                                </a>
-                                                            </div>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-
-                                        <!-- Price Section -->
-                                        <div class="flex flex-col justify-between items-end border-t sm:border-t-0 sm:border-l border-gray-100 pt-2 sm:pt-0 sm:pl-4 shrink-0 min-w-[110px]">
-                                            <div class="text-right w-full">
-                                                <span class="text-gray-400 font-semibold block text-[10px] uppercase">Total Harga</span>
-                                                <span class="text-base font-extrabold text-blue-600 block mt-0.5">Rp<?= $total ?></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
+                        <div class="text-center py-10">
+                            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400 text-3xl">
+                                <i class="bi bi-car-front"></i>
                             </div>
-                        <?php else: ?>
-                            <div class="text-center py-10">
-                                <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400 text-3xl">
-                                    <i class="bi bi-car-front"></i>
+                            <p class="text-gray-800 font-medium mb-1">Belum ada transaksi penyewaan.</p>
+                            <p class="text-gray-500 text-sm mb-8">Yuk, cari armada terbaikmu dan mulai perjalanan!</p>
+
+                            <?php if ($status === 'verified'): ?>
+                                <a href="index.php?module=Homepage&action=index" class="inline-block bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-700 transition no-underline">
+                                    Cari & Sewa Mobil
+                                </a>
+                            <?php else: ?>
+                                <div class="max-w-sm mx-auto bg-gray-50 rounded-xl p-4 border border-gray-200 text-left flex gap-3">
+                                    <i class="bi bi-lock-fill text-gray-400 text-xl mt-0.5"></i>
+                                    <div>
+                                        <h4 class="font-bold text-gray-700">Fitur Sewa Terkunci</h4>
+                                        <p class="text-sm text-gray-500">Akun Anda harus terverifikasi terlebih dahulu sebelum dapat menyewa mobil.</p>
+                                    </div>
                                 </div>
-                                <p class="text-gray-800 font-medium mb-1">Belum ada transaksi penyewaan.</p>
-                                <p class="text-gray-500 text-sm mb-8">Yuk, cari armada terbaikmu dan mulai perjalanan!</p>
-
-                                <?php if ($status === 'verified'): ?>
-                                    <a href="index.php?module=Homepage&action=index" class="inline-block bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-700 transition no-underline">
-                                        Cari & Sewa Mobil
-                                    </a>
-                                <?php else: ?>
-                                    <div class="max-w-sm mx-auto bg-gray-50 rounded-xl p-4 border border-gray-200 text-left flex gap-3">
-                                        <i class="bi bi-lock-fill text-gray-400 text-xl mt-0.5"></i>
-                                        <div>
-                                            <h4 class="font-bold text-gray-700">Fitur Sewa Terkunci</h4>
-                                            <p class="text-sm text-gray-500">Akun Anda harus terverifikasi terlebih dahulu sebelum dapat menyewa mobil.</p>
-                                        </div>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        <?php endif; ?>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 <?php endif; ?>
                 
