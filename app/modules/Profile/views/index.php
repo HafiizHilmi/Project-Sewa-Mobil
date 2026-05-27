@@ -309,6 +309,10 @@
                 <i class="bi bi-shield-lock text-slate-400 dark:text-slate-500 text-base w-5 text-center"></i>
                 <span>Ubah Password</span>
             </a>
+            <a href="#" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-600 dark:text-slate-300 no-underline" data-tab="tema">
+                <i class="bi bi-palette text-slate-400 dark:text-slate-500 text-base w-5 text-center"></i>
+                <span>Pengaturan Tema</span>
+            </a>
 
             <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-3 pt-4 pb-2">Dukungan</p>
             <a href="#" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-600 dark:text-slate-300 no-underline" data-tab="bantuan">
@@ -328,35 +332,50 @@
     <main class="flex-1 min-w-0 p-4 sm:p-6 xl:p-8 space-y-6 lg:ml-64 xl:ml-72">
 
         <?php if (isset($_SESSION['flash_success'])): ?>
-            <div class="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 text-green-800 dark:text-green-300 p-4 rounded-xl flex items-center gap-3 transition-colors">
+            <div class="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 text-green-800 dark:text-green-300 p-4 rounded-xl flex items-center gap-3 transition-colors relative alert-banner">
                 <i class="bi bi-check-circle-fill text-green-500 flex-shrink-0"></i>
-                <p class="text-sm font-medium m-0"><?= htmlspecialchars($_SESSION['flash_success']) ?></p>
+                <p class="text-sm font-medium m-0 pr-6 flex-1"><?= htmlspecialchars($_SESSION['flash_success']) ?></p>
+                <button type="button" class="absolute top-1/2 -translate-y-1/2 right-4 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg p-1.5 transition-colors" onclick="closeAlert(this)">
+                    <i class="bi bi-x-lg text-sm"></i>
+                </button>
             </div>
             <?php unset($_SESSION['flash_success']); ?>
         <?php endif; ?>
 
         <?php if (isset($_SESSION['flash_error'])): ?>
-            <div class="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 text-red-800 dark:text-red-300 p-4 rounded-xl flex items-center gap-3 transition-colors">
+            <div class="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 text-red-800 dark:text-red-300 p-4 rounded-xl flex items-center gap-3 transition-colors relative alert-banner">
                 <i class="bi bi-x-circle-fill text-red-500 flex-shrink-0"></i>
-                <p class="text-sm font-medium m-0"><?= htmlspecialchars($_SESSION['flash_error']) ?></p>
+                <p class="text-sm font-medium m-0 pr-6 flex-1"><?= htmlspecialchars($_SESSION['flash_error']) ?></p>
+                <button type="button" class="absolute top-1/2 -translate-y-1/2 right-4 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg p-1.5 transition-colors" onclick="closeAlert(this)">
+                    <i class="bi bi-x-lg text-sm"></i>
+                </button>
             </div>
             <?php unset($_SESSION['flash_error']); ?>
         <?php endif; ?>
 
         <?php if ($status === 'pending'): ?>
-            <div class="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-900 text-yellow-800 dark:text-yellow-300 p-4 rounded-xl flex items-center gap-3 transition-colors">
+            <div class="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-900 text-yellow-800 dark:text-yellow-300 p-4 rounded-xl flex items-center gap-3 transition-colors relative alert-banner">
                 <i class="bi bi-hourglass-split text-yellow-500 text-lg flex-shrink-0"></i>
-                <p class="text-sm font-medium m-0">Akun Anda sedang diverifikasi oleh admin. Pengecekan biasanya memakan waktu maksimal 1x24 jam.</p>
+                <p class="text-sm font-medium m-0 pr-6 flex-1">Akun Anda sedang diverifikasi oleh admin. Pengecekan biasanya memakan waktu maksimal 1x24 jam.</p>
+                <button type="button" class="absolute top-1/2 -translate-y-1/2 right-4 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 rounded-lg p-1.5 transition-colors" onclick="closeAlert(this)">
+                    <i class="bi bi-x-lg text-sm"></i>
+                </button>
             </div>
         <?php elseif ($status === 'verified'): ?>
-            <div class="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 text-green-800 dark:text-green-300 p-4 rounded-xl flex items-center gap-3 transition-colors">
+            <div class="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 text-green-800 dark:text-green-300 p-4 rounded-xl flex items-center gap-3 transition-colors relative alert-banner">
                 <i class="bi bi-patch-check-fill text-green-500 text-lg flex-shrink-0"></i>
-                <p class="text-sm font-medium m-0">Akun Anda Telah Terverifikasi! Seluruh fitur sewa mobil kini aktif dan siap digunakan.</p>
+                <p class="text-sm font-medium m-0 pr-6 flex-1">Akun Anda Telah Terverifikasi! Seluruh fitur sewa mobil kini aktif dan siap digunakan.</p>
+                <button type="button" class="absolute top-1/2 -translate-y-1/2 right-4 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg p-1.5 transition-colors" onclick="closeAlert(this)">
+                    <i class="bi bi-x-lg text-sm"></i>
+                </button>
             </div>
         <?php elseif ($status === 'rejected'): ?>
-            <div class="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 text-red-800 dark:text-red-300 p-4 rounded-xl flex items-center gap-3 transition-colors">
+            <div class="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 text-red-800 dark:text-red-300 p-4 rounded-xl flex items-center gap-3 transition-colors relative alert-banner">
                 <i class="bi bi-x-octagon-fill text-red-500 text-lg flex-shrink-0"></i>
-                <p class="text-sm font-medium m-0">Verifikasi ditolak. Dokumen tidak valid atau kurang jelas. Mohon unggah ulang KTP dan SIM Anda di menu <strong>Dokumen Identitas</strong>.</p>
+                <p class="text-sm font-medium m-0 pr-6 flex-1">Verifikasi ditolak. Dokumen tidak valid atau kurang jelas. Mohon unggah ulang KTP dan SIM Anda di menu <strong>Dokumen Identitas</strong>.</p>
+                <button type="button" class="absolute top-1/2 -translate-y-1/2 right-4 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg p-1.5 transition-colors" onclick="closeAlert(this)">
+                    <i class="bi bi-x-lg text-sm"></i>
+                </button>
             </div>
         <?php endif; ?>
 
@@ -535,69 +554,78 @@
                                             </div>
                                         </div>
 
-                                        <div class="grid grid-cols-1 xs:grid-cols-2 gap-x-6 gap-y-3 text-xs border-t border-slate-100 dark:border-slate-700 pt-2 mt-2">
-                                            <div>
-                                                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-0.5">ID Transaksi</span>
-                                                <span class="font-semibold text-slate-700 dark:text-slate-200">
-                                                    <i class="bi bi-receipt text-indigo-500 mr-1"></i>#TRX-<?= str_pad($booking['id'], 5, '0', STR_PAD_LEFT) ?>
-                                                </span>
-                                            </div>
-                                            <div>
-                                                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-0.5">Tanggal Transaksi</span>
-                                                <span class="font-semibold text-slate-700 dark:text-slate-200">
-                                                    <i class="bi bi-calendar-check text-green-500 mr-1"></i><?= date('d M Y H:i', strtotime($booking['created_at'])) ?>
-                                                </span>
-                                            </div>
-                                            <div>
-                                                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Durasi Sewa</span>
-                                                <span class="font-semibold text-slate-700 dark:text-slate-200">
-                                                    <i class="bi bi-calendar-range text-blue-500 mr-1"></i><?= $start ?> – <?= $end ?>
-                                                </span>
-                                            </div>
-                                            <div>
-                                                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Lokasi Pengambilan</span>
-                                                <span class="font-semibold text-slate-700 dark:text-slate-200 truncate block" title="<?= htmlspecialchars($booking['pickup_location']) ?>">
-                                                    <i class="bi bi-geo-alt-fill text-red-500 mr-1"></i><?= htmlspecialchars($booking['pickup_location']) ?>
-                                                </span>
-                                            </div>
-                                            <?php if (!empty($booking['return_location'])): ?>
-                                            <div>
-                                                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Lokasi Pengembalian</span>
-                                                <span class="font-semibold text-slate-700 dark:text-slate-200 truncate block" title="<?= htmlspecialchars($booking['return_location']) ?>">
-                                                    <i class="bi bi-arrow-left-right text-blue-500 mr-1"></i><?= htmlspecialchars($booking['return_location']) ?>
-                                                </span>
-                                            </div>
-                                            <?php endif; ?>
-                                            <?php if (!empty($booking['assigned_plate'])): ?>
-                                            <div>
-                                                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Plat Nomor</span>
-                                                <span class="inline-block bg-slate-100 border border-slate-300 px-2 py-0.5 rounded text-[10.5px] font-black text-slate-800 tracking-widest font-mono uppercase">
-                                                    <?= htmlspecialchars($booking['assigned_plate']) ?>
-                                                </span>
-                                            </div>
-                                            <?php endif; ?>
+                                        <!-- Expandable Toggle Button -->
+                                        <div class="mt-1">
+                                            <button type="button" onclick="toggleBookingDetail('detail-<?= $booking['id'] ?>', this)" class="text-[11px] font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 px-2.5 py-1 rounded-md transition-colors">
+                                                <span>↓ Detail</span>
+                                            </button>
                                         </div>
 
-                                        <?php if ($statusVal === 'completed' && ($booking['additional_cost'] > 0 || !empty($booking['damage_description']))): ?>
-                                            <div class="bg-red-50 border border-red-100 rounded-xl p-3 space-y-1.5 mt-1">
-                                                <p class="text-[10.5px] font-bold text-red-700 uppercase tracking-wide flex items-center gap-1.5">
-                                                    <i class="bi bi-exclamation-octagon-fill"></i> Detail Kerusakan / Biaya Tambahan
-                                                </p>
-                                                <div class="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs">
-                                                    <?php if ($booking['additional_cost'] > 0): ?>
-                                                        <span class="text-slate-600 dark:text-slate-300">Denda: <strong class="text-red-600">Rp<?= number_format($booking['additional_cost'], 0, ',', '.') ?></strong></span>
-                                                    <?php endif; ?>
-                                                    <?php if (!empty($booking['damage_description'])): ?>
-                                                        <span class="text-slate-600 dark:text-slate-300">Keterangan: <em class="text-slate-700 dark:text-slate-200"><?= htmlspecialchars($booking['damage_description']) ?></em></span>
-                                                    <?php endif; ?>
-                                                    <?php if (!empty($booking['damage_image'])): ?>
-                                                        <a href="assets/images/damages/<?= htmlspecialchars($booking['damage_image']) ?>" target="_blank" class="inline-flex items-center gap-1 text-blue-600 hover:underline font-bold no-underline">
-                                                            <i class="bi bi-image"></i> Lihat Bukti Foto
-                                                        </a>
-                                                    <?php endif; ?>
+                                        <div id="detail-<?= $booking['id'] ?>" class="hidden opacity-0 transition-opacity duration-300">
+                                            <div class="grid grid-cols-1 xs:grid-cols-2 gap-x-6 gap-y-3 text-xs border-t border-slate-100 dark:border-slate-700 pt-3 mt-3">
+                                                <div>
+                                                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-0.5">ID Transaksi</span>
+                                                    <span class="font-semibold text-slate-700 dark:text-slate-200">
+                                                        <i class="bi bi-receipt text-indigo-500 mr-1"></i>#TRX-<?= str_pad($booking['id'], 5, '0', STR_PAD_LEFT) ?>
+                                                    </span>
                                                 </div>
+                                                <div>
+                                                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-0.5">Tanggal Transaksi</span>
+                                                    <span class="font-semibold text-slate-700 dark:text-slate-200">
+                                                        <i class="bi bi-calendar-check text-green-500 mr-1"></i><?= date('d M Y H:i', strtotime($booking['created_at'])) ?>
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Durasi Sewa</span>
+                                                    <span class="font-semibold text-slate-700 dark:text-slate-200">
+                                                        <i class="bi bi-calendar-range text-blue-500 mr-1"></i><?= $start ?> – <?= $end ?>
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Lokasi Pengambilan</span>
+                                                    <span class="font-semibold text-slate-700 dark:text-slate-200 truncate block" title="<?= htmlspecialchars($booking['pickup_location']) ?>">
+                                                        <i class="bi bi-geo-alt-fill text-red-500 mr-1"></i><?= htmlspecialchars($booking['pickup_location']) ?>
+                                                    </span>
+                                                </div>
+                                                <?php if (!empty($booking['return_location'])): ?>
+                                                <div>
+                                                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Lokasi Pengembalian</span>
+                                                    <span class="font-semibold text-slate-700 dark:text-slate-200 truncate block" title="<?= htmlspecialchars($booking['return_location']) ?>">
+                                                        <i class="bi bi-arrow-left-right text-blue-500 mr-1"></i><?= htmlspecialchars($booking['return_location']) ?>
+                                                    </span>
+                                                </div>
+                                                <?php endif; ?>
+                                                <?php if (!empty($booking['assigned_plate'])): ?>
+                                                <div>
+                                                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Plat Nomor</span>
+                                                    <span class="inline-block bg-slate-100 border border-slate-300 px-2 py-0.5 rounded text-[10.5px] font-black text-slate-800 tracking-widest font-mono uppercase">
+                                                        <?= htmlspecialchars($booking['assigned_plate']) ?>
+                                                    </span>
+                                                </div>
+                                                <?php endif; ?>
                                             </div>
-                                        <?php endif; ?>
+
+                                            <?php if ($statusVal === 'completed' && ($booking['additional_cost'] > 0 || !empty($booking['damage_description']))): ?>
+                                                <div class="bg-red-50 border border-red-100 rounded-xl p-3 space-y-1.5 mt-3">
+                                                    <p class="text-[10.5px] font-bold text-red-700 uppercase tracking-wide flex items-center gap-1.5">
+                                                        <i class="bi bi-exclamation-octagon-fill"></i> Detail Kerusakan / Biaya Tambahan
+                                                    </p>
+                                                    <div class="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs">
+                                                        <?php if ($booking['additional_cost'] > 0): ?>
+                                                            <span class="text-slate-600 dark:text-slate-300">Denda: <strong class="text-red-600">Rp<?= number_format($booking['additional_cost'], 0, ',', '.') ?></strong></span>
+                                                        <?php endif; ?>
+                                                        <?php if (!empty($booking['damage_description'])): ?>
+                                                            <span class="text-slate-600 dark:text-slate-300">Keterangan: <em class="text-slate-700 dark:text-slate-200"><?= htmlspecialchars($booking['damage_description']) ?></em></span>
+                                                        <?php endif; ?>
+                                                        <?php if (!empty($booking['damage_image'])): ?>
+                                                            <a href="assets/images/damages/<?= htmlspecialchars($booking['damage_image']) ?>" target="_blank" class="inline-flex items-center gap-1 text-blue-600 hover:underline font-bold no-underline">
+                                                                <i class="bi bi-image"></i> Lihat Bukti Foto
+                                                            </a>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
 
                                     <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start border-t sm:border-t-0 sm:border-l border-slate-100 dark:border-slate-700 pt-3 sm:pt-0 sm:pl-5 sm:min-w-[120px]">
@@ -714,26 +742,30 @@
                 <?php else: ?>
                     <?php if ($status !== 'rejected'): ?>
                         <div class="dm-unlocked bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 sm:p-8 mb-6 relative">
-                            <!-- Indikator Unlocked -->
-                            <div class="absolute top-4 right-4 text-green-500 flex items-center gap-1 text-xs font-bold bg-green-50 px-2 py-1 rounded-md border border-green-100">
-                                <i class="bi bi-unlock-fill"></i> Terbuka
+                            <div class="flex items-center justify-between mt-2 mb-4">
+                                <h3 class="font-bold text-slate-800 dark:text-white text-base">File Terunggah</h3>
+                                <button type="button" onclick="toggleDocImages('doc-images-verified', this)" class="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors">
+                                    <i class="bi bi-eye-fill"></i> <span>Buka Dokumen</span>
+                                </button>
                             </div>
                             
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
-                                <div>
-                                    <p class="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3 flex items-center gap-2">
-                                        <i class="bi bi-person-vcard-fill text-blue-500"></i> Foto KTP Anda
-                                    </p>
-                                    <div class="dm-doc-img border border-slate-200 dark:border-slate-600 rounded-xl p-2 bg-slate-50 dark:bg-slate-900/50 aspect-video flex items-center justify-center overflow-hidden shadow-inner">
-                                        <img src="../admin/serve_file.php?file=<?= htmlspecialchars($user['ktp_file'] ?? '') ?>" class="max-w-full max-h-full object-contain" alt="KTP">
+                            <div id="doc-images-verified" class="hidden opacity-0 transition-opacity duration-300">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+                                    <div>
+                                        <p class="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3 flex items-center gap-2">
+                                            <i class="bi bi-person-vcard-fill text-blue-500"></i> Foto KTP Anda
+                                        </p>
+                                        <div class="dm-doc-img border border-slate-200 dark:border-slate-600 rounded-xl p-2 bg-slate-50 dark:bg-slate-900/50 aspect-video flex items-center justify-center overflow-hidden shadow-inner">
+                                            <img src="../admin/serve_file.php?file=<?= htmlspecialchars($user['ktp_file'] ?? '') ?>" class="max-w-full max-h-full object-contain" alt="KTP">
+                                        </div>
                                     </div>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3 flex items-center gap-2">
-                                        <i class="bi bi-card-heading text-blue-500"></i> Foto SIM Anda
-                                    </p>
-                                    <div class="dm-doc-img border border-slate-200 dark:border-slate-600 rounded-xl p-2 bg-slate-50 dark:bg-slate-900/50 aspect-video flex items-center justify-center overflow-hidden shadow-inner">
-                                        <img src="../admin/serve_file.php?file=<?= htmlspecialchars($user['sim_file'] ?? '') ?>" class="max-w-full max-h-full object-contain" alt="SIM">
+                                    <div>
+                                        <p class="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3 flex items-center gap-2">
+                                            <i class="bi bi-card-heading text-blue-500"></i> Foto SIM Anda
+                                        </p>
+                                        <div class="dm-doc-img border border-slate-200 dark:border-slate-600 rounded-xl p-2 bg-slate-50 dark:bg-slate-900/50 aspect-video flex items-center justify-center overflow-hidden shadow-inner">
+                                            <img src="../admin/serve_file.php?file=<?= htmlspecialchars($user['sim_file'] ?? '') ?>" class="max-w-full max-h-full object-contain" alt="SIM">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -745,10 +777,15 @@
                             
                             <!-- KIRI: Foto Dokumen Lama -->
                             <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 sm:p-8">
-                                <h3 class="font-bold text-slate-800 dark:text-white text-base mb-4 flex items-center gap-2">
-                                    <i class="bi bi-file-earmark-image text-slate-400"></i> Dokumen yang Ditolak
-                                </h3>
-                                <div class="space-y-5">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="font-bold text-slate-800 dark:text-white text-base flex items-center gap-2 m-0">
+                                        <i class="bi bi-file-earmark-image text-slate-400"></i> Dokumen yang Ditolak
+                                    </h3>
+                                    <button type="button" onclick="toggleDocImages('doc-images-rejected', this)" class="text-[11px] font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 px-2.5 py-1.5 rounded-md flex items-center gap-1.5 transition-colors">
+                                        <i class="bi bi-eye-fill"></i> <span>Buka Dokumen</span>
+                                    </button>
+                                </div>
+                                <div id="doc-images-rejected" class="hidden opacity-0 transition-opacity duration-300 space-y-5">
                                     <div>
                                         <p class="text-sm font-bold text-slate-700 dark:text-slate-200 mb-2 flex items-center gap-2">
                                             <i class="bi bi-person-vcard-fill text-blue-500"></i> Foto KTP Lama
@@ -788,9 +825,8 @@
                             <div class="bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/40 rounded-xl p-4 flex gap-3">
                                 <i class="bi bi-exclamation-triangle-fill text-red-500 text-base mt-0.5 flex-shrink-0"></i>
                                 <div>
-                                    <p class="text-sm font-bold text-red-700 dark:text-red-400 mb-1">Alasan Penolakan</p>
-                                    <p class="text-sm text-red-600 dark:text-red-300 leading-relaxed">
-                                        <strong>Alasan Penolakan:</strong> <?php echo htmlspecialchars($user['reject_reason'] ?? 'Tidak ada alasan spesifik.'); ?>
+                                    <p class="text-sm font-bold text-red-700 dark:text-red-400 mb-1">Alasan Penolakan:</p>
+                                    <p class="text-sm text-red-600 dark:text-red-300 leading-relaxed"><?php echo htmlspecialchars($user['reject_reason'] ?? 'Tidak ada alasan spesifik.'); ?>
                                     </p>
                                 </div>
                             </div>
@@ -807,7 +843,7 @@
                                     </div>
                                     <div class="flex items-start gap-2.5 bg-slate-50 dark:bg-slate-900/50 rounded-xl p-3 border border-slate-100 dark:border-slate-700">
                                         <i class="bi bi-aspect-ratio-fill text-blue-500 text-base mt-0.5 flex-shrink-0"></i>
-                                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">Pastikan seluruh bagian dokumen terlihat penuh, tidak terpotong</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">Pastikan KTP dan SIM Asli, bukan fotocopy</p>
                                     </div>
                                     <div class="flex items-start gap-2.5 bg-slate-50 dark:bg-slate-900/50 rounded-xl p-3 border border-slate-100 dark:border-slate-700">
                                         <i class="bi bi-eye-fill text-blue-500 text-base mt-0.5 flex-shrink-0"></i>
@@ -929,12 +965,13 @@
         </div>
 
         <div class="tab-panel" id="tab-editprofil">
-            <div class="mb-6">
-                <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Edit Profil</h1>
-                <p class="text-slate-500 dark:text-slate-400 text-sm mt-0.5">Perbarui informasi akun Anda.</p>
-            </div>
+            <div class="max-w-2xl mx-auto">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Edit Profil</h1>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mt-0.5">Perbarui informasi akun Anda.</p>
+                </div>
 
-            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 sm:p-8 max-w-xl">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 sm:p-8">
                 <form action="index.php?module=Profile&action=update" method="POST" class="space-y-5">
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Nama Lengkap</label>
@@ -959,15 +996,17 @@
                     </button>
                 </form>
             </div>
+            </div>
         </div>
 
         <div class="tab-panel" id="tab-ubahpassword">
-            <div class="mb-6">
-                <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Ubah Password</h1>
-                <p class="text-slate-500 dark:text-slate-400 text-sm mt-0.5">Ganti kata sandi akun Anda secara berkala untuk keamanan.</p>
-            </div>
+            <div class="max-w-2xl mx-auto">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Ubah Password</h1>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mt-0.5">Ganti kata sandi akun Anda secara berkala untuk keamanan.</p>
+                </div>
 
-            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 sm:p-8 max-w-xl">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 sm:p-8">
                 <form action="index.php?module=Profile&action=changePassword" method="POST" class="space-y-5">
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Password Lama</label>
@@ -1012,6 +1051,42 @@
                         <i class="bi bi-shield-check mr-1.5"></i>Ubah Password
                     </button>
                 </form>
+            </div>
+            </div>
+        </div>
+
+        <div class="tab-panel" id="tab-tema">
+            <div class="max-w-2xl mx-auto">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">⚙️ Pengaturan Tema</h1>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mt-0.5">Sesuaikan tampilan antarmuka aplikasi sesuai kenyamanan Anda.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Light Mode Card -->
+                    <div id="theme-card-light" onclick="setThemeMode('light')" class="theme-card cursor-pointer bg-white dark:bg-slate-800 rounded-2xl border-2 shadow-sm p-6 text-center transition-all duration-200">
+                        <div class="w-16 h-16 bg-brand-50 dark:bg-slate-700 text-brand-500 dark:text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                            <i class="bi bi-sun-fill"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 dark:text-white text-lg mb-1">Mode Terang</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Tampilan cerah yang bersih dan elegan.</p>
+                        <button type="button" class="theme-btn w-full font-bold py-2 rounded-xl transition-colors text-sm">
+                            Pilih
+                        </button>
+                    </div>
+
+                    <!-- Dark Mode Card -->
+                    <div id="theme-card-dark" onclick="setThemeMode('dark')" class="theme-card cursor-pointer bg-white dark:bg-slate-800 rounded-2xl border-2 shadow-sm p-6 text-center transition-all duration-200">
+                        <div class="w-16 h-16 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-brand-400 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                            <i class="bi bi-moon-stars-fill"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 dark:text-white text-lg mb-1">Mode Gelap</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Lebih nyaman di mata pada kondisi redup.</p>
+                        <button type="button" class="theme-btn w-full font-bold py-2 rounded-xl transition-colors text-sm">
+                            Pilih
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1200,30 +1275,118 @@
         }
     }
 
+    // ==================== ALERTS CLOSABLE ====================
+    function closeAlert(btn) {
+        const alertBox = btn.closest('.alert-banner');
+        if (alertBox) {
+            alertBox.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            alertBox.style.opacity = '0';
+            alertBox.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 300);
+        }
+    }
+
+    // ==================== TOGGLE BOOKING DETAIL ====================
+    function toggleBookingDetail(detailId, btn) {
+        const detailBox = document.getElementById(detailId);
+        if (!detailBox) return;
+
+        const span = btn.querySelector('span');
+        
+        if (detailBox.classList.contains('hidden')) {
+            detailBox.classList.remove('hidden');
+            setTimeout(() => { detailBox.classList.remove('opacity-0'); }, 10);
+            span.textContent = '↑ Tutup';
+        } else {
+            detailBox.classList.add('opacity-0');
+            setTimeout(() => { detailBox.classList.add('hidden'); }, 300);
+            span.textContent = '↓ Detail';
+        }
+    }
+
+    // ==================== TOGGLE DOCUMENT IMAGES ====================
+    function toggleDocImages(docId, btn) {
+        const docBox = document.getElementById(docId);
+        if (!docBox) return;
+
+        const span = btn.querySelector('span');
+        const icon = btn.querySelector('i');
+
+        if (docBox.classList.contains('hidden')) {
+            docBox.classList.remove('hidden');
+            setTimeout(() => { docBox.classList.remove('opacity-0'); }, 10);
+            span.textContent = 'Tutup Dokumen';
+            icon.classList.replace('bi-eye-fill', 'bi-eye-slash-fill');
+        } else {
+            docBox.classList.add('opacity-0');
+            setTimeout(() => { docBox.classList.add('hidden'); }, 300);
+            span.textContent = 'Buka Dokumen';
+            icon.classList.replace('bi-eye-slash-fill', 'bi-eye-fill');
+        }
+    }
+
     // ==================== THEME TOGGLE ====================
     const themeToggleBtn = document.getElementById('theme-toggle');
     const themeToggleIcon = document.getElementById('theme-toggle-icon');
 
     function updateThemeIcon() {
-        if (document.documentElement.classList.contains('dark')) {
-            themeToggleIcon.classList.replace('bi-moon-fill', 'bi-sun-fill');
-        } else {
-            themeToggleIcon.classList.replace('bi-sun-fill', 'bi-moon-fill');
+        const isDark = document.documentElement.classList.contains('dark');
+        
+        if (themeToggleIcon) {
+            if (isDark) {
+                themeToggleIcon.classList.remove('bi-moon-fill');
+                themeToggleIcon.classList.add('bi-sun-fill');
+            } else {
+                themeToggleIcon.classList.remove('bi-sun-fill');
+                themeToggleIcon.classList.add('bi-moon-fill');
+            }
+        }
+        
+        // Update Theme Setting Cards if they exist
+        document.querySelectorAll('.theme-card').forEach(card => {
+            card.classList.remove('border-brand-500', 'dark:border-brand-500');
+            card.classList.add('border-slate-200', 'dark:border-slate-700');
+            const btn = card.querySelector('.theme-btn');
+            btn.classList.remove('bg-brand-600', 'text-white', 'hover:bg-brand-700');
+            btn.classList.add('bg-slate-100', 'hover:bg-slate-200', 'text-slate-700', 'dark:bg-slate-700', 'dark:hover:bg-slate-600', 'dark:text-slate-200');
+            btn.innerHTML = 'Pilih';
+        });
+
+        const activeCardId = isDark ? 'theme-card-dark' : 'theme-card-light';
+        const activeCard = document.getElementById(activeCardId);
+        if (activeCard) {
+            activeCard.classList.remove('border-slate-200', 'dark:border-slate-700');
+            activeCard.classList.add('border-brand-500', 'dark:border-brand-500');
+            const btn = activeCard.querySelector('.theme-btn');
+            btn.classList.remove('bg-slate-100', 'hover:bg-slate-200', 'text-slate-700', 'dark:bg-slate-700', 'dark:hover:bg-slate-600', 'dark:text-slate-200');
+            btn.classList.add('bg-brand-600', 'text-white', 'hover:bg-brand-700');
+            btn.innerHTML = '<i class="bi bi-check2"></i> Aktif';
         }
     }
 
-    if (themeToggleBtn) {
+    function setThemeMode(mode) {
+        if (mode === 'dark') {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+        }
         updateThemeIcon();
+    }
+
+    if (themeToggleBtn) {
         themeToggleBtn.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            if (document.documentElement.classList.contains('dark')) {
-                localStorage.setItem('theme', 'dark');
-            } else {
-                localStorage.setItem('theme', 'light');
-            }
-            updateThemeIcon();
+            const isDark = document.documentElement.classList.contains('dark');
+            setThemeMode(isDark ? 'light' : 'dark');
         });
     }
+
+    // Initialize UI on load
+    document.addEventListener('DOMContentLoaded', updateThemeIcon);
+    updateThemeIcon();
 </script>
 </body>
 </html>
