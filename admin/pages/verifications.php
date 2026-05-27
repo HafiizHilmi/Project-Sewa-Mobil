@@ -141,19 +141,29 @@
             <div>
                 <p class="text-sm font-semibold text-blue-800 mb-1">Tindakan Diperlukan</p>
                 <p class="text-xs text-blue-600 mb-4">Pastikan KTP dan SIM asli, jelas terbaca, dan nama sesuai dengan data yang terdaftar.</p>
-                <div class="flex gap-2">
-                    <form method="POST" action="verify_action.php" class="inline">
-                        <input type="hidden" name="user_id" :value="selectedVerification.id">
-                        <input type="hidden" name="action" value="verified">
-                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg text-xs transition">
+                <div x-data="{ action: '' }" class="w-full">
+                    <div class="flex gap-2">
+                        <button type="button" @click="action = 'verified'" :class="action === 'verified' ? 'ring-2 ring-offset-1 ring-green-500 bg-green-700' : 'bg-green-600 hover:bg-green-700'" class="text-white font-bold py-2 px-4 rounded-lg text-xs transition-all">
                             <i class="fa-solid fa-check mr-1"></i> Approve
                         </button>
-                    </form>
-                    <form method="POST" action="verify_action.php" class="inline">
-                        <input type="hidden" name="user_id" :value="selectedVerification.id">
-                        <input type="hidden" name="action" value="rejected">
-                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg text-xs transition" onclick="return confirm('Tolak verifikasi ini?')">
+                        <button type="button" @click="action = 'rejected'" :class="action === 'rejected' ? 'ring-2 ring-offset-1 ring-red-500 bg-red-700' : 'bg-red-600 hover:bg-red-700'" class="text-white font-bold py-2 px-4 rounded-lg text-xs transition-all">
                             <i class="fa-solid fa-xmark mr-1"></i> Reject
+                        </button>
+                    </div>
+
+                    <form method="POST" action="verify_action.php" x-show="action !== ''" x-transition.opacity class="mt-4 bg-white border border-blue-200 rounded-xl p-4 shadow-sm">
+                        <input type="hidden" name="user_id" :value="selectedVerification.id">
+                        <input type="hidden" name="action" :value="action">
+                        
+                        <div x-show="action === 'rejected'" class="mb-4">
+                            <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">Alasan Penolakan <span class="text-red-500">*</span></label>
+                            <textarea name="reject_reason" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" rows="3" placeholder="Contoh: Foto KTP buram dan terpotong..." :required="action === 'rejected'"></textarea>
+                            <p class="text-[10px] text-slate-500 mt-1.5"><i class="fa-solid fa-circle-info mr-1"></i>Alasan ini akan otomatis muncul di profil pelanggan.</p>
+                        </div>
+
+                        <button type="submit" class="w-full text-white font-bold py-2.5 px-4 rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm" :class="action === 'verified' ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'">
+                            <i class="fa-solid" :class="action === 'verified' ? 'fa-check-circle' : 'fa-paper-plane'"></i>
+                            <span x-text="action === 'verified' ? 'Konfirmasi Approve Akun' : 'Kirim Penolakan'"></span>
                         </button>
                     </form>
                 </div>

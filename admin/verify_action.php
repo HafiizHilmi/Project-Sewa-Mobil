@@ -10,14 +10,24 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $user_id = $_POST['user_id'] ?? null;
 $action = $_POST['action'] ?? null;
+$reject_reason = $_POST['reject_reason'] ?? null;
 
 if ($user_id && in_array($action, ['verified', 'rejected'])) {
     try {
-        $stmt = $pdo->prepare("UPDATE users SET verification_status = :status WHERE id = :id");
-        $stmt->execute([
-            ':status' => $action,
-            ':id' => $user_id
-        ]);
+        if ($action === 'rejected') {
+            $stmt = $pdo->prepare("UPDATE users SET verification_status = :status, reject_reason = :reason WHERE id = :id");
+            $stmt->execute([
+                ':status' => $action,
+                ':reason' => $reject_reason,
+                ':id' => $user_id
+            ]);
+        } else {
+            $stmt = $pdo->prepare("UPDATE users SET verification_status = :status, reject_reason = NULL WHERE id = :id");
+            $stmt->execute([
+                ':status' => $action,
+                ':id' => $user_id
+            ]);
+        }
         
         // Redirect kembali ke index dengan notifikasi
         echo "<script>
