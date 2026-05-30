@@ -2,8 +2,15 @@
      x-data="{ showEditAdmin: false, showChangePass: false, editForm: {id:'', nama:'', email:'', role:''} }"
      x-init="
         const setDefaultTab = () => {
-            if ('<?= $role ?>' === 'superuser') activeTab = 'admin';
-            else activeTab = 'preferences';
+            const params = new URLSearchParams(window.location.search);
+            // Cek apakah ada request tab spesifik di URL (misal: &tab=blacklist)
+            if (params.has('tab')) {
+                activeTab = params.get('tab');
+            } else if ('<?= $role ?>' === 'superuser') {
+                activeTab = 'admin';
+            } else {
+                activeTab = 'preferences';
+            }
         };
         // Set tab saat halaman pertama dimuat
         if (activePage === 'settings') setDefaultTab();

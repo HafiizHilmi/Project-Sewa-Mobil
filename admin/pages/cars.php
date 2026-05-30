@@ -165,7 +165,7 @@ foreach ($types_data as $t) {
 
           <div class="flex-1 min-w-0">
             <p class="font-bold text-slate-800 dark:text-slate-100 text-sm leading-snug truncate" x-text="car.name"></p>
-            <p class="text-xs text-slate-400 mt-0.5" x-text="car.stock + ' unit'" ></p>
+            <p class="text-xs text-slate-400 mt-0.5" x-text="'Transmisi ' +  car.transmission + ' · ' + car.stock + ' unit'"></p>
             <div class="flex items-center gap-2 mt-1.5 sm:hidden">
               <span class="inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full" :class="carBadge(car.status)" x-text="car.status"></span>
               <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full" x-text="car.category"></span>

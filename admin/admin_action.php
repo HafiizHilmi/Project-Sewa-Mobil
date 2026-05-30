@@ -102,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         } else {
             $_SESSION['flash_msg'] = "Gagal menambah data.";
         }
-        header("Location: index.php?page=settings");
+        header("Location: index.php?page=settings&tab=blacklist");
         exit();
     }
 
@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         if ($stmt->execute([$id])) {
             $_SESSION['flash_msg'] = "Daerah dihapus dari daftar Blacklist!";
         }
-        header("Location: index.php?page=settings");
+        header("Location: index.php?page=settings&tab=blacklist");
         exit();
     }
 }
