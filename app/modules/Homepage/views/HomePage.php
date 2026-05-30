@@ -136,6 +136,9 @@
                         $carCategory = htmlspecialchars($car['category'] ?: 'Lainnya'); 
                         $carFuel = htmlspecialchars($car['fuel_type'] ?: '-'); 
                         $carSeats = htmlspecialchars($car['seats'] ?: '-'); 
+                        // --- BARIS BARU: Mengambil data transmisi ---
+                        $carTrans = htmlspecialchars($car['transmission'] ?: 'Manual'); 
+                        
                         $carPrice = number_format($car['price_per_day'], 0, ',', '.'); 
                         
                         // Perbaikan Logic Gambar
@@ -162,6 +165,7 @@
                             <div class="flex flex-wrap items-center gap-2 mb-6">
                                 <span class="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 px-2.5 py-1.5 rounded-full text-xs font-medium"><?= $carFuel ?></span>
                                 <span class="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 px-2.5 py-1.5 rounded-full text-xs font-medium"><?= $carSeats ?> Kursi</span>
+                                <span class="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 px-2.5 py-1.5 rounded-full text-xs font-medium">Transmisi <?= $carTrans ?></span>
                             </div>
                         </div>
                         <a href="index.php?module=Booking&action=checkout&car_id=<?= htmlspecialchars($car['id']) ?>" class="block w-full text-center bg-blue-600 text-white py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition no-underline">Sewa Sekarang</a>
