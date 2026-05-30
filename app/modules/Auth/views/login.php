@@ -11,7 +11,18 @@ if (empty($_SESSION['csrf_token'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Masuk - SewaMobil</title>
-    
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-bs-theme', 'light');
+            }
+        })();
+    </script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     
@@ -50,6 +61,23 @@ if (empty($_SESSION['csrf_token'])) {
             background-color: #e2e8f0;
             min-height: 100%;
         }
+        html.dark body {
+            background-color: #020617;
+            color: #f8fafc;
+        }
+        html.dark .navbar {
+            background-color: #0f172a !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+        }
+        html.dark .navbar-brand,
+        html.dark .text-brand { color: #93c5fd !important; }
+        html.dark .auth-card { background-color: #111827 !important; }
+        html.dark .form-control-custom { background-color: #0f172a !important; border-color: #334155 !important; color: #f8fafc; }
+        html.dark .form-control-custom:focus { background-color: #111827 !important; box-shadow: 0 0 0 0.2rem rgba(56,189,248,0.2); border-color: #3b82f6 !important; }
+        html.dark .btn-brand { background-color: #2563eb !important; }
+        html.dark .btn-brand:hover { background-color: #1d4ed8 !important; }
+        html.dark .text-muted { color: #94a3b8 !important; }
+        html.dark .image-placeholder { background-color: #111827 !important; }
     </style>
 </head>
 <body>
