@@ -196,12 +196,14 @@ foreach ($types_data as $t) {
             <button @click.stop="viewCar(car)" class="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center transition-all hover:scale-105 shadow-sm">
               <i class="fa-solid fa-eye text-white text-xs"></i>
             </button>
+            <?php if (isset($_SESSION['admin_role']) && $_SESSION['admin_role'] === 'superuser'): ?>
             <button @click.stop="openEditCarModal(car, true)" title="Edit Tipe" class="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center transition-all hover:scale-105 shadow-sm">
               <i class="fa-solid fa-pen text-white text-[10px]"></i>
             </button>
             <button @click.stop="openAddUnit(car)" title="Tambah Unit" class="w-8 h-8 rounded-full bg-emerald-500 hover:bg-emerald-600 flex items-center justify-center transition-all hover:scale-105 shadow-sm">
               <i class="fa-solid fa-plus text-white text-[10px]"></i>
             </button>
+            <?php endif; ?>
           </div>
 
         </div>
@@ -230,7 +232,6 @@ foreach ($types_data as $t) {
         <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-4">
           <div class="space-y-4">
             
-            <!-- Rental Info Block -->
             <template x-if="selectedCar.status === 'Tersewa' && selectedCar.is_type === 0 && selectedCar.renter">
               <div class="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 rounded-2xl p-4 space-y-3">
                 <div class="flex items-center gap-2 pb-2 border-b border-blue-100 dark:border-blue-900/50">
@@ -257,7 +258,6 @@ foreach ($types_data as $t) {
               </div>
             </template>
 
-            <!-- Child Unit -->
             <template x-if="selectedCar.is_type === 0">
               <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
                 <div class="h-[210px] flex flex-col items-center justify-center gap-3 relative" :class="selectedCar.bgCls">
@@ -277,10 +277,8 @@ foreach ($types_data as $t) {
               </div>
             </template>
 
-            <!-- Parent Tipe Mobil -->
             <template x-if="selectedCar.is_type === 1">
               <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 space-y-6">
-                <!-- Header -->
                 <div class="flex items-center justify-between border-b dark:border-slate-700 pb-4">
                   <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-3xs">
@@ -294,12 +292,10 @@ foreach ($types_data as $t) {
                   <span class="text-xs font-bold px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-100/50 dark:border-blue-900/30" x-text="selectedCar.children ? (selectedCar.children.length + ' Unit') : '0 Unit'"></span>
                 </div>
 
-                <!-- Grid Foto -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
                   <template x-for="(c, index) in selectedCar.children" :key="c.id">
                     <div class="relative group bg-slate-50/50 dark:bg-slate-900/20 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-700/80 hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex flex-col">
                       
-                      <!-- Foto Unit -->
                       <div class="h-36 w-full relative overflow-hidden bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
                         <template x-if="c.image">
                           <img :src="c.image" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
@@ -311,7 +307,6 @@ foreach ($types_data as $t) {
                           </div>
                         </template>
                         
-                        <!-- Status -->
                         <div class="absolute top-2.5 right-2.5">
                           <span class="text-[9px] font-extrabold px-2.5 py-0.5 rounded-full shadow-3xs uppercase tracking-wide border" 
                                 :class="c.status === 'Tersedia' 
@@ -321,20 +316,16 @@ foreach ($types_data as $t) {
                         </div>
                       </div>
 
-                      <!-- Detail Unit -->
                       <div class="p-4 flex-1 flex flex-col justify-between bg-white dark:bg-slate-800">
                         <div>
-                          <!-- Plat -->
                           <div class="flex justify-between items-center gap-2 mb-2">
                             <span class="text-xs font-extrabold text-slate-800 dark:text-slate-100 bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-md font-mono tracking-wider uppercase border border-slate-200/50 dark:border-slate-600 shadow-3xs" x-text="c.plate"></span>
                           </div>
                           
-                          <!-- Rangka -->
                           <p class="text-[10px] text-slate-400 font-medium" x-show="c.chassis">
                             No. Rangka: <span class="font-mono text-slate-600 dark:text-slate-300 font-semibold" x-text="c.chassis.substring(0, 10) + '...'"></span>
                           </p>
 
-                          <!-- Info Sewa -->
                           <template x-if="c.status === 'Tersewa' && c.renter">
                             <div class="mt-3 text-[10px] text-slate-600 dark:text-slate-300 bg-orange-50/40 dark:bg-orange-950/10 border border-orange-100/50 dark:border-orange-900/30 rounded-xl p-2.5 space-y-1">
                               <div class="flex justify-between items-center">
@@ -349,14 +340,15 @@ foreach ($types_data as $t) {
                           </template>
                         </div>
 
-                        <!-- Action -->
                         <div class="flex gap-2 mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/80">
                           <button type="button" @click="viewChild(c, selectedCar)" class="flex-1 text-[10.5px] font-bold py-2 px-3 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30 rounded-xl transition duration-200 text-center flex items-center justify-center gap-1.5 active:scale-97">
                             <i class="fa-solid fa-satellite-dish text-[10px]"></i> Detail & Map
                           </button>
+                          <?php if (isset($_SESSION['admin_role']) && $_SESSION['admin_role'] === 'superuser'): ?>
                           <button type="button" @click="openEditCarModal({...c, make: selectedCar.make, model: selectedCar.model, year: selectedCar.year, category: selectedCar.category, price_raw: selectedCar.price_raw, fuel: selectedCar.fuel, engine: selectedCar.engine, passengers: selectedCar.passengers, transmission: selectedCar.transmission, type_key: selectedCar.type_key}, false)" class="text-[10.5px] font-bold py-2 px-3 bg-slate-50 hover:bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 rounded-xl transition duration-200 flex items-center justify-center gap-1 active:scale-97">
                             <i class="fa-solid fa-pen text-[9px]"></i> Edit
                           </button>
+                          <?php endif; ?>
                         </div>
                       </div>
                     </div>
@@ -395,7 +387,6 @@ foreach ($types_data as $t) {
                   <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">Kontrol</h4>
                 </div>
                 
-                <!-- Telemetri Real-Time -->
                 <div class="grid grid-cols-2 gap-3 mb-4 text-left">
                   <div class="bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100/50 dark:border-slate-700/50 p-3 rounded-xl">
                     <span class="text-slate-400 font-semibold block text-[10px] uppercase">Status Mobil</span>
@@ -434,6 +425,7 @@ foreach ($types_data as $t) {
     </template>
   </div>
 
+  <?php if (isset($_SESSION['admin_role']) && $_SESSION['admin_role'] === 'superuser'): ?>
   <div x-show="showEditModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
     <div @click="showEditModal = false" class="modal-backdrop absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
     
@@ -500,6 +492,7 @@ foreach ($types_data as $t) {
       </div>
     </form>
   </div>
+  <?php endif; ?>
 </div>
 
 <script>
@@ -649,36 +642,6 @@ document.addEventListener('alpine:init', () => {
                         submitBtn.disabled = false;
                         submitBtn.classList.remove("opacity-70", "cursor-wait");
                     }
-                });
-            }
-        },
-
-        // Ganti kedua fungsi deleteCar lama dengan fungsi tunggal ini di dalam Alpine.data
-        deleteCar(id, typeKey = '', isType = 0) {
-            let confirmMsg = 'Apakah Anda yakin mau menghapus kendaraan ini? Data yang dihapus tidak dapat dikembalikan.';
-            if (isType == 1 && typeKey) {
-                confirmMsg = 'PERINGATAN: Anda akan menghapus Tipe Induk ini BESERTA SEMUA UNIT MOBIL di dalamnya. Lanjutkan?';
-            }
-            
-            if (confirm(confirmMsg)) {
-                // Tampilkan indikator loading agar user tahu proses sedang berjalan
-                document.body.style.cursor = 'wait';
-                
-                let url = 'car_action.php?delete_id=' + id;
-                if (isType == 1 && typeKey) {
-                    url += '&delete_is_type=1&delete_type_key=' + encodeURIComponent(typeKey);
-                }
-                
-                // Kirim permintaan hapus ke server
-                fetch(url)
-                .then(response => {
-                    document.body.style.cursor = 'default';
-                    // Paksa pemuatan ulang halaman setelah penghapusan berhasil
-                    window.location.href = 'index.php?page=cars';
-                })
-                .catch(error => {
-                    document.body.style.cursor = 'default';
-                    alert('Terjadi kesalahan saat menghapus data.');
                 });
             }
         },

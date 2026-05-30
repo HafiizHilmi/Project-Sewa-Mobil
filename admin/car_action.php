@@ -1,4 +1,15 @@
 <?php
+// Pastikan session sudah menyala untuk mengecek role
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// PROTEKSI BACKEND: Jika bukan superuser, matikan proses.
+if (!isset($_SESSION['admin_role']) || $_SESSION['admin_role'] !== 'superuser') {
+    http_response_code(403);
+    die("Akses Ditolak! Hanya Superuser yang diizinkan untuk menambah, mengedit, atau menghapus kendaraan.");
+}
+
 // Pastikan path ke database benar
 require_once '../Config/database.php';
 
@@ -100,7 +111,6 @@ if (isset($_POST['save_car'])) {
     // Eksekusi query
     mysqli_query($conn, $sql);
     
-    session_start();
     $_SESSION['flash_msg'] = "Data kendaraan berhasil disimpan!";
 
     // KUNCI PERBAIKAN EDIT: Tambahkan page=cars SEBELUM open_type_key
@@ -117,8 +127,6 @@ if (isset($_GET['delete_id'])) {
     $id = mysqli_real_escape_string($conn, $_GET['delete_id']);
     $delete_is_type = isset($_GET['delete_is_type']) ? intval($_GET['delete_is_type']) : 0;
     $delete_type_key = isset($_GET['delete_type_key']) ? mysqli_real_escape_string($conn, $_GET['delete_type_key']) : '';
-    
-    session_start();
 
     // JIKA YANG DIHAPUS ADALAH PARENT (Beserta semua anaknya)
     if ($delete_is_type === 1 && !empty($delete_type_key)) {
