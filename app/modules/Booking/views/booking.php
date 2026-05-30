@@ -4,7 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reservasi Kendaraan - SewaMobil</title>
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-bs-theme', 'light');
+            }
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -104,16 +121,52 @@
         .input-floating-label input::placeholder {
             color: #9ca3af;
         }
+
+        /* Dark Mode overrides */
+        html.dark body {
+            background-color: #020617 !important;
+            color: #f1f5f9 !important;
+        }
+        html.dark .input-floating-label {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+        }
+        html.dark .input-floating-label label {
+            color: #94a3b8 !important;
+        }
+        html.dark .input-floating-label input {
+            color: #f8fafc !important;
+        }
+        html.dark .input-floating-label input::placeholder {
+            color: #64748b !important;
+        }
+        html.dark .date-cell {
+            color: #94a3b8 !important;
+        }
+        html.dark .date-cell:hover:not(.empty-cell):not(.bg-gray-150):not(.bg-gray-100) {
+            background-color: #334155 !important;
+        }
+        html.dark .date-cell.in-range {
+            color: #60a5fa !important;
+        }
+        html.dark .date-cell.in-range::before {
+            background-color: rgba(30, 58, 138, 0.4) !important;
+        }
+        html.dark .date-cell.start-date::after,
+        html.dark .date-cell.end-date::after {
+            background-color: rgba(30, 58, 138, 0.4) !important;
+        }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="bg-gray-50 text-gray-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
 
-    <nav class="bg-white border-b sticky top-0 z-50">
+    <nav class="bg-white dark:bg-slate-900 border-b dark:border-slate-800 sticky top-0 z-50 transition-colors duration-200">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between relative">
-            <a href="index.php?module=Homepage&action=index" class="text-gray-800 hover:text-blue-600 font-semibold absolute left-6 flex items-center gap-2">
+            <a href="index.php?module=Homepage&action=index" class="text-gray-800 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 font-semibold absolute left-6 flex items-center gap-2">
                 <i class="bi bi-arrow-left"></i> Kembali
             </a>
-            <h1 class="text-lg font-bold w-full text-center">Reservasi Kendaraan</h1>
+            <h1 class="text-lg font-bold w-full text-center dark:text-white">Reservasi Kendaraan</h1>
+                <!-- Theme toggle removed: controlled from Profile page only -->
         </div>
     </nav>
 
@@ -121,12 +174,12 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             <div class="lg:col-span-2 space-y-6">
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-800">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-lg">
                             <i class="bi bi-geo-alt-fill"></i>
                         </div>
-                        <h2 class="text-xl font-bold">Detail Lokasi</h2>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Detail Lokasi</h2>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="input-floating-label flex items-center justify-between">
@@ -143,12 +196,12 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-800">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-lg">
                             <i class="bi bi-person-fill"></i>
                         </div>
-                        <h2 class="text-xl font-bold">Detail Personal</h2>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Detail Personal</h2>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="input-floating-label">
@@ -170,25 +223,25 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-800">
                     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-lg">
                                 <i class="bi bi-calendar-event-fill"></i>
                             </div>
                             <div>
-                                <h2 class="text-xl font-bold leading-tight">Pilih Tanggal</h2>
-                                <p class="text-sm text-gray-500">Cek ketersediaan kendaraan.</p>
+                                <h2 class="text-xl font-bold leading-tight text-gray-900 dark:text-white">Pilih Tanggal</h2>
+                                <p class="text-sm text-gray-500 dark:text-slate-400">Cek ketersediaan kendaraan.</p>
                             </div>
                         </div>
-                        <div class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-full px-4 py-2 min-w-[200px]">
-                            <button class="text-gray-600 hover:text-blue-600" id="prev-month"><i class="bi bi-chevron-left"></i></button>
-                            <span class="font-semibold text-sm" id="current-month-year"></span>
-                            <button class="text-gray-600 hover:text-blue-600" id="next-month"><i class="bi bi-chevron-right"></i></button>
+                        <div class="flex items-center justify-between bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-full px-4 py-2 min-w-[200px]">
+                            <button class="text-gray-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400" id="prev-month"><i class="bi bi-chevron-left"></i></button>
+                            <span class="font-semibold text-sm text-gray-800 dark:text-slate-200" id="current-month-year"></span>
+                            <button class="text-gray-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400" id="next-month"><i class="bi bi-chevron-right"></i></button>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-7 text-center mb-2 font-medium text-gray-500 text-sm">
+                    <div class="grid grid-cols-7 text-center mb-2 font-medium text-gray-500 dark:text-slate-400 text-sm">
                         <div class="pb-2">Min</div>
                         <div class="pb-2">Sen</div>
                         <div class="pb-2">Sel</div>
@@ -200,23 +253,23 @@
                     <div class="grid grid-cols-7 text-center" id="calendar-grid"></div>
                 </div>
 
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-800">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-lg">
                             <i class="bi bi-nut-fill"></i>
                         </div>
-                        <h2 class="text-xl font-bold">Pilih Layanan Tambahan</h2>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Pilih Layanan Tambahan</h2>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="addon-card border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-blue-300 transition" data-price="100000" onclick="selectAddon(this)">
-                            <h3 class="font-bold text-sm">Dengan Driver</h3>
-                            <p class="text-xs text-gray-500 mb-4">Sewa mobil menggunakan supir.</p>
-                            <p class="text-xs font-semibold text-gray-500">+Rp 100.000 /hari</p>
+                        <div class="addon-card border border-gray-200 dark:border-slate-700 rounded-xl p-4 cursor-pointer hover:border-blue-300 dark:hover:border-blue-700/50 transition" data-price="100000" onclick="selectAddon(this)">
+                            <h3 class="font-bold text-sm text-gray-900 dark:text-white">Dengan Driver</h3>
+                            <p class="text-xs text-gray-500 dark:text-slate-400 mb-4">Sewa mobil menggunakan supir.</p>
+                            <p class="text-xs font-semibold text-gray-500 dark:text-slate-400">+Rp 100.000 /hari</p>
                         </div>
-                        <div class="addon-card border-2 border-blue-600 bg-blue-50/30 rounded-xl p-4 cursor-pointer transition active-addon" data-price="0" onclick="selectAddon(this)">
-                            <h3 class="font-bold text-sm">Tanpa Supir</h3>
-                            <p class="text-xs text-gray-500 mb-4">Sewa mobil tanpa menggunakan supir.</p>
-                            <p class="text-xs font-semibold text-gray-500">+Rp 0 /hari</p>
+                        <div class="addon-card border-2 border-blue-600 dark:border-blue-500 bg-blue-50/30 dark:bg-blue-900/20 rounded-xl p-4 cursor-pointer transition active-addon" data-price="0" onclick="selectAddon(this)">
+                            <h3 class="font-bold text-sm text-gray-900 dark:text-white">Tanpa Supir</h3>
+                            <p class="text-xs text-gray-500 dark:text-slate-400 mb-4">Sewa mobil tanpa menggunakan supir.</p>
+                            <p class="text-xs font-semibold text-gray-500 dark:text-slate-400">+Rp 0 /hari</p>
                         </div>
                     </div>
                 </div>
@@ -224,8 +277,8 @@
             </div>
 
             <div class="lg:col-span-1">
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
-                    <div class="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
+                <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden sticky top-24">
+                    <div class="h-48 bg-gray-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
                         <?php 
                             // Perbaikan Logika Path Gambar
                             $rawImg = $car['image'] ?? '';
@@ -235,45 +288,45 @@
                     </div>
                     
                     <div class="p-6">
-                        <h3 class="font-bold text-xl mb-1"><?= htmlspecialchars($car['make'] . ' ' . $car['model'] . ' ' . $car['year']) ?></h3>
-                        <p class="text-sm text-gray-500 mb-6"><?= htmlspecialchars($car['category'] ?: 'Lainnya') ?> • <?= htmlspecialchars($car['fuel_type'] ?: '-') ?> • <?= htmlspecialchars($car['seats'] ?: '-') ?> Penumpang</p>
+                        <h3 class="font-bold text-xl mb-1 text-gray-900 dark:text-white"><?= htmlspecialchars($car['make'] . ' ' . $car['model'] . ' ' . $car['year']) ?></h3>
+                        <p class="text-sm text-gray-500 dark:text-slate-400 mb-6"><?= htmlspecialchars($car['category'] ?: 'Lainnya') ?> • <?= htmlspecialchars($car['fuel_type'] ?: '-') ?> • <?= htmlspecialchars($car['seats'] ?: '-') ?> Penumpang</p>
                         
                         <div class="space-y-4 mb-6">
                             <div class="flex gap-4">
-                                <i class="bi bi-calendar3 mt-0.5 text-gray-600"></i>
+                                <i class="bi bi-calendar3 mt-0.5 text-gray-600 dark:text-slate-400"></i>
                                 <div>
-                                    <p class="text-sm font-medium" id="summary-dates">Belum pilih tanggal</p>
-                                    <p class="text-xs text-gray-400" id="summary-days">0 Hari</p>
+                                    <p class="text-sm font-medium text-gray-800 dark:text-slate-200" id="summary-dates">Belum pilih tanggal</p>
+                                    <p class="text-xs text-gray-400 dark:text-slate-500" id="summary-days">0 Hari</p>
                                 </div>
                             </div>
                             <div class="flex gap-4">
-                                <i class="bi bi-geo-alt mt-0.5 text-gray-600"></i>
+                                <i class="bi bi-geo-alt mt-0.5 text-gray-600 dark:text-slate-400"></i>
                                 <div>
-                                    <p class="text-sm font-medium" id="summary-location">Lokasi belum ditentukan</p>
+                                    <p class="text-sm font-medium text-gray-800 dark:text-slate-200" id="summary-location">Lokasi belum ditentukan</p>
                                 </div>
                             </div>
                         </div>
                         
-                        <hr class="border-gray-100 mb-4">
+                        <hr class="border-gray-100 dark:border-slate-800 mb-4">
                         
                         <div class="space-y-2 mb-6">
                             <div class="flex justify-between text-sm">
-                                <span class="text-gray-500">Harga Sewa <span id="label-sewa"></span></span>
-                                <span class="font-medium" id="summary-base-price">Rp 0</span>
+                                <span class="text-gray-500 dark:text-slate-400">Harga Sewa <span id="label-sewa"></span></span>
+                                <span class="font-medium text-gray-800 dark:text-slate-200" id="summary-base-price">Rp 0</span>
                             </div>
-                            <div class="flex justify-between text-sm text-blue-600 hidden" id="row-driver">
+                            <div class="flex justify-between text-sm text-blue-600 dark:text-blue-400 hidden" id="row-driver">
                                 <span>Biaya Supir</span>
-                                <span class="font-medium" id="summary-driver">Rp 0</span>
+                                <span class="font-medium text-gray-800 dark:text-slate-200" id="summary-driver">Rp 0</span>
                             </div>
                             <div class="flex justify-between text-sm">
-                                <span class="text-gray-500">Pajak (10%)</span>
-                                <span class="font-medium" id="summary-tax">Rp 0</span>
+                                <span class="text-gray-500 dark:text-slate-400">Pajak (10%)</span>
+                                <span class="font-medium text-gray-800 dark:text-slate-200" id="summary-tax">Rp 0</span>
                             </div>
                         </div>
                         
                         <div class="flex justify-between items-center mb-6">
-                            <span class="text-xl font-bold">Total</span>
-                            <span class="text-xl font-bold text-blue-600" id="summary-total">Rp 0</span>
+                            <span class="text-xl font-bold text-gray-900 dark:text-white">Total</span>
+                            <span class="text-xl font-bold text-blue-600 dark:text-blue-400" id="summary-total">Rp 0</span>
                         </div>
                         
                         <form action="index.php?module=Booking&action=process" method="POST" id="booking-form">
@@ -286,11 +339,10 @@
                                 Konfirmasi Pesanan <i class="bi bi-arrow-right ml-1"></i>
                             </button>
                         </form>
-
+ 
                     </div>
                 </div>
             </div>
-
         </div>
     </main>
 
@@ -345,9 +397,9 @@
 
         function selectAddon(selectedElement) {
             document.querySelectorAll('.addon-card').forEach(card => {
-                card.className = 'addon-card border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-blue-300 transition';
+                card.className = 'addon-card border border-gray-200 dark:border-slate-700 rounded-xl p-4 cursor-pointer hover:border-blue-300 dark:hover:border-blue-700/50 transition';
             });
-            selectedElement.className = 'addon-card border-2 border-blue-600 bg-blue-50/30 rounded-xl p-4 cursor-pointer transition active-addon';
+            selectedElement.className = 'addon-card border-2 border-blue-600 dark:border-blue-500 bg-blue-50/30 dark:bg-blue-900/20 rounded-xl p-4 cursor-pointer transition active-addon';
             
             driverPrice = parseInt(selectedElement.getAttribute('data-price'));
             addonDriverInput.value = driverPrice > 0 ? '1' : '0';
@@ -497,6 +549,47 @@
                 return;
             }
         });
+
+        // ==================== GLOBAL THEME SYSTEM ====================
+        function updateGlobalNavbarIcon() {
+            const themeIcon = document.getElementById('global-theme-icon');
+            if (themeIcon) {
+                if (document.documentElement.classList.contains('dark')) {
+                    themeIcon.className = 'bi bi-sun-fill text-lg';
+                } else {
+                    themeIcon.className = 'bi bi-moon-fill text-lg';
+                }
+            }
+        }
+
+        function toggleGlobalTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-bs-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            updateGlobalNavbarIcon();
+        }
+
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'theme') {
+                if (e.newValue === 'dark') {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.setAttribute('data-bs-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.setAttribute('data-bs-theme', 'light');
+                }
+                updateGlobalNavbarIcon();
+            }
+        });
+
+        // Initialize theme icon on load
+        updateGlobalNavbarIcon();
     </script>
 </body>
 </html>

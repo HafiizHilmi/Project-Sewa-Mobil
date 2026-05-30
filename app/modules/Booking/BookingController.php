@@ -107,7 +107,7 @@ class BookingController {
 
         $bookingId = $pdo->lastInsertId();
 
-        $_SESSION['booking_success'] = [
+        $_SESSION['booking_pending'] = [
             'id' => $bookingId,
             'full_name' => $full_name,
             'pickup_location' => $pickup_location,
@@ -119,12 +119,20 @@ class BookingController {
             'car_id' => $car_id
         ];
 
-        header('Location: index.php?module=Booking&action=success');
+        header('Location: index.php?module=Booking&action=pending&booking_id=' . $bookingId);
         exit;
     }
 
     public function success() {
         require_once __DIR__ . '/views/payment_success.php';
+    }
+
+    public function pending() {
+        require_once __DIR__ . '/views/payment_pending.php';
+    }
+
+    public function rejected() {
+        require_once __DIR__ . '/views/payment_rejected.php';
     }
 }
 
