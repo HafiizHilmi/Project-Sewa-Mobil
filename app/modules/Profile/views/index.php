@@ -439,8 +439,10 @@
                                 $end      = date('d M Y', strtotime($booking['end_date']));
                                 $total    = number_format($booking['total_price'], 0, ',', '.');
                                 $statusVal= $booking['status'];
-                                $image    = htmlspecialchars($booking['image'] ?: 'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop');
-
+                                $rawImg   = $booking['image'] ?? '';
+                                $image    = !empty($rawImg) ? (filter_var($rawImg, FILTER_VALIDATE_URL) ? $rawImg : 'assets/images/' . $rawImg) : 'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop';
+                                $image    = htmlspecialchars($image);
+                                
                                 $statusLabel = 'Menunggu';
                                 $statusClass = 'bg-yellow-50 text-yellow-700 border border-yellow-200';
                                 $dotClass    = 'bg-yellow-400';
@@ -501,7 +503,9 @@
                             $end      = date('d M Y', strtotime($booking['end_date']));
                             $total    = number_format($booking['total_price'], 0, ',', '.');
                             $statusVal= $booking['status'];
-                            $image    = htmlspecialchars($booking['image'] ?: 'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop');
+                            $rawImg   = $booking['image'] ?? '';
+                            $image    = !empty($rawImg) ? (filter_var($rawImg, FILTER_VALIDATE_URL) ? $rawImg : 'assets/images/' . $rawImg) : 'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop';
+                            $image    = htmlspecialchars($image);
 
                             $statusLabel = 'Menunggu Persetujuan';
                             $statusClass = 'bg-yellow-50 text-yellow-700 border border-yellow-200';

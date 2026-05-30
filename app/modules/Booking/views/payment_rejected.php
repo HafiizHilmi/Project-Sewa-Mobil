@@ -43,7 +43,9 @@ $orderId = $bookingRow['id'];
 $carName = htmlspecialchars(trim(($bookingRow['make'] ?? '') . ' ' . ($bookingRow['model'] ?? '') . ' ' . ($bookingRow['year'] ?? '')));
 $rejectReason = trim($bookingRow['reject_reason'] ?? '');
 $rejectReason = $rejectReason !== '' ? $rejectReason : 'Tidak ada alasan spesifik yang diberikan oleh admin.';
-$carImage = htmlspecialchars($bookingRow['image'] ?: 'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop');
+$rawImg = $bookingRow['image'] ?? '';
+$carImage = !empty($rawImg) ? (filter_var($rawImg, FILTER_VALIDATE_URL) ? $rawImg : 'assets/images/' . $rawImg) : 'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop';
+$carImage = htmlspecialchars($carImage);
 ?>
 <!DOCTYPE html>
 <html lang="id">
