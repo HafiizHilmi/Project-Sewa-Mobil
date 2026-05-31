@@ -15,7 +15,7 @@ if (!$bookingId || !$pdo) {
 }
 
 $stmt = $pdo->prepare(
-    "SELECT b.*, c.make, c.model, c.year, COALESCE((SELECT p.image FROM cars p WHERE p.type_key = c.type_key AND p.is_type = 1 AND p.image != '' LIMIT 1), c.image) AS image FROM bookings b LEFT JOIN cars c ON c.id = b.car_id WHERE b.id = :id LIMIT 1"
+    "SELECT b.*, c.make, c.model, c.year, c.category, c.fuel_type, c.seats, COALESCE((SELECT p.image FROM cars p WHERE p.type_key = c.type_key AND p.is_type = 1 AND p.image != '' LIMIT 1), c.image) AS image FROM bookings b LEFT JOIN cars c ON c.id = b.car_id WHERE b.id = :id LIMIT 1"
 );
 $stmt->execute(['id' => $bookingId]);
 $bookingRow = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -37,12 +37,29 @@ if (in_array($status, ['rejected', 'cancelled'], true)) {
     exit;
 }
 
+function rupiah($value) {
+    return 'Rp ' . number_format($value, 0, ',', '.');
+}
+
 $orderId = $bookingRow['id'];
-$startLabel = date('j F Y', strtotime($bookingRow['start_date']));
-$endLabel = date('j F Y', strtotime($bookingRow['end_date']));
-$totalPrice = number_format($bookingRow['total_price'], 0, ',', '.');
-$pickupLocation = htmlspecialchars($bookingRow['pickup_location']);
-$returnLocation = htmlspecialchars($bookingRow['return_location'] ?: 'Sama dengan lokasi pengambilan');
+$startDate = $bookingRow['start_date'];
+$endDate = $bookingRow['end_date'];
+$rentalDays = 3;
+if ($bookingRow['start_date'] && $bookingRow['end_date']) {
+    $start = date_create($bookingRow['start_date']);
+    $end = date_create($bookingRow['end_date']);
+    $interval = date_diff($start, $end);
+    $rentalDays = $interval->days + 1;
+}
+$driverText = ($bookingRow['addon_driver'] ?? 0) ? 'Rp 100.000' : 'Rp 0';
+$totalPrice = $bookingRow['total_price'] ?? 1155000;
+$pickupLocation = $bookingRow['pickup_location'] ?? '';
+$returnLocation = $bookingRow['return_location'] ?: 'Sama dengan lokasi pengambilan';
+$startLabel = date('j F Y', strtotime($startDate));
+$endLabel = date('j F Y', strtotime($endDate));
+$baseSubtotal = round($totalPrice / 1.1);
+$taxAmount = round($totalPrice - $baseSubtotal);
+
 $carName = htmlspecialchars(trim(($bookingRow['make'] ?? '') . ' ' . ($bookingRow['model'] ?? '') . ' ' . ($bookingRow['year'] ?? '')));
 $rawImg = $bookingRow['image'] ?? '';
 $carImage = !empty($rawImg) ? (filter_var($rawImg, FILTER_VALIDATE_URL) ? $rawImg : 'assets/images/' . $rawImg) : 'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop';
@@ -67,92 +84,209 @@ $carImage = htmlspecialchars($carImage);
         })();
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        html, body {
-            min-height: 100%;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            min-height: 100vh;
         }
-        body {
-            margin: 0;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        .barcode {
+            height: 35px;
+            width: 140px;
+            background: repeating-linear-gradient(
+                90deg,
+                #1f2937,
+                #1f2937 2px,
+                transparent 2px,
+                transparent 4px,
+                #1f2937 4px,
+                #1f2937 7px,
+                transparent 7px,
+                transparent 10px,
+                #1f2937 10px,
+                #1f2937 11px,
+                transparent 11px,
+                transparent 14px
+            );
         }
         html.dark body {
-            background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
-            color: #f8fafc;
+            background: linear-gradient(135deg, #090d1f 0%, #030712 100%) !important;
+            color: #f1f5f9 !important;
+        }
+        html.dark .barcode {
+            background: repeating-linear-gradient(
+                90deg,
+                #f8fafc,
+                #f8fafc 2px,
+                transparent 2px,
+                transparent 4px,
+                #f8fafc 4px,
+                #f8fafc 7px,
+                transparent 7px,
+                transparent 10px,
+                #f8fafc 10px,
+                #f8fafc 11px,
+                transparent 11px,
+                transparent 14px
+            ) !important;
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center px-4 py-12 transition-colors duration-200">
-    <div class="w-full max-w-5xl">
-        <div class="rounded-[2rem] overflow-hidden shadow-2xl ring-1 ring-black/5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-            <div class="grid grid-cols-1 lg:grid-cols-[1.35fr_0.9fr] gap-0">
-                <div class="p-10 lg:p-14">
-                    <div class="inline-flex items-center gap-3 rounded-full bg-blue-50 dark:bg-blue-900/40 px-4 py-2 mb-6 text-blue-700 dark:text-blue-200 text-sm font-semibold">
-                        <i class="bi bi-clock-history"></i>
-                        <span>Status: Menunggu Verifikasi Admin</span>
-                    </div>
-                    <h1 class="text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white leading-tight">Reservasi Berhasil Dikirim!</h1>
-                    <p class="mt-5 text-slate-600 dark:text-slate-300 text-base leading-8 max-w-2xl">
-                        Mohon tunggu, pesanan Anda sedang ditinjau dan menunggu persetujuan dari Admin. Anda dapat memantau status pesanan di halaman Riwayat Penyewaan.
-                    </p>
+<body class="flex flex-col items-center justify-center py-10 px-4 relative transition-colors duration-200">
 
-                    <div class="mt-8 grid gap-4 sm:grid-cols-2">
-                        <a href="index.php?module=Homepage&action=index" class="inline-flex items-center justify-center gap-2 rounded-3xl bg-blue-600 text-white px-6 py-3 text-sm font-semibold shadow-lg shadow-blue-600/10 hover:bg-blue-700 transition">
-                            <i class="bi bi-house-door-fill"></i>
-                            Halaman Utama
-                        </a>
-                        <a href="index.php?module=Profile&action=index#riwayat" class="inline-flex items-center justify-center gap-2 rounded-3xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-6 py-3 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
-                            <i class="bi bi-clock-history"></i>
-                            Riwayat Penyewaan
-                        </a>
-                    </div>
+    <div class="z-10 flex flex-col items-center text-center mb-6">
+        <div class="w-16 h-16 bg-amber-500 text-white rounded-full flex items-center justify-center text-3xl shadow-lg shadow-amber-500/40 mb-4 animate-pulse">
+            <i class="bi bi-hourglass-split"></i>
+        </div>
+        <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">Reservasi Menunggu Verifikasi!</h1>
+        <p class="text-gray-600 dark:text-slate-400 text-sm max-w-md leading-relaxed">Pesanan Anda berhasil dikirim dan saat ini sedang ditinjau oleh Admin. Anda dapat memeriksa statusnya secara berkala.</p>
+    </div>
 
-                    <div class="mt-10 grid gap-4 sm:grid-cols-2">
-                        <div class="rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-5">
-                            <p class="text-xs uppercase font-semibold tracking-[0.2em] text-slate-500 dark:text-slate-400 mb-2">Nomor Pesanan</p>
-                            <p class="text-xl font-bold text-slate-900 dark:text-white">#RESRV-<?= htmlspecialchars($orderId) ?></p>
-                        </div>
-                        <div class="rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-5">
-                            <p class="text-xs uppercase font-semibold tracking-[0.2em] text-slate-500 dark:text-slate-400 mb-2">Mobil pilihan</p>
-                            <p class="text-lg font-semibold text-slate-900 dark:text-white"><?= $carName ?></p>
-                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1"><?= $startLabel ?> – <?= $endLabel ?></p>
-                        </div>
+    <div class="z-10 flex flex-col lg:flex-row gap-5 max-w-4xl w-full">
+        
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-xl border border-white/50 dark:border-slate-800 flex-1 relative overflow-hidden">
+            <div class="flex justify-between items-start mb-5">
+                <div>
+                    <p class="text-[0.65rem] font-bold text-amber-600 dark:text-amber-400 tracking-wider uppercase mb-1">Order ID</p>
+                    <h2 class="text-xl font-black text-gray-900 dark:text-white">#RESRV-<?= htmlspecialchars($orderId) ?></h2>
+                    <div class="barcode mt-2 opacity-80"></div>
+                    <p class="text-[0.6rem] text-gray-400 dark:text-slate-500 mt-1 tracking-widest"><?php echo htmlspecialchars($orderId . '004928173645'); ?></p>
+                </div>
+                <div class="bg-amber-500 text-white text-[0.7rem] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1">
+                    <i class="bi bi-clock-history"></i> Pending Verification
+                </div>
+            </div>
+
+            <div class="h-36 w-full mb-5 rounded-2xl overflow-hidden bg-gray-100 dark:bg-slate-800 flex items-center justify-center">
+                <img src="<?= $carImage ?>" alt="<?= $carName ?>" class="w-full h-full object-cover">
+            </div>
+
+            <div class="mb-4">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white"><?= $carName ?></h3>
+                <p class="text-xs text-gray-500 dark:text-slate-400 mt-0.5"><?= htmlspecialchars($bookingRow['category'] ?? 'MPV') ?> • <?= htmlspecialchars($bookingRow['fuel_type'] ?? 'Bensin') ?> • <?= htmlspecialchars($bookingRow['seats'] ?? '7') ?> Penumpang</p>
+            </div>
+
+            <div class="bg-gray-50 dark:bg-slate-950 rounded-xl p-4 border border-gray-100 dark:border-slate-800 space-y-4">
+                <div class="flex gap-3 items-start">
+                    <div class="mt-0.5 w-6 flex justify-center"><i class="bi bi-calendar2-range text-amber-500 dark:text-amber-400"></i></div>
+                    <div>
+                        <p class="text-[0.65rem] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">Rentang Waktu Sewa</p>
+                        <p class="text-xs font-bold text-gray-900 dark:text-white"><?= htmlspecialchars($startLabel) ?> <span class="text-gray-400 dark:text-slate-500 mx-1">→</span> <?= htmlspecialchars($endLabel) ?></p>
                     </div>
                 </div>
-                <div class="relative bg-slate-900 dark:bg-slate-950 px-8 py-10 sm:px-10 sm:py-16 text-white">
-                    <div class="absolute inset-0 bg-gradient-to-br from-blue-700/20 via-slate-900/10 to-slate-900/0"></div>
-                    <div class="relative z-10">
-                        <div class="rounded-[2rem] overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl shadow-slate-900/20 p-5">
-                            <img src="<?= $carImage ?>" alt="<?= $carName ?>" class="w-full h-56 object-cover rounded-3xl shadow-inner">
-                        </div>
-                        <div class="mt-7 rounded-3xl border border-slate-800 bg-slate-900/95 p-6">
-                            <h2 class="text-xl font-bold">Rangkuman Pemesanan</h2>
-                            <p class="mt-3 text-sm text-slate-400">Total harga akan ditampilkan setelah admin menyetujui pesanan Anda.</p>
-                            <div class="mt-6 space-y-3 text-sm">
-                                <div class="flex items-center justify-between text-slate-400">
-                                    <span>Rentang Sewa</span>
-                                    <span class="text-white"><?= $startLabel ?> – <?= $endLabel ?></span>
-                                </div>
-                                <div class="flex items-center justify-between text-slate-400">
-                                    <span>Lokasi Ambil</span>
-                                    <span class="text-white text-right max-w-[140px] truncate"><?= $pickupLocation ?></span>
-                                </div>
-                                <div class="flex items-center justify-between text-slate-400">
-                                    <span>Lokasi Antar</span>
-                                    <span class="text-white text-right max-w-[140px] truncate"><?= $returnLocation ?></span>
-                                </div>
-                                <div class="flex items-center justify-between text-slate-400 border-t border-slate-800 pt-3">
-                                    <span class="font-semibold text-slate-200">Estimasi Pembayaran</span>
-                                    <span class="font-semibold text-white">Rp<?= $totalPrice ?></span>
-                                </div>
-                            </div>
-                        </div>
+                
+                <div class="w-full h-px bg-gray-200 dark:bg-slate-800"></div>
+                
+                <div class="flex gap-3 items-start">
+                    <div class="mt-0.5 w-6 flex justify-center"><i class="bi bi-geo-alt-fill text-amber-500 dark:text-amber-400"></i></div>
+                    <div>
+                        <p class="text-[0.65rem] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">Lokasi Pengambilan</p>
+                        <p class="text-xs font-semibold text-gray-900 dark:text-white"><?= htmlspecialchars($pickupLocation) ?></p>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3 items-start">
+                    <div class="mt-0.5 w-6 flex justify-center"><i class="bi bi-geo-fill text-amber-500 dark:text-amber-400"></i></div>
+                    <div>
+                        <p class="text-[0.65rem] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">Lokasi Pengembalian</p>
+                        <p class="text-xs font-semibold text-gray-900 dark:text-white"><?= htmlspecialchars($returnLocation) ?></p>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-xl border border-white/50 dark:border-slate-800 w-full lg:w-[300px] flex flex-col">
+            <h3 class="text-base font-bold text-gray-900 dark:text-white mb-5">Estimasi Pembayaran</h3>
+            
+            <div class="space-y-4 flex-grow">
+                <div class="flex justify-between text-xs">
+                    <span class="text-gray-500 dark:text-slate-400">Metode Bayar</span>
+                    <span class="font-bold text-gray-900 dark:text-white">Transfer Bank</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                    <span class="text-gray-500 dark:text-slate-400">Harga Sewa (<?= htmlspecialchars($rentalDays) ?> Hari)</span>
+                    <span class="font-bold text-gray-900 dark:text-white"><?= rupiah($baseSubtotal) ?></span>
+                </div>
+                <div class="flex justify-between text-xs">
+                    <span class="text-gray-500 dark:text-slate-400">Biaya Supir</span>
+                    <span class="font-bold text-gray-900 dark:text-white"><?= $driverText ?></span>
+                </div>
+                <div class="flex justify-between text-xs">
+                    <span class="text-gray-500 dark:text-slate-400">Pajak (10%)</span>
+                    <span class="font-bold text-gray-900 dark:text-white"><?= rupiah($taxAmount) ?></span>
+                </div>
+                
+                <hr class="border-gray-100 dark:border-slate-800 my-4">
+                
+                <div class="text-right">
+                    <p class="text-[0.65rem] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-1">Total Pembayaran</p>
+                    <p class="text-2xl font-black text-amber-500 dark:text-amber-450 tracking-tight"><?= rupiah($totalPrice) ?></p>
+                </div>
+            </div>
+
+            <div class="bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/50 rounded-xl p-3 mt-5 flex gap-3 items-start">
+                <i class="bi bi-info-circle-fill text-amber-500 dark:text-amber-450 mt-0.5 flex-shrink-0"></i>
+                <p class="text-[0.65rem] font-medium text-amber-800 dark:text-amber-300 leading-relaxed">Admin akan memverifikasi pembayaran dan kelengkapan dokumen Anda. Status akan segera diperbarui dalam 1x24 jam.</p>
+            </div>
+        </div>
+        
     </div>
+
+    <div class="z-10 flex flex-col sm:flex-row gap-3 mt-8 w-full max-w-md justify-center">
+        <a href="index.php?module=Profile&action=index#riwayat" class="bg-amber-500 text-white px-6 py-3 rounded-full font-bold shadow-lg hover:bg-amber-600 transition text-center text-sm">
+            Lihat Riwayat Pesanan
+        </a>
+        <a href="index.php?module=Homepage&action=index" class="bg-white dark:bg-slate-900 text-amber-500 dark:text-amber-400 border-2 border-amber-500 dark:border-amber-400 px-6 py-3 rounded-full font-bold hover:bg-amber-50 dark:hover:bg-slate-800 transition text-center text-sm">
+            Kembali ke Beranda
+        </a>
+    </div>
+
+    <script>
+        function updateGlobalNavbarIcon() {
+            const themeIcon = document.getElementById('global-theme-icon');
+            if (themeIcon) {
+                if (document.documentElement.classList.contains('dark')) {
+                    themeIcon.className = 'bi bi-sun-fill text-lg';
+                } else {
+                    themeIcon.className = 'bi bi-moon-fill text-lg';
+                }
+            }
+        }
+
+        function toggleGlobalTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-bs-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            updateGlobalNavbarIcon();
+        }
+
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'theme') {
+                if (e.newValue === 'dark') {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.setAttribute('data-bs-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.setAttribute('data-bs-theme', 'light');
+                }
+                updateGlobalNavbarIcon();
+            }
+        });
+
+        updateGlobalNavbarIcon();
+    </script>
 </body>
 </html>
