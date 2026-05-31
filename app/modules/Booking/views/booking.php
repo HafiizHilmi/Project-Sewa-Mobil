@@ -334,9 +334,17 @@
                                 </div>
                             </div>
                             <div class="flex gap-4">
-                                <i class="bi bi-geo-alt mt-0.5 text-gray-600 dark:text-slate-400"></i>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-800 dark:text-slate-200" id="summary-location">Lokasi belum ditentukan</p>
+                                <i class="bi bi-geo-alt-fill mt-0.5 text-blue-600 dark:text-blue-400"></i>
+                                <div class="overflow-hidden">
+                                    <span class="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider block mb-0.5">Lokasi Pengambilan</span>
+                                    <p class="text-sm font-medium text-gray-800 dark:text-slate-200 truncate" id="summary-pickup" title="Lokasi belum ditentukan">Lokasi belum ditentukan</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-4 mt-3">
+                                <i class="bi bi-geo-alt mt-0.5 text-emerald-600 dark:text-emerald-400"></i>
+                                <div class="overflow-hidden">
+                                    <span class="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider block mb-0.5">Lokasi Pengembalian</span>
+                                    <p class="text-sm font-medium text-gray-800 dark:text-slate-200 truncate" id="summary-return" title="Sama dengan lokasi pengambilan">Sama dengan lokasi pengambilan</p>
                                 </div>
                             </div>
                         </div>
@@ -385,7 +393,8 @@
         let driverPrice = 0;
         let totalDays = 0;
 
-        const sumLocation = document.getElementById('summary-location');
+        const sumPickup = document.getElementById('summary-pickup');
+        const sumReturn = document.getElementById('summary-return');
         const sumDates = document.getElementById('summary-dates');
         const sumDays = document.getElementById('summary-days');
         const sumBasePrice = document.getElementById('summary-base-price');
@@ -401,7 +410,13 @@
         const bookingForm = document.getElementById('booking-form');
 
         document.getElementById('input-pickup').addEventListener('input', function(e) {
-            sumLocation.textContent = e.target.value || 'Lokasi belum ditentukan';
+            sumPickup.textContent = e.target.value || 'Lokasi belum ditentukan';
+            sumPickup.title = e.target.value || 'Lokasi belum ditentukan';
+        });
+
+        document.getElementById('input-return').addEventListener('input', function(e) {
+            sumReturn.textContent = e.target.value || 'Sama dengan lokasi pengambilan';
+            sumReturn.title = e.target.value || 'Sama dengan lokasi pengambilan';
         });
 
         const formatRupiah = (angka) => {
@@ -736,9 +751,13 @@
 
         // Initialize Auto-suggest
         initAutocomplete('input-pickup', 'dropdown-pickup', function(val) {
-            sumLocation.textContent = val || 'Lokasi belum ditentukan';
+            sumPickup.textContent = val || 'Lokasi belum ditentukan';
+            sumPickup.title = val || 'Lokasi belum ditentukan';
         });
-        initAutocomplete('input-return', 'dropdown-return');
+        initAutocomplete('input-return', 'dropdown-return', function(val) {
+            sumReturn.textContent = val || 'Sama dengan lokasi pengambilan';
+            sumReturn.title = val || 'Sama dengan lokasi pengambilan';
+        });
         initAutocomplete('input-address', 'dropdown-address');
 
         bookingForm.addEventListener('submit', function(e) {
@@ -748,7 +767,7 @@
                 return;
             }
 
-            if (sumLocation.textContent === 'Lokasi belum ditentukan') {
+            if (sumPickup.textContent === 'Lokasi belum ditentukan') {
                 alert('Masukkan lokasi pengambilan.');
                 e.preventDefault();
                 return;
