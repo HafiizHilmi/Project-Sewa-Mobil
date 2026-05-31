@@ -69,7 +69,7 @@ class BookingController {
         $total_price = floatval($_POST['total_price'] ?? 0);
 
         if ($pickup_location === '' || $full_name === '' || $email === '' || $phone === '' || $address === '' || $start_date === '' || $end_date === '' || $total_price <= 0) {
-            $_SESSION['flash'] = "Lengkapi semua data booking terlebih dahulu. Debug: pickup=$pickup_location, name=$full_name, email=$email, phone=$phone, address=$address, start=$start_date, end=$end_date, total=$total_price";
+            $_SESSION['flash'] = "Lengkapi semua data booking terlebih dahulu.";
             header('Location: index.php?module=Booking&action=checkout&car_id=' . $car_id);
             exit;
         }
@@ -120,7 +120,7 @@ class BookingController {
             $gfRad = intval($gf['radius']);
             $locationName = $gf['location_name'];
 
-            // 1. Cek Lokasi Pengambilan
+            // Cek Lokasi Pengambilan
             if ($pickup_lat && $pickup_lon) {
                 $dist = $haversine($pickup_lat, $pickup_lon, $gfLat, $gfLng);
                 if ($dist <= $gfRad) {
@@ -130,7 +130,7 @@ class BookingController {
                 }
             }
 
-            // 2. Cek Lokasi Pengembalian
+            // Cek Lokasi Pengembalian
             if ($return_lat && $return_lon) {
                 $dist = $haversine($return_lat, $return_lon, $gfLat, $gfLng);
                 if ($dist <= $gfRad) {
@@ -140,7 +140,7 @@ class BookingController {
                 }
             }
 
-            // 3. Cek Alamat Lengkap
+            // Cek Alamat Lengkap
             if ($address_lat && $address_lon) {
                 $dist = $haversine($address_lat, $address_lon, $gfLat, $gfLng);
                 if ($dist <= $gfRad) {
@@ -190,6 +190,16 @@ class BookingController {
             'car_id' => $car_id
         ];
 
+        // --- AMBIL NAMA MOBIL LALU KIRIM NOTIFIKASI PENDING ---
+        $stmtCarDetails = $pdo->prepare("SELECT make, model FROM cars WHERE id = :id");
+        $stmtCarDetails->execute(['id' => $car_id]);
+        $carDetails = $stmtCarDetails->fetch(PDO::FETCH_ASSOC);
+        $carName = trim(($carDetails['make'] ?? '') . ' ' . ($carDetails['model'] ?? ''));
+
+        $msgWA = "Halo *$full_name*,\n\nTerima kasih telah memesan mobil *$carName* di SewaMobil SBY (Order ID: #$bookingId).\n\nPesanan Anda saat ini berstatus *PENDING* dan sedang ditinjau oleh Admin. Kami akan menghubungi Anda segera setelah pesanan disetujui.\n\nTerima kasih!";
+        $this->sendNotification($phone, $email, "Pesanan Diterima - SewaMobil SBY", $msgWA);
+        // ------------------------------------------------------
+
         header('Location: index.php?module=Booking&action=pending&booking_id=' . $bookingId);
         exit;
     }
@@ -205,5 +215,42 @@ class BookingController {
     public function rejected() {
         require_once __DIR__ . '/views/payment_rejected.php';
     }
-}
 
+    // ==============================================================
+    // FUNGSI PRIVAT PENGIRIM NOTIFIKASI (EMAIL & WHATSAPP)
+    // ==============================================================
+    private function sendNotification($phone, $email, $subject, $message) {
+        // Panggil file rahasia
+        require_once __DIR__ . '/../../../include/api_keys.php';
+
+        // 1. Kirim Email (Bawaan PHP)
+        $headers = "From: no-reply@sewamobil.com\r\n";
+        $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+        @mail($email, $subject, $message, $headers);
+
+        // 2. Kirim WhatsApp (Fonnte API)
+        $token = FONNTE_TOKEN; // <-- Ambil token dari file api_keys.php
+        
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+          CURLOPT_URL => 'https://api.fonnte.com/send',
+          CURLOPT_RETURNTRANSFER => true,
+          CURLOPT_ENCODING => '',
+          CURLOPT_MAXREDIRS => 10,
+          CURLOPT_TIMEOUT => 2, // Timeout cepat agar loading web tidak lemot
+          CURLOPT_FOLLOWLOCATION => true,
+          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+          CURLOPT_CUSTOMREQUEST => 'POST',
+          CURLOPT_POSTFIELDS => array(
+            'target' => $phone,
+            'message' => $message,
+            'countryCode' => '62',
+          ),
+          CURLOPT_HTTPHEADER => array(
+            "Authorization: $token"
+          ),
+        ));
+        @curl_exec($curl);
+        @curl_close($curl);
+    }
+}
