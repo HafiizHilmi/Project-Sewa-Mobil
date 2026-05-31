@@ -56,13 +56,16 @@
             </div>
             
             <div class="w-full md:w-[450px] lg:w-[550px] md:absolute md:left-1/2 md:-translate-x-1/2 order-last md:order-none z-10">
-                <form action="index.php" method="GET" class="relative">
+                <form id="searchForm" action="index.php" method="GET" class="relative">
                     <input type="hidden" name="module" value="Homepage">
                     <input type="hidden" name="action" value="index">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 dark:text-slate-500">
                         <i class="bi bi-search"></i>    
                     </div>
-                    <input type="text" name="search" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" placeholder="Cari mobil, ukuran, kategori..." class="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-100 dark:bg-slate-800 rounded-full border-none text-sm sm:text-base focus:ring-2 focus:ring-blue-100 placeholder:text-gray-500 dark:placeholder:text-slate-400 text-gray-900 dark:text-white">
+                    <input type="text" id="searchInput" name="search" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" placeholder="Cari mobil, ukuran, kategori..." class="w-full pl-10 pr-10 py-2.5 sm:py-3 bg-gray-100 dark:bg-slate-800 rounded-full border-none text-sm sm:text-base focus:ring-2 focus:ring-blue-100 placeholder:text-gray-500 dark:placeholder:text-slate-400 text-gray-900 dark:text-white">
+                    <button type="button" id="clearSearchBtn" class="hidden absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
+                        <i class="bi bi-x-circle-fill text-base"></i>
+                    </button>
                 </form>
             </div>
 
@@ -85,8 +88,6 @@
                 </div>
                 <?php endif; ?>
                 
-                <!-- Theme toggle removed: theme controlled from Profile page only -->
-                
                 <div class="border-l border-gray-300 dark:border-slate-700 pl-3 ml-1 shrink-0">
                     <a href="index.php?module=Auth&action=logout" class="flex items-center gap-1 text-red-500 hover:text-red-700 font-medium transition text-sm no-underline">
                         <i class="bi bi-box-arrow-right text-lg"></i> 
@@ -97,7 +98,7 @@
         </div>
     </nav>
 
-    <main class="flex-grow w-full max-w-6xl mx-auto px-4 md:px-6 pt-10 pb-40 space-y-10 md:space-y-12">
+    <main class="flex-grow w-full max-w-6xl mx-auto px-4 md:px-6 pt-10 pb-40 space-y-8 md:space-y-10">
         
         <?php if(isset($_SESSION['user_id']) && isset($verification_status) && in_array($verification_status, ['unverified', 'rejected'])): ?>
         <div class="bg-red-50 dark:bg-red-950/20 border-l-4 border-red-500 text-red-800 dark:text-red-350 p-4 rounded-xl shadow-sm flex items-start gap-3 mb-6" role="alert">
@@ -114,18 +115,65 @@
             <p class="text-lg md:text-xl text-gray-600 dark:text-slate-400">Pilih mobil terbaik yang kami sediakan untukmu.</p>
         </header>
 
-        <section class="flex flex-wrap items-center gap-3">
-            <button class="bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition">Semua Mobil</button>
-            <button class="bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-200 px-6 py-3 rounded-full font-medium hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-800 transition">SUV</button>
-            <button class="bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-200 px-6 py-3 rounded-full font-medium hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-800 transition">MPV</button>
-            <button class="bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-200 px-6 py-3 rounded-full font-medium hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-800 transition">Sedan</button>
-            <button class="bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-200 px-6 py-3 rounded-full font-medium hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-800 transition">EV</button>
-        </section>
+        <div>
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                <section class="flex flex-wrap items-center gap-3">
+                    <button class="filter-category bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition" data-val="SEMUA MOBIL">Semua Mobil</button>
+                    <button class="filter-category bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-200 px-6 py-3 rounded-full font-medium hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-800 transition" data-val="SUV">SUV</button>
+                    <button class="filter-category bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-200 px-6 py-3 rounded-full font-medium hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-800 transition" data-val="MPV">MPV</button>
+                    <button class="filter-category bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-200 px-6 py-3 rounded-full font-medium hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-800 transition" data-val="SEDAN">Sedan</button>
+                    <button class="filter-category bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-200 px-6 py-3 rounded-full font-medium hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-800 transition" data-val="EV">EV</button>
+                </section>
+                
+                <button id="toggleFilterBtn" class="flex items-center justify-center gap-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-gray-800 dark:text-slate-200 px-6 py-3 rounded-full font-bold hover:bg-gray-50 dark:hover:bg-slate-800 transition shadow-sm w-full md:w-auto">
+                    <i class="bi bi-sliders"></i> Filter Lanjutan
+                </button>
+            </div>
+
+            <div id="filterPanel" class="hidden bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-sm transition-all duration-300 transform origin-top">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Transmisi</label>
+                        <div class="relative">
+                            <select id="filterTrans" class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-800 dark:text-slate-200 text-sm font-medium rounded-xl px-4 py-3 appearance-none outline-none focus:ring-2 focus:ring-blue-500 transition cursor-pointer">
+                                <option value="ALL">Semua Transmisi</option>
+                                <option value="MANUAL">Manual</option>
+                                <option value="MATIC">Matic</option>
+                            </select>
+                            <i class="bi bi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-xs"></i>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Urutkan Harga</label>
+                        <div class="relative">
+                            <select id="sortPrice" class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-800 dark:text-slate-200 text-sm font-medium rounded-xl px-4 py-3 appearance-none outline-none focus:ring-2 focus:ring-blue-500 transition cursor-pointer">
+                                <option value="asc">Harga Termurah</option>
+                                <option value="desc">Harga Termahal</option>
+                            </select>
+                            <i class="bi bi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-xs"></i>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <label class="block text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Batas Maksimal Harga</label>
+                            <span id="priceLabel" class="text-sm font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-lg">Rp 2.000.000</span>
+                        </div>
+                        <input type="range" id="priceRange" min="100000" max="2000000" step="50000" value="2000000" class="w-full h-2.5 bg-gray-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 mt-2">
+                        <div class="flex justify-between text-[10px] text-gray-400 font-bold mt-2 uppercase">
+                            <span>Rp 100rb</span>
+                            <span>Rp 2 Jt+</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6 car-grid mb-16">
             <?php if (!empty($_GET['search'])): ?>
                 <div class="col-span-full rounded-xl bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/50 px-5 py-3 text-sm text-blue-700 dark:text-blue-300">
-                    Menampilkan <?= count($cars ?? []) ?> hasil untuk "<?= htmlspecialchars($_GET['search']) ?>".
+                    Menampilkan hasil untuk "<?= htmlspecialchars($_GET['search']) ?>".
                 </div>
             <?php endif; ?>
 
@@ -136,12 +184,11 @@
                         $carCategory = htmlspecialchars($car['category'] ?: 'Lainnya'); 
                         $carFuel = htmlspecialchars($car['fuel_type'] ?: '-'); 
                         $carSeats = htmlspecialchars($car['seats'] ?: '-'); 
-                        // --- BARIS BARU: Mengambil data transmisi ---
+                        
                         $carTrans = htmlspecialchars($car['transmission'] ?: 'Manual'); 
+                        $carPriceRaw = $car['price_per_day'];
+                        $carPrice = number_format($carPriceRaw, 0, ',', '.'); 
                         
-                        $carPrice = number_format($car['price_per_day'], 0, ',', '.'); 
-                        
-                        // Perbaikan Logic Gambar
                         $rawImg = $car['image'] ?? '';
                         if (!empty($rawImg)) {
                             $carImage = filter_var($rawImg, FILTER_VALIDATE_URL) ? $rawImg : 'assets/images/' . $rawImg;
@@ -150,7 +197,10 @@
                         }
                     ?>
                     
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-lg border border-gray-100 dark:border-slate-800 hover:shadow-2xl hover:border-gray-200 dark:hover:border-slate-700 transition-all duration-300 car-card">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-lg border border-gray-100 dark:border-slate-800 hover:shadow-2xl hover:border-gray-200 dark:hover:border-slate-700 transition-all duration-300 car-card"
+                         data-category="<?= strtoupper($carCategory) ?>"
+                         data-trans="<?= strtoupper($carTrans) ?>"
+                         data-price="<?= $carPriceRaw ?>">
                         <img src="<?= htmlspecialchars($carImage) ?>" alt="<?= $carName ?>" class="w-full h-40 object-cover rounded-2xl mb-4">
                         <div class="card-body">
                             <div class="flex items-start justify-between gap-2 mb-2">
@@ -175,14 +225,14 @@
                 <div id="empty-state-js" class="col-span-full p-12 bg-white dark:bg-slate-900 rounded-3xl border border-gray-200 dark:border-slate-800 text-center" style="display: none;">
                     <i class="bi bi-car-front text-5xl text-gray-300 dark:text-slate-700 mb-3 block"></i>
                     <p class="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Tidak ada produk</p>
-                    <p class="text-gray-500 dark:text-slate-400">Mohon maaf, mobil untuk kategori ini sedang kosong.</p>
+                    <p class="text-gray-500 dark:text-slate-400">Mobil untuk kategori, transmisi, atau rentang harga ini sedang kosong.</p>
                 </div>
 
             <?php else: ?>
                 <div class="col-span-full p-12 bg-white dark:bg-slate-900 rounded-3xl border border-gray-200 dark:border-slate-800 text-center">
                     <i class="bi bi-search text-5xl text-gray-300 dark:text-slate-700 mb-3 block"></i>
-                    <p class="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Tidak ada produk</p>
-                    <p class="text-gray-500 dark:text-slate-400">Coba kata kunci pencarian lain atau kembali lagi nanti.</p>
+                    <p class="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Pencarian Tidak Ditemukan</p>
+                    <p class="text-gray-500 dark:text-slate-400">Silakan hapus teks pencarian atau coba kata kunci lain.</p>
                 </div>
             <?php endif; ?>
         </section>
@@ -192,45 +242,160 @@
 
     <script>
     document.addEventListener("DOMContentLoaded", () => {
-        const filterButtons = document.querySelectorAll("section.flex-wrap button");
-        const carCards = document.querySelectorAll("section.car-grid > div.car-card");
+        
+        // ==========================================
+        // 1. LOGIKA SEARCH BAR (CLEAR TEXT FIX)
+        // ==========================================
+        const searchForm = document.getElementById('searchForm');
+        const searchInput = document.getElementById('searchInput');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+        // Munculkan atau sembunyikan tombol (X)
+        const toggleClearBtn = () => {
+            if (searchInput.value.trim() !== '') {
+                clearSearchBtn.classList.remove('hidden');
+            } else {
+                clearSearchBtn.classList.add('hidden');
+            }
+        };
+
+        // Panggil saat awal load
+        toggleClearBtn();
+
+        // Saat user mengetik atau menghapus teks (backspace)
+        searchInput.addEventListener('input', () => {
+            toggleClearBtn();
+            
+            // FITUR OTOMATIS KEMBALI: 
+            // Jika kolom pencarian jadi kosong & URL saat ini sedang dalam mode pencarian, langsung refresh!
+            const urlParams = new URLSearchParams(window.location.search);
+            if (searchInput.value.trim() === '' && urlParams.has('search') && urlParams.get('search') !== '') {
+                window.location.href = 'index.php?module=Homepage&action=index';
+            }
+        });
+
+        // Jika tombol (X) diklik, reset tampilan secara total
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            window.location.href = 'index.php?module=Homepage&action=index';
+        });
+
+        // Jika user telanjur menekan enter saat kosong (untuk jaga-jaga)
+        searchForm.addEventListener('submit', (e) => {
+            if (searchInput.value.trim() === '') {
+                e.preventDefault(); // Cegah pengiriman parameter kosong
+                window.location.href = 'index.php?module=Homepage&action=index';
+            }
+        });
+
+
+        // ==========================================
+        // 2. LOGIKA TOGGLE PANEL FILTER LANJUTAN
+        // ==========================================
+        const toggleFilterBtn = document.getElementById('toggleFilterBtn');
+        const filterPanel = document.getElementById('filterPanel');
+
+        toggleFilterBtn.addEventListener('click', () => {
+            if (filterPanel.classList.contains('hidden')) {
+                filterPanel.classList.remove('hidden');
+                // Optional styling active button
+                toggleFilterBtn.classList.replace('bg-white', 'bg-blue-50');
+                toggleFilterBtn.classList.replace('dark:bg-slate-900', 'dark:bg-slate-800');
+                toggleFilterBtn.classList.add('text-blue-600', 'border-blue-200');
+            } else {
+                filterPanel.classList.add('hidden');
+                toggleFilterBtn.classList.replace('bg-blue-50', 'bg-white');
+                toggleFilterBtn.classList.replace('dark:bg-slate-800', 'dark:bg-slate-900');
+                toggleFilterBtn.classList.remove('text-blue-600', 'border-blue-200');
+            }
+        });
+
+
+        // ==========================================
+        // 3. LOGIKA PENYARINGAN (FILTER & SORT)
+        // ==========================================
+        const filterButtons = document.querySelectorAll(".filter-category");
+        const gridContainer = document.querySelector("section.car-grid");
+        const carCards = Array.from(document.querySelectorAll("section.car-grid > div.car-card"));
         const emptyStateJs = document.getElementById("empty-state-js");
+        
+        const filterTrans = document.getElementById("filterTrans");
+        const sortPrice = document.getElementById("sortPrice");
+        const priceRange = document.getElementById("priceRange");
+        const priceLabel = document.getElementById("priceLabel");
+
+        let currentCategory = "SEMUA MOBIL";
+
+        const formatRupiah = (angka) => {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+        };
+
+        // Event listener komponen filter
+        priceRange.addEventListener('input', (e) => {
+            priceLabel.textContent = formatRupiah(e.target.value);
+            applyAllFilters();
+        });
+
+        filterTrans.addEventListener('change', applyAllFilters);
+        sortPrice.addEventListener('change', applyAllFilters);
 
         filterButtons.forEach(button => {
             button.addEventListener("click", () => {
                 filterButtons.forEach(btn => {
-                    btn.className = "bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-200 px-6 py-3 rounded-full font-medium hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-800 transition";
+                    btn.className = "filter-category bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-200 px-6 py-3 rounded-full font-medium hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-800 transition";
                 });
                 
-                button.className = "bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition";
+                button.className = "filter-category bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition";
 
-                const filterText = button.textContent.trim().toUpperCase();
-                let visibleCount = 0;
-
-                carCards.forEach(card => {
-                    if (filterText === "SEMUA MOBIL") {
-                        card.style.display = "";
-                        visibleCount++;
-                    } else {
-                        const categoryEl = card.querySelector("p.text-gray-500.font-medium");
-                        if (categoryEl && categoryEl.textContent.trim().toUpperCase() === filterText) {
-                            card.style.display = "";
-                            visibleCount++;
-                        } else {
-                            card.style.display = "none";
-                        }
-                    }
-                });
-
-                if (emptyStateJs) {
-                    if (visibleCount === 0) {
-                        emptyStateJs.style.display = "block";
-                    } else {
-                        emptyStateJs.style.display = "none";
-                    }
-                }
+                currentCategory = button.getAttribute('data-val');
+                applyAllFilters();
             });
         });
+
+        function applyAllFilters() {
+            const transVal = filterTrans.value.toUpperCase();
+            const maxPrice = parseInt(priceRange.value);
+            const sortOrder = sortPrice.value;
+            let visibleCount = 0;
+
+            // Saring (Filter)
+            carCards.forEach(card => {
+                const cardCategory = card.getAttribute('data-category');
+                const cardTrans = card.getAttribute('data-trans');
+                const cardPrice = parseInt(card.getAttribute('data-price'));
+
+                let matchCategory = (currentCategory === "SEMUA MOBIL" || cardCategory === currentCategory);
+                let matchTrans = (transVal === "ALL" || cardTrans.includes(transVal));
+                let matchPrice = (cardPrice <= maxPrice);
+
+                if (matchCategory && matchTrans && matchPrice) {
+                    card.style.display = "";
+                    visibleCount++;
+                } else {
+                    card.style.display = "none";
+                }
+            });
+
+            // Urutkan (Sort)
+            const visibleCards = carCards.filter(card => card.style.display !== "none");
+            visibleCards.sort((a, b) => {
+                const priceA = parseInt(a.getAttribute('data-price'));
+                const priceB = parseInt(b.getAttribute('data-price'));
+                return sortOrder === 'asc' ? priceA - priceB : priceB - priceA;
+            });
+
+            // Susun ulang di DOM
+            visibleCards.forEach(card => gridContainer.appendChild(card));
+            
+            if (emptyStateJs) {
+                gridContainer.appendChild(emptyStateJs);
+                emptyStateJs.style.display = visibleCount === 0 ? "block" : "none";
+            }
+        }
+        
+        // Panggil saat awal diload
+        priceLabel.textContent = formatRupiah(priceRange.value);
+        applyAllFilters();
     });
     </script>
 </body>
