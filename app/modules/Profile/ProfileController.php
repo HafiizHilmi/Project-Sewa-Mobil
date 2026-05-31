@@ -167,4 +167,130 @@ class ProfileController {
         header('Location: index.php?module=Profile&action=index#dokumen');
         exit;
     }
+
+    public function update() {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: index.php?module=Auth&action=login');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php?module=Profile&action=index');
+            exit;
+        }
+
+        require_once __DIR__ . '/../../../include/db_config.php';
+        $pdo = getPDO();
+
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+
+        if ($name === '' || $email === '' || $phone === '') {
+            $_SESSION['flash_error'] = "Lengkapi semua kolom input.";
+            header('Location: index.php?module=Profile&action=index#editprofil');
+            exit;
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['flash_error'] = "Email tidak valid.";
+            header('Location: index.php?module=Profile&action=index#editprofil');
+            exit;
+        }
+
+        // Check if email is already taken by another user
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email AND id != :id LIMIT 1");
+        $stmt->execute(['email' => $email, 'id' => $_SESSION['user_id']]);
+        if ($stmt->fetch()) {
+            $_SESSION['flash_error'] = "Email sudah digunakan oleh akun lain.";
+            header('Location: index.php?module=Profile&action=index#editprofil');
+            exit;
+        }
+
+        $stmt = $pdo->prepare("UPDATE users SET name = :name, email = :email, phone = :phone WHERE id = :id");
+        if ($stmt->execute([
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
+            'id' => $_SESSION['user_id']
+        ])) {
+            $_SESSION['user_name'] = $name; // Sync session user_name
+            $_SESSION['flash_success'] = "Profil berhasil diperbarui.";
+        } else {
+            $_SESSION['flash_error'] = "Gagal memperbarui profil.";
+        }
+
+        header('Location: index.php?module=Profile&action=index#editprofil');
+        exit;
+    }
+
+    public function changePassword() {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: index.php?module=Auth&action=login');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php?module=Profile&action=index');
+            exit;
+        }
+
+        require_once __DIR__ . '/../../../include/db_config.php';
+        $pdo = getPDO();
+
+        $oldPassword = $_POST['old_password'] ?? '';
+        $newPassword = $_POST['new_password'] ?? '';
+        $confirmPassword = $_POST['confirm_password'] ?? '';
+
+        if ($oldPassword === '' || $newPassword === '' || $confirmPassword === '') {
+            $_SESSION['flash_error'] = "Semua kolom password wajib diisi.";
+            header('Location: index.php?module=Profile&action=index#ubahpassword');
+            exit;
+        }
+
+        if (strlen($newPassword) < 8) {
+            $_SESSION['flash_error'] = "Password baru minimal 8 karakter.";
+            header('Location: index.php?module=Profile&action=index#ubahpassword');
+            exit;
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            $_SESSION['flash_error'] = "Konfirmasi password baru tidak cocok.";
+            header('Location: index.php?module=Profile&action=index#ubahpassword');
+            exit;
+        }
+
+        // Fetch current password
+        $stmt = $pdo->prepare("SELECT password FROM users WHERE id = :id");
+        $stmt->execute(['id' => $_SESSION['user_id']]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$user || !password_verify($oldPassword, $user['password'])) {
+            $_SESSION['flash_error'] = "Password lama salah.";
+            header('Location: index.php?module=Profile&action=index#ubahpassword');
+            exit;
+        }
+
+        $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $stmt = $pdo->prepare("UPDATE users SET password = :password WHERE id = :id");
+        if ($stmt->execute([
+            'password' => $newPasswordHash,
+            'id' => $_SESSION['user_id']
+        ])) {
+            $_SESSION['flash_success'] = "Password berhasil diubah.";
+        } else {
+            $_SESSION['flash_error'] = "Gagal mengubah password.";
+        }
+
+        header('Location: index.php?module=Profile&action=index#ubahpassword');
+        exit;
+    }
 }
