@@ -16,11 +16,12 @@ $totalRevenue = $stats['total_revenue'] ?? 0;
 
 
 // ====================================================================================
-// FITUR BARU: KALKULASI GRAFIK DYNAMIC DENGAN FITUR SLIDE / SCROLL & TOOLTIP
+// FITUR: KALKULASI GRAFIK DYNAMIC DENGAN FITUR SLIDE / SCROLL & TOOLTIP
 // ====================================================================================
 
 // Helper untuk format Y koordinat SVG (mencegah bug koma di locale Indonesia)
 function getSvgY($val, $max) {
+    if ($max == 0) $max = 1; // Cegah division by zero
     return number_format(150 - (($val / $max) * 130), 2, '.', '');
 }
 
@@ -71,7 +72,7 @@ for ($i = $numPoints - 1; $i >= 0; $i--) {
     $weeklyValues[] = $countW;
 }
 
-// 3. Data Harian (FITUR BARU)
+// 3. Data Harian
 $dailyLabels = [];
 $dailyValues = [];
 $maxDailyValue = 10;
@@ -139,6 +140,30 @@ $bgPathDD = $pathDD . " L " . end($xCoords) . ",150 L " . $xCoords[0] . ",150 Z"
 $stepD = $maxDailyValue / 4;
 
 // ====================================================================================
+// FITUR BARU: PESANAN MASUK (RECENT ALERTS)
+// Menarik data pesanan yang baru masuk (Pending) langsung dari Database
+// ====================================================================================
+$alertsStmt = $pdo->query("
+    SELECT b.id, b.created_at, b.full_name, c.make, c.model 
+    FROM bookings b 
+    LEFT JOIN cars c ON b.car_id = c.id 
+    WHERE b.status = 'pending' 
+    ORDER BY b.created_at DESC
+");
+$pendingOrders = $alertsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+$dynamicAlerts = [];
+foreach($pendingOrders as $order) {
+    $carName = trim(($order['make'] ?? '') . ' ' . ($order['model'] ?? ''));
+    $custName = $order['full_name'] ?? 'Pelanggan';
+    $dynamicAlerts[] = [
+        'id' => $order['id'],
+        'title' => 'Pesanan Masuk #' . $order['id'],
+        'desc' => $custName . ' ingin menyewa ' . ($carName ?: 'mobil'),
+        'time' => date('d M Y, H:i', strtotime($order['created_at']))
+    ];
+}
+// ====================================================================================
 
 ?>
 
@@ -147,7 +172,7 @@ $stepD = $maxDailyValue / 4;
 .hide-scroll::-webkit-scrollbar { display: none; }
 .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Animasi untuk menggambar garis kurva (tinta ekstra panjang 4000px agar tidak putus) */
+/* Animasi untuk menggambar garis kurva */
 .chart-path {
     stroke-dasharray: 4000;
     stroke-dashoffset: 4000;
@@ -169,11 +194,15 @@ $stepD = $maxDailyValue / 4;
 }
 </style>
 
+<!-- ====================================================
+     PAGE: DASHBOARD
+ ===================================================== -->
 <div x-show="activePage === 'dashboard'"
      x-transition:enter="transition ease-out duration-200"
      x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
      class="absolute inset-0 overflow-y-auto px-5 lg:px-7 py-6 space-y-6">
 
+  <!-- Stat Cards -->
   <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
     <div class="stat-card bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5">
       <div class="flex items-start justify-between mb-4">
@@ -221,16 +250,16 @@ $stepD = $maxDailyValue / 4;
     </div>
   </div>
 
+  <!-- Chart + Alerts -->
   <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-4">
+    <!-- CHART SECTION -->
     <div x-data="{ chartMode: 'daily' }" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 flex flex-col">
-      
       <div class="flex items-center justify-between mb-5 shrink-0">
         <div>
           <h2 class="text-sm font-bold text-slate-800 dark:text-white">Rental Trends</h2>
           <p class="text-xs text-slate-400 mt-0.5">Arahkan kursor ke titik untuk detail penyewaan</p>
         </div>
         <div class="flex items-center flex-wrap gap-2 justify-end">
-          
           <div class="hidden sm:flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5">
             <button @click="$refs.chartScroll.scrollBy({left: -300, behavior: 'smooth'})" title="Geser Kiri" class="w-7 h-7 rounded-md flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
               <i class="fa-solid fa-chevron-left text-xs"></i>
@@ -239,7 +268,6 @@ $stepD = $maxDailyValue / 4;
               <i class="fa-solid fa-chevron-right text-xs"></i>
             </button>
           </div>
-          
           <div class="flex items-center bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5">
             <button @click="chartMode='daily'" :class="chartMode==='daily' ? 'bg-slate-800 dark:bg-slate-600 text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'" class="text-xs font-semibold px-3 py-1.5 rounded-md transition-all">Daily</button>
             <button @click="chartMode='weekly'" :class="chartMode==='weekly' ? 'bg-slate-800 dark:bg-slate-600 text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'" class="text-xs font-semibold px-3 py-1.5 rounded-md transition-all">Weekly</button>
@@ -249,7 +277,6 @@ $stepD = $maxDailyValue / 4;
       </div>
 
       <div class="relative w-full h-[180px] bg-slate-50/50 dark:bg-slate-900/20 border border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden mt-auto">
-        
         <div class="absolute left-0 top-0 bottom-0 w-[45px] bg-gradient-to-r from-white via-white to-white/0 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800/0 z-10 pointer-events-none">
           <svg x-show="chartMode === 'daily'" viewBox="0 0 45 180" class="w-full h-full" style="display:none;">
             <text x="32" y="24" font-size="10" fill="#94a3b8" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif"><?= round($maxDailyValue) ?></text>
@@ -375,27 +402,83 @@ $stepD = $maxDailyValue / 4;
       </div>
     </div>
 
-    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 flex flex-col">
+    <!-- PESANAN MASUK (RECENT ALERTS) -->
+    <div x-data="{ incomingOrders: <?= htmlspecialchars(json_encode($dynamicAlerts), ENT_QUOTES, 'UTF-8') ?>, showAllModal: false }" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 flex flex-col">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-sm font-bold text-slate-800 dark:text-white">Recent Alerts</h2>
-        <a href="#" class="text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400">View All</a>
+        <h2 class="text-sm font-bold text-slate-800 dark:text-white">Pesanan Masuk</h2>
+        <button @click="showAllModal = true" class="text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400">View All</button>
       </div>
+      
       <div class="flex-1 space-y-0.5">
-        <template x-for="(a, i) in dashAlerts" :key="i">
+        <template x-if="incomingOrders.length === 0">
+           <div class="py-8 text-center text-xs text-slate-400 font-medium">Belum ada pesanan masuk.</div>
+        </template>
+        
+        <template x-for="(a, i) in incomingOrders.slice(0, 4)" :key="a.id">
           <div>
-            <div class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-              <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5" :class="a.bg">
-                <i class="fa-solid text-xs" :class="[a.icon, a.color]"></i>
+            <div @click="activePage = 'orders'" class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer group">
+              <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 bg-blue-50 dark:bg-blue-900/30">
+                <i class="fa-solid fa-bell text-xs text-blue-500"></i>
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-xs font-semibold text-slate-800 dark:text-slate-100 leading-snug" x-text="a.title"></p>
+                <p class="text-xs font-semibold text-slate-800 dark:text-slate-100 leading-snug group-hover:text-blue-600 transition-colors" x-text="a.title"></p>
                 <p class="text-[11px] text-slate-400 mt-0.5 leading-snug" x-text="a.desc"></p>
-                <p class="text-[10px] text-slate-300 dark:text-slate-500 mt-1 font-medium" x-text="a.time"></p>
+                <p class="text-[10px] text-slate-300 dark:text-slate-500 mt-1 font-medium"><i class="fa-regular fa-clock mr-1"></i><span x-text="a.time"></span></p>
               </div>
             </div>
-            <div x-show="i < dashAlerts.length - 1" class="border-t border-slate-50 dark:border-slate-700 mx-2"></div>
+            <div x-show="i < Math.min(incomingOrders.length, 4) - 1" class="border-t border-slate-50 dark:border-slate-700 mx-2"></div>
           </div>
         </template>
+      </div>
+
+      <!-- MODAL: VIEW ALL ALERTS -->
+      <div x-show="showAllModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4" x-cloak>
+        <div @click="showAllModal = false" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" x-transition.opacity></div>
+        <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden" style="max-height: 85vh;" x-transition>
+            
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-700">
+                <h2 class="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-bell text-blue-500"></i> Semua Pesanan Masuk
+                </h2>
+                <button @click="showAllModal = false" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark text-slate-500 text-xs"></i>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-2">
+                <template x-if="incomingOrders.length === 0">
+                    <div class="py-12 text-center text-xs text-slate-400 font-medium">Tidak ada pesanan masuk.</div>
+                </template>
+                
+                <div class="divide-y divide-slate-100 dark:divide-slate-700/50">
+                    <template x-for="a in incomingOrders" :key="a.id">
+                        <div class="flex items-center justify-between p-3 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors rounded-xl m-1 group">
+                            <!-- Info Pesanan (Klik langsung arahkan ke tab Orders) -->
+                            <div @click="activePage = 'orders'; showAllModal = false;" class="flex items-start gap-3 flex-1 cursor-pointer">
+                                <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 bg-blue-50 dark:bg-blue-900/30">
+                                    <i class="fa-solid fa-car text-sm text-blue-500"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 group-hover:text-blue-600 transition-colors" x-text="a.title"></p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" x-text="a.desc"></p>
+                                    <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-medium"><i class="fa-regular fa-clock mr-1"></i><span x-text="a.time"></span></p>
+                                </div>
+                            </div>
+                            
+                            <!-- Form Tolak/Hapus Pesanan -->
+                            <form action="order_action.php" method="POST" class="m-0 pl-3 border-l border-slate-100 dark:border-slate-700" onsubmit="return confirm('Hapus / Tolak pesanan ini secara permanen?')">
+                                <input type="hidden" name="action" value="reject">
+                                <input type="hidden" name="booking_id" :value="a.id">
+                                <button type="submit" title="Tolak Pesanan" class="w-8 h-8 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                    <i class="fa-solid fa-trash-can text-sm"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </template>
+                </div>
+            </div>
+            
+        </div>
       </div>
     </div>
   </div>
