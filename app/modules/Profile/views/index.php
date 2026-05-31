@@ -979,7 +979,44 @@
                     <p class="text-slate-500 dark:text-slate-400 text-sm mt-0.5">Perbarui informasi akun Anda.</p>
                 </div>
 
-                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 sm:p-8">
+                <!-- GATE PAGE: EDIT PROFIL -->
+                <div id="edit-profile-gate" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 sm:p-8 space-y-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-500 flex-shrink-0 animate-bounce">
+                            <i class="bi bi-shield-fill-exclamation text-2xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-extrabold text-slate-800 dark:text-white text-lg leading-tight">Konfirmasi Keamanan Profil</h2>
+                            <p class="text-slate-500 dark:text-slate-400 text-xs mt-0.5">Langkah verifikasi penting sebelum mengubah data akun.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 p-5 rounded-xl space-y-3 leading-relaxed">
+                        <p class="text-sm font-bold flex items-center gap-2">
+                            ⚠️ Peringatan Keamanan Penting
+                        </p>
+                        <div class="text-xs space-y-2 font-medium">
+                            <p>• Perubahan pada <strong>Nama Lengkap</strong>, <strong>Email</strong>, atau <strong>Nomor HP</strong> akan langsung mempengaruhi validitas kontrak sewa mobil Anda yang sedang berjalan.</p>
+                            <p>• Data profil yang tidak akurat dapat membatalkan klaim asuransi atau penyewaan kendaraan Anda secara sepihak.</p>
+                            <p>• Mohon pastikan data baru yang Anda masukkan sepenuhnya valid dan sesuai dengan dokumen identitas resmi (KTP/SIM).</p>
+                        </div>
+                    </div>
+
+                    <!-- Checklist persetujuan -->
+                    <div class="flex items-start gap-3 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-100 dark:border-slate-750">
+                        <input type="checkbox" id="chk-edit-profile-gate" class="w-5 h-5 mt-0.5 text-blue-600 border-slate-300 dark:border-slate-600 rounded focus:ring-blue-500 cursor-pointer transition-colors" onchange="toggleGateButton('chk-edit-profile-gate', 'btn-edit-profile-gate')">
+                        <label for="chk-edit-profile-gate" class="text-xs font-semibold text-slate-600 dark:text-slate-300 cursor-pointer select-none leading-relaxed">
+                            Saya menyatakan data yang saya masukkan sudah benar dan saya bertanggung jawab penuh atas perubahan ini.
+                        </label>
+                    </div>
+
+                    <button type="button" id="btn-edit-profile-gate" disabled onclick="passGate('edit-profile-gate', 'edit-profile-form-container')" class="w-full bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed font-bold py-3.5 rounded-xl transition-all duration-200 text-sm flex items-center justify-center gap-2">
+                        Saya Mengerti, Lanjutkan <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- FORM CONTAINER: EDIT PROFIL -->
+                <div id="edit-profile-form-container" class="hidden bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 sm:p-8">
                 <form action="index.php?module=Profile&action=update" method="POST" class="space-y-5">
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Nama Lengkap</label>
@@ -999,11 +1036,11 @@
                                class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-slate-50 dark:bg-slate-900/50"
                                placeholder="Nomor telepon">
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all duration-200 text-sm">
-                        <i class="bi bi-check2 mr-1.5"></i>Simpan Perubahan
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all duration-200 text-sm flex items-center justify-center gap-1.5">
+                        <i class="bi bi-check2"></i>Simpan Perubahan
                     </button>
                 </form>
-            </div>
+                </div>
             </div>
         </div>
 
@@ -1014,7 +1051,44 @@
                     <p class="text-slate-500 dark:text-slate-400 text-sm mt-0.5">Ganti kata sandi akun Anda secara berkala untuk keamanan.</p>
                 </div>
 
-                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 sm:p-8">
+                <!-- GATE PAGE: UBAH PASSWORD -->
+                <div id="change-password-gate" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 sm:p-8 space-y-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-rose-500/10 rounded-xl flex items-center justify-center text-rose-500 flex-shrink-0 animate-bounce">
+                            <i class="bi bi-key-fill text-2xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-extrabold text-slate-800 dark:text-white text-lg leading-tight">Konfirmasi Keamanan Akun</h2>
+                            <p class="text-slate-500 dark:text-slate-400 text-xs mt-0.5">Langkah proteksi akun sebelum mengubah kata sandi.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-400 p-5 rounded-xl space-y-3 leading-relaxed">
+                        <p class="text-sm font-bold flex items-center gap-2 text-rose-600 dark:text-rose-400">
+                            ⚠️ Peringatan Keamanan Kredensial
+                        </p>
+                        <div class="text-xs space-y-2 font-medium">
+                            <p>• Mengubah password akan langsung mengakhiri (<em>logout</em>) seluruh sesi aktif Anda di perangkat atau browser lain demi menjaga keamanan akun Anda.</p>
+                            <p>• Pastikan Anda mencatat atau mengingat password baru Anda untuk menghindari hilangnya akses masuk ke akun sewa mobil.</p>
+                            <p>• Gunakan kombinasi kata sandi yang kuat (min. 8 karakter, kombinasi huruf, angka, dan simbol) serta hindari password yang mudah ditebak.</p>
+                        </div>
+                    </div>
+
+                    <!-- Checklist persetujuan -->
+                    <div class="flex items-start gap-3 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-100 dark:border-slate-750">
+                        <input type="checkbox" id="chk-change-password-gate" class="w-5 h-5 mt-0.5 text-blue-600 border-slate-300 dark:border-slate-600 rounded focus:ring-blue-500 cursor-pointer transition-colors" onchange="toggleGateButton('chk-change-password-gate', 'btn-change-password-gate')">
+                        <label for="chk-change-password-gate" class="text-xs font-semibold text-slate-600 dark:text-slate-300 cursor-pointer select-none leading-relaxed">
+                            Saya sadar sepenuhnya dan menyetujui perubahan kata sandi untuk akun saya.
+                        </label>
+                    </div>
+
+                    <button type="button" id="btn-change-password-gate" disabled onclick="passGate('change-password-gate', 'change-password-form-container')" class="w-full bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed font-bold py-3.5 rounded-xl transition-all duration-200 text-sm flex items-center justify-center gap-2">
+                        Saya Mengerti, Lanjutkan <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- FORM CONTAINER: UBAH PASSWORD -->
+                <div id="change-password-form-container" class="hidden bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 sm:p-8">
                 <form action="index.php?module=Profile&action=changePassword" method="POST" class="space-y-5">
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Password Lama</label>
@@ -1055,10 +1129,11 @@
                         <p>• Kombinasikan huruf besar, kecil, angka & simbol</p>
                         <p>• Jangan gunakan password yang sama di layanan lain</p>
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all duration-200 text-sm">
-                        <i class="bi bi-shield-check mr-1.5"></i>Ubah Password
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all duration-200 text-sm flex items-center justify-center gap-1.5">
+                        <i class="bi bi-shield-check"></i>Ubah Password
                     </button>
                 </form>
+                </div>
             </div>
             </div>
         </div>
@@ -1409,6 +1484,51 @@
             const isDark = document.documentElement.classList.contains('dark');
             setThemeMode(isDark ? 'light' : 'dark');
         });
+    }
+
+    // ==================== GATE PAGE HANDLING ====================
+    function toggleGateButton(checkboxId, buttonId) {
+        const checkbox = document.getElementById(checkboxId);
+        const button   = document.getElementById(buttonId);
+        if (!checkbox || !button) return;
+
+        if (checkbox.checked) {
+            button.disabled = false;
+            button.classList.remove('bg-slate-200', 'dark:bg-slate-700', 'text-slate-400', 'dark:text-slate-500', 'cursor-not-allowed');
+            button.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white', 'cursor-pointer');
+        } else {
+            button.disabled = true;
+            button.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'text-white', 'cursor-pointer');
+            button.classList.add('bg-slate-200', 'dark:bg-slate-700', 'text-slate-400', 'dark:text-slate-500', 'cursor-not-allowed');
+        }
+    }
+
+    function passGate(gateId, containerId) {
+        const gate = document.getElementById(gateId);
+        const container = document.getElementById(containerId);
+        if (!gate || !container) return;
+
+        // Hide gate, show actual form with fade effect
+        gate.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+        gate.style.opacity = '0';
+        gate.style.transform = 'translateY(-8px)';
+
+        setTimeout(() => {
+            gate.classList.add('hidden');
+            gate.style.opacity = '';
+            gate.style.transform = '';
+
+            container.classList.remove('hidden');
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(8px)';
+            container.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+            
+            // Trigger reflow for transition
+            void container.offsetHeight;
+            
+            container.style.opacity = '1';
+            container.style.transform = 'translateY(0)';
+        }, 200);
     }
 
     // Initialize UI on load
