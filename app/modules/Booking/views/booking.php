@@ -377,6 +377,15 @@
                             <input type="hidden" name="start_date" id="start-date-input" value="">
                             <input type="hidden" name="end_date" id="end-date-input" value="">
                             <input type="hidden" name="total_price" id="total-price-input" value="0">
+                            
+                            <!-- Geofence Coordinates -->
+                            <input type="hidden" name="pickup_lat" id="pickup-lat-input" value="">
+                            <input type="hidden" name="pickup_lon" id="pickup-lon-input" value="">
+                            <input type="hidden" name="return_lat" id="return-lat-input" value="">
+                            <input type="hidden" name="return_lon" id="return-lon-input" value="">
+                            <input type="hidden" name="address_lat" id="address-lat-input" value="">
+                            <input type="hidden" name="address_lon" id="address-lon-input" value="">
+
                             <button type="submit" class="w-full bg-blue-700 text-white text-center py-3 rounded-xl font-semibold hover:bg-blue-800 transition">
                                 Konfirmasi Pesanan <i class="bi bi-arrow-right ml-1"></i>
                             </button>
@@ -707,7 +716,7 @@
                     input.value = selected.display_name;
                     closeDropdown();
                     if (onSelectCallback) {
-                        onSelectCallback(selected.display_name);
+                        onSelectCallback(selected);
                     }
                 }
             }
@@ -750,15 +759,24 @@
         }
 
         // Initialize Auto-suggest
-        initAutocomplete('input-pickup', 'dropdown-pickup', function(val) {
+        initAutocomplete('input-pickup', 'dropdown-pickup', function(place) {
+            const val = place.display_name;
             sumPickup.textContent = val || 'Lokasi belum ditentukan';
             sumPickup.title = val || 'Lokasi belum ditentukan';
+            document.getElementById('pickup-lat-input').value = place.lat;
+            document.getElementById('pickup-lon-input').value = place.lon;
         });
-        initAutocomplete('input-return', 'dropdown-return', function(val) {
+        initAutocomplete('input-return', 'dropdown-return', function(place) {
+            const val = place.display_name;
             sumReturn.textContent = val || 'Sama dengan lokasi pengambilan';
             sumReturn.title = val || 'Sama dengan lokasi pengambilan';
+            document.getElementById('return-lat-input').value = place.lat;
+            document.getElementById('return-lon-input').value = place.lon;
         });
-        initAutocomplete('input-address', 'dropdown-address');
+        initAutocomplete('input-address', 'dropdown-address', function(place) {
+            document.getElementById('address-lat-input').value = place.lat;
+            document.getElementById('address-lon-input').value = place.lon;
+        });
 
         bookingForm.addEventListener('submit', function(e) {
             if (!startDate || !endDate) {

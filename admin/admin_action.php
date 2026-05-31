@@ -95,10 +95,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         if (!isset($_SESSION['admin_role']) || $_SESSION['admin_role'] !== 'superuser') die("Akses Ditolak!");
         
         $location_name = trim($_POST['location_name']);
+        $latitude = isset($_POST['latitude']) && $_POST['latitude'] !== '' ? floatval($_POST['latitude']) : null;
+        $longitude = isset($_POST['longitude']) && $_POST['longitude'] !== '' ? floatval($_POST['longitude']) : null;
+        $radius = isset($_POST['radius']) && $_POST['radius'] !== '' ? intval($_POST['radius']) : null;
         
-        $stmt = $pdo->prepare("INSERT INTO blacklisted_locations (location_name) VALUES (?)");
-        if ($stmt->execute([$location_name])) {
-            $_SESSION['flash_msg'] = "Daerah berhasil dimasukkan ke daftar Blacklist!";
+        $stmt = $pdo->prepare("INSERT INTO blacklisted_locations (location_name, latitude, longitude, radius) VALUES (?, ?, ?, ?)");
+        if ($stmt->execute([$location_name, $latitude, $longitude, $radius])) {
+            $_SESSION['flash_msg'] = "Geofence Blacklist berhasil ditambahkan!";
         } else {
             $_SESSION['flash_msg'] = "Gagal menambah data.";
         }

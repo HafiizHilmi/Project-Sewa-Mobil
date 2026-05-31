@@ -87,6 +87,77 @@ class BookingController {
             exit;
         }
 
+        // ----------------- GEOFENCING BLACKLIST CHECK -----------------
+        $stmtBL = $pdo->query("SELECT * FROM blacklisted_locations WHERE latitude IS NOT NULL AND longitude IS NOT NULL");
+        $geofences = $stmtBL->fetchAll(PDO::FETCH_ASSOC);
+
+        $pickup_lat = isset($_POST['pickup_lat']) && $_POST['pickup_lat'] !== '' ? floatval($_POST['pickup_lat']) : null;
+        $pickup_lon = isset($_POST['pickup_lon']) && $_POST['pickup_lon'] !== '' ? floatval($_POST['pickup_lon']) : null;
+
+        $return_lat = isset($_POST['return_lat']) && $_POST['return_lat'] !== '' ? floatval($_POST['return_lat']) : null;
+        $return_lon = isset($_POST['return_lon']) && $_POST['return_lon'] !== '' ? floatval($_POST['return_lon']) : null;
+
+        $address_lat = isset($_POST['address_lat']) && $_POST['address_lat'] !== '' ? floatval($_POST['address_lat']) : null;
+        $address_lon = isset($_POST['address_lon']) && $_POST['address_lon'] !== '' ? floatval($_POST['address_lon']) : null;
+
+        $is_blocked = false;
+        $block_reason = "";
+
+        $haversine = function($lat1, $lon1, $lat2, $lon2) {
+            $earthRadius = 6371000; // in meters
+            $latDelta = deg2rad($lat2 - $lat1);
+            $lonDelta = deg2rad($lon2 - $lon1);
+            $a = sin($latDelta / 2) * sin($latDelta / 2) +
+                 cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+                 sin($lonDelta / 2) * sin($lonDelta / 2);
+            $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+            return $earthRadius * $c;
+        };
+
+        foreach ($geofences as $gf) {
+            $gfLat = floatval($gf['latitude']);
+            $gfLng = floatval($gf['longitude']);
+            $gfRad = intval($gf['radius']);
+            $locationName = $gf['location_name'];
+
+            // 1. Cek Lokasi Pengambilan
+            if ($pickup_lat && $pickup_lon) {
+                $dist = $haversine($pickup_lat, $pickup_lon, $gfLat, $gfLng);
+                if ($dist <= $gfRad) {
+                    $is_blocked = true;
+                    $block_reason = "Lokasi pengambilan kendaraan Anda berada di dalam zona blacklist: " . $locationName;
+                    break;
+                }
+            }
+
+            // 2. Cek Lokasi Pengembalian
+            if ($return_lat && $return_lon) {
+                $dist = $haversine($return_lat, $return_lon, $gfLat, $gfLng);
+                if ($dist <= $gfRad) {
+                    $is_blocked = true;
+                    $block_reason = "Lokasi pengembalian kendaraan Anda berada di dalam zona blacklist: " . $locationName;
+                    break;
+                }
+            }
+
+            // 3. Cek Alamat Lengkap
+            if ($address_lat && $address_lon) {
+                $dist = $haversine($address_lat, $address_lon, $gfLat, $gfLng);
+                if ($dist <= $gfRad) {
+                    $is_blocked = true;
+                    $block_reason = "Alamat lengkap Anda berada di dalam zona blacklist: " . $locationName;
+                    break;
+                }
+            }
+        }
+
+        if ($is_blocked) {
+            $_SESSION['flash'] = "Maaf, transaksi tidak dapat diproses karena: " . $block_reason;
+            header('Location: index.php?module=Booking&action=checkout&car_id=' . $car_id);
+            exit;
+        }
+        // -------------------------------------------------------------
+
         $stmt = $pdo->prepare('INSERT INTO bookings (user_id, car_id, pickup_location, return_location, full_name, email, phone, address, start_date, end_date, addon_driver, total_price, status, created_at) VALUES (:user_id, :car_id, :pickup_location, :return_location, :full_name, :email, :phone, :address, :start_date, :end_date, :addon_driver, :total_price, :status, NOW())');
 
         $stmt->execute([
