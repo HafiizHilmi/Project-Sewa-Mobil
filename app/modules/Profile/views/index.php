@@ -219,10 +219,6 @@
             </a>
         </div>
         <div class="flex items-center gap-2">
-            <!-- Theme Toggle Button -->
-            <button id="theme-toggle" class="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:bg-slate-700 dark:hover:bg-slate-700 transition-all duration-200 mr-1" title="Toggle Theme">
-                <i id="theme-toggle-icon" class="bi bi-moon-fill text-lg"></i>
-            </button>
             <a href="index.php?module=Homepage&action=index" class="hidden sm:inline-flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-all duration-200 no-underline px-3 py-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700">
                 <i class="bi bi-house-fill"></i> Beranda
             </a>
@@ -1134,7 +1130,6 @@
                     </button>
                 </form>
                 </div>
-            </div>
             </div>
         </div>
 
