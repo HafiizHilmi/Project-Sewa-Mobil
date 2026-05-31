@@ -257,6 +257,22 @@
           <p class="text-base font-extrabold" x-text="'Rp ' + selectedOrder.totalFormatted"></p>
         </div>
 
+        <div class="bg-slate-50 dark:bg-slate-700/30 border border-slate-100 dark:border-slate-700/50 rounded-xl p-4 mb-4 space-y-3">
+          <div>
+            <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              <i class="fa-solid fa-map-pin text-blue-500 text-[9px]"></i> Lokasi Pengambilan
+            </span>
+            <p class="text-xs font-semibold text-slate-700 dark:text-slate-200 mt-1 leading-relaxed" x-text="selectedOrder.pickupLocation"></p>
+          </div>
+          <div class="border-t border-slate-100 dark:border-slate-700/50 my-1"></div>
+          <div>
+            <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              <i class="fa-solid fa-location-dot text-rose-500 text-[9px]"></i> Lokasi Pengembalian
+            </span>
+            <p class="text-xs font-semibold text-slate-700 dark:text-slate-200 mt-1 leading-relaxed" x-text="selectedOrder.returnLocation"></p>
+          </div>
+        </div>
+
         <template x-if="selectedOrder.status === 'Completed' && (selectedOrder.additionalCost > 0 || selectedOrder.damageDescription)">
           <div class="bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 rounded-xl p-4 mb-4 text-rose-800 dark:text-rose-300">
             <p class="text-[10px] font-bold uppercase mb-2">Laporan Pengembalian (Kerusakan/Denda)</p>
