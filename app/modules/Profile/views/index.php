@@ -1486,20 +1486,50 @@
         });
     }
 
-    // ==================== GATE PAGE HANDLING ====================
+    // Object to track active countdown timers per button
+    const gateTimers = {};
+
     function toggleGateButton(checkboxId, buttonId) {
         const checkbox = document.getElementById(checkboxId);
         const button   = document.getElementById(buttonId);
         if (!checkbox || !button) return;
 
+        // Clear any existing active timer for this button first
+        if (gateTimers[buttonId]) {
+            clearInterval(gateTimers[buttonId]);
+            delete gateTimers[buttonId];
+        }
+
         if (checkbox.checked) {
-            button.disabled = false;
-            button.classList.remove('bg-slate-200', 'dark:bg-slate-700', 'text-slate-400', 'dark:text-slate-500', 'cursor-not-allowed');
-            button.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white', 'cursor-pointer');
-        } else {
+            let secondsLeft = 5;
+            
+            // Keep button styled as disabled
             button.disabled = true;
             button.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'text-white', 'cursor-pointer');
             button.classList.add('bg-slate-200', 'dark:bg-slate-700', 'text-slate-400', 'dark:text-slate-500', 'cursor-not-allowed');
+            button.innerHTML = `Tunggu (${secondsLeft}s)...`;
+
+            gateTimers[buttonId] = setInterval(() => {
+                secondsLeft--;
+                if (secondsLeft > 0) {
+                    button.innerHTML = `Tunggu (${secondsLeft}s)...`;
+                } else {
+                    // Countdown complete, enable the button
+                    clearInterval(gateTimers[buttonId]);
+                    delete gateTimers[buttonId];
+                    
+                    button.disabled = false;
+                    button.classList.remove('bg-slate-200', 'dark:bg-slate-700', 'text-slate-400', 'dark:text-slate-500', 'cursor-not-allowed');
+                    button.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white', 'cursor-pointer');
+                    button.innerHTML = `Saya Mengerti, Lanjutkan <i class="bi bi-arrow-right ml-1.5"></i>`;
+                }
+            }, 1000);
+        } else {
+            // Checkbox unchecked: make sure button is disabled and reset to original state
+            button.disabled = true;
+            button.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'text-white', 'cursor-pointer');
+            button.classList.add('bg-slate-200', 'dark:bg-slate-700', 'text-slate-400', 'dark:text-slate-500', 'cursor-not-allowed');
+            button.innerHTML = `Saya Mengerti, Lanjutkan <i class="bi bi-arrow-right ml-1.5"></i>`;
         }
     }
 
