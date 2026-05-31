@@ -394,7 +394,7 @@ foreach ($types_data as $t) {
                   </div>
                   <div class="bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100/50 dark:border-slate-700/50 p-3 rounded-xl">
                     <span class="text-slate-400 font-semibold block text-[10px] uppercase">Kecepatan</span>
-                    <span class="font-bold text-xs text-slate-700 dark:text-slate-200 block mt-0.5">N/A</span>
+                    <span class="font-bold text-xs text-sla te-700 dark:text-slate-200 block mt-0.5">N/A</span>
                   </div>
                   <div class="bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100/50 dark:border-slate-700/50 p-3 rounded-xl col-span-2">
                     <span class="text-slate-400 font-semibold block text-[10px] uppercase">GPS Terakhir Diperbarui</span>

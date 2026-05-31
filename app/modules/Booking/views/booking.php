@@ -156,6 +156,37 @@
         html.dark .date-cell.end-date::after {
             background-color: rgba(30, 58, 138, 0.4) !important;
         }
+
+        /* Custom Scrollbar Styles for Autocomplete Dropdowns */
+        [id^="dropdown-"]::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        [id^="dropdown-"]::-webkit-scrollbar-track {
+            background: transparent !important;
+        }
+        [id^="dropdown-"]::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 9999px;
+        }
+        html.dark [id^="dropdown-"]::-webkit-scrollbar-thumb {
+            background-color: #475569;
+        }
+        [id^="dropdown-"]::-webkit-scrollbar-thumb:hover {
+            background-color: #94a3b8;
+        }
+        html.dark [id^="dropdown-"]::-webkit-scrollbar-thumb:hover {
+            background-color: #64748b;
+        }
+        
+        /* Firefox scrollbar support */
+        [id^="dropdown-"] {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
+        html.dark [id^="dropdown-"] {
+            scrollbar-color: #475569 transparent;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
@@ -188,10 +219,12 @@
                                 <input type="text" id="input-pickup" name="pickup_location" form="booking-form" placeholder="Contoh: Soekarno Hatta T3..." autocomplete="off">
                             </div>
                             <i class="bi bi-crosshair text-gray-400"></i>
+                            <div id="dropdown-pickup" class="absolute left-0 right-0 top-[calc(100%+4px)] z-[100] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl shadow-xl max-h-60 overflow-y-auto hidden"></div>
                         </div>
                         <div class="input-floating-label">
                             <label>Lokasi Pengembalian</label>
-                            <input type="text" name="return_location" form="booking-form" placeholder="Sama dengan lokasi pengambilan" autocomplete="off">
+                            <input type="text" id="input-return" name="return_location" form="booking-form" placeholder="Sama dengan lokasi pengambilan" autocomplete="off">
+                            <div id="dropdown-return" class="absolute left-0 right-0 top-[calc(100%+4px)] z-[100] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl shadow-xl max-h-60 overflow-y-auto hidden"></div>
                         </div>
                     </div>
                 </div>
@@ -218,7 +251,8 @@
                         </div>
                         <div class="input-floating-label">
                             <label>Alamat Lengkap</label>
-                            <input type="text" name="address" form="booking-form" placeholder="Jl. Veteran...">
+                            <input type="text" id="input-address" name="address" form="booking-form" placeholder="Jl. Veteran..." autocomplete="off">
+                            <div id="dropdown-address" class="absolute left-0 right-0 top-[calc(100%+4px)] z-[100] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl shadow-xl max-h-60 overflow-y-auto hidden"></div>
                         </div>
                     </div>
                 </div>
@@ -535,6 +569,177 @@
 
         generateCalendarGrid(currentMonth, currentYear);
         calculateTotal();
+
+        // ==================== AUTOCOMPLETE NOMINATIM SYSTEM ====================
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function createSuggestionItem(place, index, activeIndex) {
+            const mainText = place.name || place.display_name.split(',')[0];
+            const secondaryText = place.display_name.replace(mainText + ', ', '') || '';
+            const activeClass = index === activeIndex ? 'bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-600' : 'border-l-4 border-transparent';
+            return `
+                <div class="suggestion-item p-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/40 flex items-start gap-3 transition-colors ${activeClass}" data-index="${index}">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
+                        <i class="bi bi-geo-alt-fill text-sm"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <div class="font-semibold text-sm text-gray-800 dark:text-slate-200 truncate">${escapeHtml(mainText)}</div>
+                        <div class="text-xs text-gray-500 dark:text-slate-400 truncate">${escapeHtml(secondaryText)}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showLoading(dropdown) {
+            dropdown.innerHTML = `
+                <div class="p-4 text-center text-sm text-gray-500 dark:text-slate-400 flex items-center justify-center gap-2">
+                    <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Mencari lokasi...</span>
+                </div>
+            `;
+            dropdown.classList.remove('hidden');
+        }
+
+        function showNoResults(dropdown) {
+            dropdown.innerHTML = `
+                <div class="p-4 text-center text-sm text-gray-500 dark:text-slate-400">
+                    <i class="bi bi-geo-fill text-lg block mb-1"></i>
+                    <span>Lokasi tidak ditemukan</span>
+                </div>
+            `;
+            dropdown.classList.remove('hidden');
+        }
+
+        function initAutocomplete(inputId, dropdownId, onSelectCallback = null) {
+            const input = document.getElementById(inputId);
+            const dropdown = document.getElementById(dropdownId);
+            let debounceTimer;
+            let suggestions = [];
+            let activeIndex = -1;
+
+            function closeDropdown() {
+                dropdown.classList.add('hidden');
+                dropdown.innerHTML = '';
+                activeIndex = -1;
+            }
+
+            input.addEventListener('input', function() {
+                const query = input.value.trim();
+                clearTimeout(debounceTimer);
+                
+                if (query.length < 3) {
+                    closeDropdown();
+                    return;
+                }
+
+                debounceTimer = setTimeout(() => {
+                    showLoading(dropdown);
+                    
+                    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1&countrycodes=id`;
+                    
+                    fetch(url, {
+                        headers: {
+                            'Accept-Language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network error');
+                        return response.json();
+                    })
+                    .then(data => {
+                        suggestions = data;
+                        if (suggestions.length === 0) {
+                            showNoResults(dropdown);
+                            return;
+                        }
+                        renderSuggestions();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching autocomplete:', error);
+                        closeDropdown();
+                    });
+                }, 350);
+            });
+
+            function renderSuggestions() {
+                dropdown.innerHTML = suggestions.map((place, idx) => 
+                    createSuggestionItem(place, idx, activeIndex)
+                ).join('');
+                dropdown.classList.remove('hidden');
+
+                dropdown.querySelectorAll('.suggestion-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        const index = parseInt(item.getAttribute('data-index'));
+                        selectSuggestion(index);
+                    });
+                });
+            }
+
+            function selectSuggestion(index) {
+                if (index >= 0 && index < suggestions.length) {
+                    const selected = suggestions[index];
+                    input.value = selected.display_name;
+                    closeDropdown();
+                    if (onSelectCallback) {
+                        onSelectCallback(selected.display_name);
+                    }
+                }
+            }
+
+            input.addEventListener('keydown', function(e) {
+                if (dropdown.classList.contains('hidden') || suggestions.length === 0) return;
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    activeIndex = (activeIndex + 1) % suggestions.length;
+                    renderSuggestions();
+                    scrollActiveIntoView();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    activeIndex = (activeIndex - 1 + suggestions.length) % suggestions.length;
+                    renderSuggestions();
+                    scrollActiveIntoView();
+                } else if (e.key === 'Enter') {
+                    if (activeIndex >= 0 && activeIndex < suggestions.length) {
+                        e.preventDefault();
+                        selectSuggestion(activeIndex);
+                    }
+                } else if (e.key === 'Escape') {
+                    closeDropdown();
+                }
+            });
+
+            function scrollActiveIntoView() {
+                const activeItem = dropdown.querySelector(`.suggestion-item[data-index="${activeIndex}"]`);
+                if (activeItem) {
+                    activeItem.scrollIntoView({ block: 'nearest' });
+                }
+            }
+
+            document.addEventListener('click', function(e) {
+                if (e.target !== input && !dropdown.contains(e.target)) {
+                    closeDropdown();
+                }
+            });
+        }
+
+        // Initialize Auto-suggest
+        initAutocomplete('input-pickup', 'dropdown-pickup', function(val) {
+            sumLocation.textContent = val || 'Lokasi belum ditentukan';
+        });
+        initAutocomplete('input-return', 'dropdown-return');
+        initAutocomplete('input-address', 'dropdown-address');
 
         bookingForm.addEventListener('submit', function(e) {
             if (!startDate || !endDate) {
