@@ -219,10 +219,6 @@
             </a>
         </div>
         <div class="flex items-center gap-2">
-            <!-- Theme Toggle Button -->
-            <button id="theme-toggle" class="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:bg-slate-700 dark:hover:bg-slate-700 transition-all duration-200 mr-1" title="Toggle Theme">
-                <i id="theme-toggle-icon" class="bi bi-moon-fill text-lg"></i>
-            </button>
             <a href="index.php?module=Homepage&action=index" class="hidden sm:inline-flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-all duration-200 no-underline px-3 py-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700">
                 <i class="bi bi-house-fill"></i> Beranda
             </a>
@@ -1135,7 +1131,6 @@
                 </form>
                 </div>
             </div>
-            </div>
         </div>
 
         <div class="tab-panel" id="tab-tema">
@@ -1486,20 +1481,50 @@
         });
     }
 
-    // ==================== GATE PAGE HANDLING ====================
+    // Object to track active countdown timers per button
+    const gateTimers = {};
+
     function toggleGateButton(checkboxId, buttonId) {
         const checkbox = document.getElementById(checkboxId);
         const button   = document.getElementById(buttonId);
         if (!checkbox || !button) return;
 
+        // Clear any existing active timer for this button first
+        if (gateTimers[buttonId]) {
+            clearInterval(gateTimers[buttonId]);
+            delete gateTimers[buttonId];
+        }
+
         if (checkbox.checked) {
-            button.disabled = false;
-            button.classList.remove('bg-slate-200', 'dark:bg-slate-700', 'text-slate-400', 'dark:text-slate-500', 'cursor-not-allowed');
-            button.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white', 'cursor-pointer');
-        } else {
+            let secondsLeft = 5;
+            
+            // Keep button styled as disabled
             button.disabled = true;
             button.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'text-white', 'cursor-pointer');
             button.classList.add('bg-slate-200', 'dark:bg-slate-700', 'text-slate-400', 'dark:text-slate-500', 'cursor-not-allowed');
+            button.innerHTML = `Tunggu (${secondsLeft}s)...`;
+
+            gateTimers[buttonId] = setInterval(() => {
+                secondsLeft--;
+                if (secondsLeft > 0) {
+                    button.innerHTML = `Tunggu (${secondsLeft}s)...`;
+                } else {
+                    // Countdown complete, enable the button
+                    clearInterval(gateTimers[buttonId]);
+                    delete gateTimers[buttonId];
+                    
+                    button.disabled = false;
+                    button.classList.remove('bg-slate-200', 'dark:bg-slate-700', 'text-slate-400', 'dark:text-slate-500', 'cursor-not-allowed');
+                    button.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white', 'cursor-pointer');
+                    button.innerHTML = `Saya Mengerti, Lanjutkan <i class="bi bi-arrow-right ml-1.5"></i>`;
+                }
+            }, 1000);
+        } else {
+            // Checkbox unchecked: make sure button is disabled and reset to original state
+            button.disabled = true;
+            button.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'text-white', 'cursor-pointer');
+            button.classList.add('bg-slate-200', 'dark:bg-slate-700', 'text-slate-400', 'dark:text-slate-500', 'cursor-not-allowed');
+            button.innerHTML = `Saya Mengerti, Lanjutkan <i class="bi bi-arrow-right ml-1.5"></i>`;
         }
     }
 
