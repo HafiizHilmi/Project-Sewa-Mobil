@@ -138,16 +138,32 @@ foreach ($types_data as $t) {
 
   <div x-show="!showCarDetail" class="px-5 lg:px-6 py-5">
 
-    <div class="flex items-center gap-2 flex-wrap mb-5">
-      <template x-for="f in ['All','MPV','SUV','Sedan','EV']" :key="f">
-        <button @click="carFilter = f"
-                :class="carFilter === f
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-blue-300'"
-                class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-all"
-                x-text="f">
-        </button>
-      </template>
+    <div class="flex items-center justify-between flex-wrap gap-4 mb-5">
+      <div class="flex items-center gap-2 flex-wrap">
+        <template x-for="f in ['All','MPV','SUV','Sedan','EV']" :key="f">
+          <button @click="carFilter = f"
+                  :class="carFilter === f
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-blue-300'"
+                  class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-all"
+                  x-text="f">
+          </button>
+        </template>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <select x-model="statusFilter" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg px-3 py-1.5 outline-none hover:border-blue-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer transition-colors">
+          <option value="All">Semua Status</option>
+          <option value="Tersedia">Tersedia</option>
+          <option value="Tersewa">Tersewa</option>
+        </select>
+        
+        <select x-model="transFilter" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg px-3 py-1.5 outline-none hover:border-blue-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer transition-colors">
+          <option value="All">Semua Transmisi</option>
+          <option value="Manual">Manual</option>
+          <option value="Matic">Matic</option>
+        </select>
+      </div>
     </div>
 
     <div class="space-y-3">
@@ -502,8 +518,10 @@ document.addEventListener('alpine:init', () => {
         showEditModal: false,
         editModalTitle: '',
         carFilter: 'All',
+        statusFilter: 'All', // Variabel baru penangkap status
+        transFilter: 'All',  // Variabel baru penangkap transmisi
         selectedCar: null,
-        imagePreview: null, 
+        imagePreview: null,
         
         cars: <?php echo json_encode($cars_data); ?>,
         
@@ -530,8 +548,14 @@ document.addEventListener('alpine:init', () => {
         },
 
         get filteredCars() {
-            if (this.carFilter === 'All') return this.cars;
-            return this.cars.filter(c => c.category === this.carFilter);
+            return this.cars.filter(c => {
+                // Mengecek apakah mobil cocok dengan ketiga filter sekaligus
+                let matchCategory = (this.carFilter === 'All' || c.category === this.carFilter);
+                let matchStatus   = (this.statusFilter === 'All' || c.status === this.statusFilter);
+                let matchTrans    = (this.transFilter === 'All' || c.transmission === this.transFilter);
+                
+                return matchCategory && matchStatus && matchTrans;
+            });
         },
 
         viewCar(car) {
