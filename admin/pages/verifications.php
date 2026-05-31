@@ -1,14 +1,16 @@
-<!-- ====================================================
-     PAGE: VERIFICATIONS
-     Berisi: List user yang perlu diverifikasi, drawer detail dengan foto KTP/SIM
-===================================================== -->
 <div x-show="activePage === 'verifications'"
+     x-data="{ verifySearch: '' }"
      x-transition:enter="transition ease-out duration-200"
      x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
      class="absolute inset-0 overflow-y-auto px-5 lg:px-6 py-5">
 
-  <!-- Search & Filter -->
   <div class="flex items-center gap-3 flex-wrap mb-5">
+    
+    <div class="relative flex-1 min-w-[200px] max-w-xs">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+        <input x-model="verifySearch" type="text" placeholder="Cari nama, email..." class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 focus:border-blue-500 transition-all"/>
+    </div>
+
     <div class="flex items-center gap-2 flex-wrap">
       <template x-for="s in ['Semua','Pending','Verified','Rejected']" :key="s">
         <button @click="verifyFilter = s"
@@ -22,9 +24,7 @@
     </div>
   </div>
 
-  <!-- Tabel Verifikasi -->
   <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
-    <!-- Header Tabel (Desktop) -->
     <div class="hidden md:grid px-5 py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-[11px] font-bold uppercase tracking-wider"
          style="grid-template-columns: 48px 1fr 150px 150px 110px 50px; gap: 10px;">
       <div>No</div><div>Pelanggan</div><div>Tanggal Upload</div><div>Status</div><div>Aksi</div>
@@ -32,10 +32,10 @@
 
     <div>
       <template x-for="(v, idx) in filteredVerifications" :key="v.id">
-        <div>
+        <div x-show="verifySearch === '' || String(v.name + ' ' + v.email).toLowerCase().includes(verifySearch.toLowerCase())">
+          
           <div x-show="idx > 0" class="border-t border-slate-100 dark:border-slate-700 mx-5"></div>
 
-          <!-- Desktop Row -->
           <div class="hidden md:grid px-5 py-3.5 items-center dark:hover:bg-slate-700/30"
                style="grid-template-columns: 48px 1fr 150px 150px 110px 50px; gap: 10px;">
             <div class="text-sm font-semibold text-slate-500 dark:text-slate-400" x-text="idx + 1"></div>
@@ -62,7 +62,6 @@
             </div>
           </div>
 
-          <!-- Mobile Row -->
           <div class="md:hidden flex flex-col gap-3 px-4 py-3.5 dark:hover:bg-slate-700/30">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
@@ -79,6 +78,7 @@
             </div>
             <button @click="openVerificationDetail(v)" class="w-full text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-lg transition-colors">Lihat Dokumen</button>
           </div>
+
         </div>
       </template>
 
@@ -90,7 +90,6 @@
   </div>
 </div>
 
-<!-- ── Drawer Detail Verifikasi (Slide dari kanan) ── -->
 <div x-show="showVerificationDetail" @click="closeVerificationDetail()" class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm" x-transition.opacity></div>
 <div x-show="showVerificationDetail" class="fixed right-0 top-0 bottom-0 z-50 w-full max-w-2xl bg-white dark:bg-slate-800 shadow-2xl flex flex-col overflow-hidden"
      x-transition:enter="transform transition ease-out duration-300" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"

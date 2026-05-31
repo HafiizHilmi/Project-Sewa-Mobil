@@ -139,7 +139,13 @@ foreach ($types_data as $t) {
   <div x-show="!showCarDetail" class="px-5 lg:px-6 py-5">
 
     <div class="flex items-center justify-between flex-wrap gap-4 mb-5">
-      <div class="flex items-center gap-2 flex-wrap">
+      <div class="flex items-center gap-3 flex-wrap flex-1">
+        
+        <div class="relative flex-1 min-w-[200px] max-w-xs">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+            <input x-model="carSearch" type="text" placeholder="Cari tipe, kategori..." class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 focus:border-blue-500 transition-all"/>
+        </div>
+
         <template x-for="f in ['All','MPV','SUV','Sedan','EV']" :key="f">
           <button @click="carFilter = f"
                   :class="carFilter === f
@@ -168,7 +174,7 @@ foreach ($types_data as $t) {
 
     <div class="space-y-3">
       <template x-for="car in filteredCars" :key="car.type_key">
-        <div @click="viewCar(car)" class="car-row cursor-pointer bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm px-4 py-3.5 flex items-center gap-3 sm:gap-4">
+        <div x-show="carSearch === '' || String(car.name + ' ' + car.category).toLowerCase().includes(carSearch.toLowerCase())" @click="viewCar(car)" class="car-row cursor-pointer bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm px-4 py-3.5 flex items-center gap-3 sm:gap-4">
 
           <div class="w-20 sm:w-24 h-14 sm:h-16 rounded-xl flex items-center justify-center flex-shrink-0 relative overflow-hidden" :class="car.bgCls">
             <template x-if="car.image">
@@ -227,7 +233,7 @@ foreach ($types_data as $t) {
 
       <div x-show="filteredCars.length === 0" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-10 text-center">
         <i class="fa-solid fa-car-burst text-4xl text-slate-200 dark:text-slate-700 mb-3 block"></i>
-        <p class="text-sm text-slate-400 font-medium">Tidak ada kendaraan untuk kategori ini</p>
+        <p class="text-sm text-slate-400 font-medium">Tidak ada kendaraan yang ditemukan</p>
       </div>
     </div>
   </div>
@@ -410,7 +416,7 @@ foreach ($types_data as $t) {
                   </div>
                   <div class="bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100/50 dark:border-slate-700/50 p-3 rounded-xl">
                     <span class="text-slate-400 font-semibold block text-[10px] uppercase">Kecepatan</span>
-                    <span class="font-bold text-xs text-sla te-700 dark:text-slate-200 block mt-0.5">N/A</span>
+                    <span class="font-bold text-xs text-slate-700 dark:text-slate-200 block mt-0.5">N/A</span>
                   </div>
                   <div class="bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100/50 dark:border-slate-700/50 p-3 rounded-xl col-span-2">
                     <span class="text-slate-400 font-semibold block text-[10px] uppercase">GPS Terakhir Diperbarui</span>
@@ -518,8 +524,9 @@ document.addEventListener('alpine:init', () => {
         showEditModal: false,
         editModalTitle: '',
         carFilter: 'All',
-        statusFilter: 'All', // Variabel baru penangkap status
-        transFilter: 'All',  // Variabel baru penangkap transmisi
+        statusFilter: 'All', 
+        transFilter: 'All',  
+        carSearch: '', // <-- Tambahan state untuk input pencarian
         selectedCar: null,
         imagePreview: null,
         
@@ -549,11 +556,9 @@ document.addEventListener('alpine:init', () => {
 
         get filteredCars() {
             return this.cars.filter(c => {
-                // Mengecek apakah mobil cocok dengan ketiga filter sekaligus
                 let matchCategory = (this.carFilter === 'All' || c.category === this.carFilter);
                 let matchStatus   = (this.statusFilter === 'All' || c.status === this.statusFilter);
                 let matchTrans    = (this.transFilter === 'All' || c.transmission === this.transFilter);
-                
                 return matchCategory && matchStatus && matchTrans;
             });
         },
@@ -586,14 +591,13 @@ document.addEventListener('alpine:init', () => {
             this.imagePreview = car.image || null;
             this.editForm.onlyUnit = false;
           } else if (car) {
-            // Edit individual unit (child)
             this.editForm = { id: car.id, is_type: 0, type_key: car.type_key || '', make: car.make || '', model: car.model || '', year: car.year || '', plate: car.plate || '', chassis: car.chassis || '', category: car.category || 'MPV', price: car.price_raw || '', fuel: car.fuel || '', engine: car.engine || '', passengers: car.passengers || '', stock: car.stock || 1, transmission: car.transmission || 'Manual', onlyUnit: true };
             this.editModalTitle = 'Edit Unit Kendaraan';
             this.imagePreview = car.image || null;
           } else {
             this.editForm = { id: '', is_type: 1, type_key: '', make: '', model: '', year: '', plate: '', chassis: '', category: 'MPV', price: '', fuel: '', engine: '', passengers: '', stock: 0, transmission: 'Manual', onlyUnit: false };
             this.editModalTitle = 'Tambah Tipe Mobil Baru';
-            this.imagePreview = null; // Jika tambah baru, kosongkan foto
+            this.imagePreview = null; 
           }
           this.showEditModal = true;
         },
@@ -636,7 +640,6 @@ document.addEventListener('alpine:init', () => {
             let confirmMsg = isEdit ? 'Apakah Anda yakin mau menyimpan perubahan pada kendaraan ini?' : 'Apakah Anda yakin mau menambahkan kendaraan baru ini?';
             
             if (confirm(confirmMsg)) {
-                // 1. Ubah tombol jadi mode loading agar user tidak klik 2 kali
                 let submitBtn = this.$refs.carForm.querySelector('button.bg-blue-600');
                 if (submitBtn) {
                     submitBtn.innerText = "Memproses...";
@@ -644,23 +647,18 @@ document.addEventListener('alpine:init', () => {
                     submitBtn.classList.add("opacity-70", "cursor-wait");
                 }
 
-                // 2. Ambil seluruh data input & file foto
                 let formData = new FormData(this.$refs.carForm);
                 
-                // 3. Kirim data via jalur belakang (AJAX) agar layar tidak blank
                 fetch('car_action.php', {
                     method: 'POST',
                     body: formData
                 })
                 .then(() => {
-                    // Munculkan notif sukses
                     alert(isEdit ? 'Data kendaraan berhasil diperbarui!' : 'Kendaraan baru berhasil ditambahkan!');
-                    // Muat ulang halaman secara halus
                     window.location.href = 'index.php?page=cars';
                 })
                 .catch(() => {
                     alert('Terjadi kesalahan saat memproses data!');
-                    // Kembalikan tombol ke semula jika gagal
                     if (submitBtn) {
                         submitBtn.innerText = "Simpan";
                         submitBtn.disabled = false;
@@ -670,7 +668,6 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        // INI FUNGSI DELETE YANG SUDAH DIPERBAIKI (Tunggal & Efektif)
         deleteCar(id, typeKey = '', isType = 0) {
             let confirmMsg = 'Apakah Anda yakin mau menghapus kendaraan ini? Data yang dihapus tidak dapat dikembalikan.';
             if (isType == 1 && typeKey) {
@@ -682,7 +679,6 @@ document.addEventListener('alpine:init', () => {
                 if (isType == 1 && typeKey) {
                     url += '&delete_is_type=1&delete_type_key=' + encodeURIComponent(typeKey);
                 }
-                // Langsung redirect untuk refresh halaman
                 window.location.href = url;
             }
         },
