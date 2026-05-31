@@ -1,20 +1,30 @@
 <div x-show="activePage === 'orders'"
+     x-data="{ orderSearch: '' }"
      x-transition:enter="transition ease-out duration-200"
      x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
      class="absolute inset-0 overflow-y-auto px-5 lg:px-6 py-5">
 
   <div class="flex items-start sm:items-center justify-between flex-wrap gap-3 mb-5">
-    <div class="flex items-center gap-2 flex-wrap">
-      <template x-for="tab in ['All Orders','Pending','Confirmed','Completed']" :key="tab">
-        <button @click="orderFilter = tab"
-                :class="orderFilter === tab
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-blue-300'"
-                class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-all"
-                x-text="tab">
-        </button>
-      </template>
+    <div class="flex items-center gap-3 flex-wrap flex-1">
+      
+      <div class="relative flex-1 min-w-[200px] max-w-xs">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+          <input x-model="orderSearch" type="text" placeholder="Cari Order ID, nama, mobil..." class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 focus:border-blue-500 transition-all"/>
+      </div>
+
+      <div class="flex items-center gap-2 flex-wrap">
+        <template x-for="tab in ['All Orders','Pending','Confirmed','Completed']" :key="tab">
+          <button @click="orderFilter = tab"
+                  :class="orderFilter === tab
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-blue-300'"
+                  class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-all"
+                  x-text="tab">
+          </button>
+        </template>
+      </div>
     </div>
+    
     <div class="flex items-center gap-2">
       <button class="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
         <i class="fa-regular fa-calendar text-slate-400 text-xs"></i>
@@ -44,7 +54,8 @@
 
         <div>
           <template x-for="(order, idx) in filteredOrders" :key="order.idLine2">
-            <div>
+            <div x-show="orderSearch === '' || String(order.idLine1 + ' ' + order.idLine2 + ' ' + order.customer.name + ' ' + order.car.name + ' ' + (order.assignedPlate||'')).toLowerCase().includes(orderSearch.toLowerCase())">
+              
               <div x-show="idx > 0" class="border-t border-slate-100 dark:border-slate-700 mx-6"></div>
 
               <div @click="openOrderModal(order)" class="order-row px-6 py-4 dark:hover:bg-slate-700/30 cursor-pointer">
@@ -227,7 +238,7 @@
 
           <div x-show="filteredOrders.length === 0" class="py-16 text-center">
             <i class="fa-solid fa-inbox text-4xl text-slate-200 dark:text-slate-700 mb-3 block"></i>
-            <p class="text-sm text-slate-400 font-medium">Tidak ada pesanan dengan status ini</p>
+            <p class="text-sm text-slate-400 font-medium">Tidak ada pesanan ditemukan</p>
           </div>
         </div>
         
