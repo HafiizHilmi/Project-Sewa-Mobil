@@ -24,7 +24,7 @@ function getSvgY($val, $max) {
     return number_format(150 - (($val / $max) * 130), 2, '.', '');
 }
 
-$numPoints = 12; // Menarik 12 titik data ke belakang (1 tahun / 12 minggu)
+$numPoints = 12; // Menarik 12 titik data ke belakang (12 hari / minggu / bulan)
 $pointSpacing = 100; // Jarak antar titik diperlebar agar tidak sesak
 $svgWidth = 40 + (($numPoints - 1) * $pointSpacing) + 40; // Total lebar SVG memanjang
 
@@ -71,13 +71,35 @@ for ($i = $numPoints - 1; $i >= 0; $i--) {
     $weeklyValues[] = $countW;
 }
 
-// 3. Algoritma X Coordinate
+// 3. Data Harian (FITUR BARU)
+$dailyLabels = [];
+$dailyValues = [];
+$maxDailyValue = 10;
+
+for ($i = $numPoints - 1; $i >= 0; $i--) {
+    $dayStr = date('Y-m-d', strtotime("-$i days"));
+    $dayLabel = date('d M', strtotime("-$i days")); // Contoh: 25 May
+    
+    $stmtD = $pdo->prepare("SELECT COUNT(*) FROM bookings WHERE DATE(created_at) = ?");
+    $stmtD->execute([$dayStr]);
+    $countD = (int)$stmtD->fetchColumn();
+    
+    if ($countD > $maxDailyValue) {
+        $maxDailyValue = ceil($countD / 10) * 10;
+    }
+    
+    $dailyLabels[] = $dayLabel;
+    $dailyValues[] = $countD;
+}
+
+
+// 4. Algoritma X Coordinate
 $xCoords = [];
 for ($i = 0; $i < $numPoints; $i++) {
     $xCoords[] = 40 + ($i * $pointSpacing); 
 }
 
-// 4. Algoritma Melengkung (Bulan)
+// 5. Algoritma Melengkung (Bulan)
 $pathD = "M " . $xCoords[0] . "," . getSvgY($chartValues[0], $maxValue);
 for ($i = 1; $i < $numPoints; $i++) {
     $prevX = $xCoords[$i-1];
@@ -88,10 +110,9 @@ for ($i = 1; $i < $numPoints; $i++) {
     $pathD .= " C $cp1X,$prevY $cp1X,$currY $currX,$currY"; 
 }
 $bgPathD = $pathD . " L " . end($xCoords) . ",150 L " . $xCoords[0] . ",150 Z";
-$circleY = getSvgY(end($chartValues), $maxValue);
 $step = $maxValue / 4;
 
-// 5. Algoritma Melengkung (Minggu)
+// 6. Algoritma Melengkung (Minggu)
 $pathDW = "M " . $xCoords[0] . "," . getSvgY($weeklyValues[0], $maxWeekValue);
 for ($i = 1; $i < $numPoints; $i++) {
     $prevX = $xCoords[$i-1];
@@ -102,8 +123,21 @@ for ($i = 1; $i < $numPoints; $i++) {
     $pathDW .= " C $cp1X,$prevY $cp1X,$currY $currX,$currY";
 }
 $bgPathDW = $pathDW . " L " . end($xCoords) . ",150 L " . $xCoords[0] . ",150 Z";
-$circleYW = getSvgY(end($weeklyValues), $maxWeekValue);
 $stepW = $maxWeekValue / 4;
+
+// 7. Algoritma Melengkung (Harian)
+$pathDD = "M " . $xCoords[0] . "," . getSvgY($dailyValues[0], $maxDailyValue);
+for ($i = 1; $i < $numPoints; $i++) {
+    $prevX = $xCoords[$i-1];
+    $prevY = getSvgY($dailyValues[$i-1], $maxDailyValue);
+    $currX = $xCoords[$i];
+    $currY = getSvgY($dailyValues[$i], $maxDailyValue);
+    $cp1X = $prevX + ($currX - $prevX) / 2;
+    $pathDD .= " C $cp1X,$prevY $cp1X,$currY $currX,$currY";
+}
+$bgPathDD = $pathDD . " L " . end($xCoords) . ",150 L " . $xCoords[0] . ",150 Z";
+$stepD = $maxDailyValue / 4;
+
 // ====================================================================================
 
 ?>
@@ -117,13 +151,13 @@ $stepW = $maxWeekValue / 4;
 .chart-path {
     stroke-dasharray: 4000;
     stroke-dashoffset: 4000;
-    animation: drawPathAnim 2.5s ease-out forwards;
+    animation: drawPathAnim 2s ease-out forwards;
 }
 
 /* Animasi untuk memunculkan gradien warna latar secara perlahan */
 .chart-gradient {
     opacity: 0;
-    animation: fadeGradientAnim 2s ease-out 0.5s forwards;
+    animation: fadeGradientAnim 1.5s ease-out 0.5s forwards;
 }
 
 @keyframes drawPathAnim {
@@ -188,16 +222,16 @@ $stepW = $maxWeekValue / 4;
   </div>
 
   <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-4">
-    <div x-data="{ chartMode: 'monthly' }" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 flex flex-col">
+    <div x-data="{ chartMode: 'daily' }" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 flex flex-col">
       
       <div class="flex items-center justify-between mb-5 shrink-0">
         <div>
           <h2 class="text-sm font-bold text-slate-800 dark:text-white">Rental Trends</h2>
           <p class="text-xs text-slate-400 mt-0.5">Arahkan kursor ke titik untuk detail penyewaan</p>
         </div>
-        <div class="flex items-center">
+        <div class="flex items-center flex-wrap gap-2 justify-end">
           
-          <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5 mr-3">
+          <div class="hidden sm:flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5">
             <button @click="$refs.chartScroll.scrollBy({left: -300, behavior: 'smooth'})" title="Geser Kiri" class="w-7 h-7 rounded-md flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
               <i class="fa-solid fa-chevron-left text-xs"></i>
             </button>
@@ -207,6 +241,7 @@ $stepW = $maxWeekValue / 4;
           </div>
           
           <div class="flex items-center bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5">
+            <button @click="chartMode='daily'" :class="chartMode==='daily' ? 'bg-slate-800 dark:bg-slate-600 text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'" class="text-xs font-semibold px-3 py-1.5 rounded-md transition-all">Daily</button>
             <button @click="chartMode='weekly'" :class="chartMode==='weekly' ? 'bg-slate-800 dark:bg-slate-600 text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'" class="text-xs font-semibold px-3 py-1.5 rounded-md transition-all">Weekly</button>
             <button @click="chartMode='monthly'" :class="chartMode==='monthly' ? 'bg-slate-800 dark:bg-slate-600 text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'" class="text-xs font-semibold px-3 py-1.5 rounded-md transition-all">Monthly</button>
           </div>
@@ -216,11 +251,11 @@ $stepW = $maxWeekValue / 4;
       <div class="relative w-full h-[180px] bg-slate-50/50 dark:bg-slate-900/20 border border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden mt-auto">
         
         <div class="absolute left-0 top-0 bottom-0 w-[45px] bg-gradient-to-r from-white via-white to-white/0 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800/0 z-10 pointer-events-none">
-          <svg x-show="chartMode === 'monthly'" viewBox="0 0 45 180" class="w-full h-full">
-            <text x="32" y="24" font-size="10" fill="#94a3b8" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif"><?= round($maxValue) ?></text>
-            <text x="32" y="56.5" font-size="10" fill="#94a3b8" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif"><?= round($maxValue - $step) ?></text>
-            <text x="32" y="89" font-size="10" fill="#94a3b8" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif"><?= round($maxValue - ($step * 2)) ?></text>
-            <text x="32" y="121.5" font-size="10" fill="#94a3b8" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif"><?= round($maxValue - ($step * 3)) ?></text>
+          <svg x-show="chartMode === 'daily'" viewBox="0 0 45 180" class="w-full h-full" style="display:none;">
+            <text x="32" y="24" font-size="10" fill="#94a3b8" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif"><?= round($maxDailyValue) ?></text>
+            <text x="32" y="56.5" font-size="10" fill="#94a3b8" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif"><?= round($maxDailyValue - $stepD) ?></text>
+            <text x="32" y="89" font-size="10" fill="#94a3b8" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif"><?= round($maxDailyValue - ($stepD * 2)) ?></text>
+            <text x="32" y="121.5" font-size="10" fill="#94a3b8" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif"><?= round($maxDailyValue - ($stepD * 3)) ?></text>
             <text x="32" y="154" font-size="10" fill="#94a3b8" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif">0</text>
           </svg>
           <svg x-show="chartMode === 'weekly'" viewBox="0 0 45 180" class="w-full h-full" style="display:none;">
@@ -230,15 +265,22 @@ $stepW = $maxWeekValue / 4;
             <text x="32" y="121.5" font-size="10" fill="#94a3b8" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif"><?= round($maxWeekValue - ($stepW * 3)) ?></text>
             <text x="32" y="154" font-size="10" fill="#94a3b8" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif">0</text>
           </svg>
+          <svg x-show="chartMode === 'monthly'" viewBox="0 0 45 180" class="w-full h-full" style="display:none;">
+            <text x="32" y="24" font-size="10" fill="#94a3b8" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif"><?= round($maxValue) ?></text>
+            <text x="32" y="56.5" font-size="10" fill="#94a3b8" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif"><?= round($maxValue - $step) ?></text>
+            <text x="32" y="89" font-size="10" fill="#94a3b8" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif"><?= round($maxValue - ($step * 2)) ?></text>
+            <text x="32" y="121.5" font-size="10" fill="#94a3b8" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif"><?= round($maxValue - ($step * 3)) ?></text>
+            <text x="32" y="154" font-size="10" fill="#94a3b8" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif">0</text>
+          </svg>
         </div>
 
         <div x-ref="chartScroll" class="absolute inset-0 pl-[45px] overflow-x-auto hide-scroll" x-init="$nextTick(() => { $el.scrollLeft = $el.scrollWidth; })">
           
-          <svg x-show="chartMode === 'monthly'" viewBox="0 0 <?= $svgWidth ?> 180" class="h-full" style="width: <?= $svgWidth ?>px; min-width: 100%;">
+          <svg x-show="chartMode === 'daily'" viewBox="0 0 <?= $svgWidth ?> 180" class="h-full" style="width: <?= $svgWidth ?>px; min-width: 100%; display: none;">
             <defs>
-              <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#3b82f6" stop-opacity=".12"/>
-                <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+              <linearGradient id="g3" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f43f5e" stop-opacity=".12"/>
+                <stop offset="100%" stop-color="#f43f5e" stop-opacity="0"/>
               </linearGradient>
             </defs>
             <line x1="0" y1="20" x2="<?= $svgWidth ?>" y2="20" stroke="#f1f5f9" stroke-width="1.2" class="dark:stroke-slate-700"/>
@@ -247,23 +289,20 @@ $stepW = $maxWeekValue / 4;
             <line x1="0" y1="117.5" x2="<?= $svgWidth ?>" y2="117.5" stroke="#f1f5f9" stroke-width="1.2" class="dark:stroke-slate-700"/>
             <line x1="0" y1="150" x2="<?= $svgWidth ?>" y2="150" stroke="#f1f5f9" stroke-width="1.2" class="dark:stroke-slate-700"/>
             
-            <path class="chart-gradient" d="<?= $bgPathD ?>" fill="url(#g1)"/>
-            <path class="chart-path" d="<?= $pathD ?>" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path class="chart-gradient" d="<?= $bgPathDD ?>" fill="url(#g3)"/>
+            <path class="chart-path" d="<?= $pathDD ?>" fill="none" stroke="#f43f5e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
             
             <?php foreach ($xCoords as $i => $x): ?>
-                <text x="<?= $x ?>" y="172" font-size="10" fill="<?= $i == $numPoints - 1 ? '#1e293b' : '#94a3b8' ?>" font-weight="<?= $i == $numPoints - 1 ? '700' : '400' ?>" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" class="<?= $i == $numPoints - 1 ? 'dark:fill-slate-200' : '' ?>"><?= $chartMonths[$i] ?></text>
+                <text x="<?= $x ?>" y="172" font-size="10" fill="<?= $i == $numPoints - 1 ? '#1e293b' : '#94a3b8' ?>" font-weight="<?= $i == $numPoints - 1 ? '700' : '400' ?>" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" class="<?= $i == $numPoints - 1 ? 'dark:fill-slate-200' : '' ?>"><?= $i == $numPoints - 1 ? 'Hari Ini' : $dailyLabels[$i] ?></text>
             <?php endforeach; ?>
 
-            <?php foreach ($xCoords as $i => $x): $y = getSvgY($chartValues[$i], $maxValue); ?>
+            <?php foreach ($xCoords as $i => $x): $y = getSvgY($dailyValues[$i], $maxDailyValue); ?>
                 <g class="group cursor-pointer">
                     <circle cx="<?= $x ?>" cy="<?= $y ?>" r="15" fill="transparent"/>
-                    
-                    <circle class="chart-gradient" cx="<?= $x ?>" cy="<?= $y ?>" r="4" fill="#fff" stroke="#3b82f6" stroke-width="2.5" class="transition-all duration-300 group-hover:stroke-[4px] dark:fill-slate-800"/>
-                    
+                    <circle class="chart-gradient" cx="<?= $x ?>" cy="<?= $y ?>" r="4" fill="#fff" stroke="#f43f5e" stroke-width="2.5" class="transition-all duration-300 group-hover:stroke-[4px] dark:fill-slate-800"/>
                     <line x1="<?= $x ?>" y1="<?= $y + 5 ?>" x2="<?= $x ?>" y2="150" stroke="#cbd5e1" stroke-dasharray="3,3" stroke-width="1" class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 dark:stroke-slate-600 pointer-events-none"/>
-                    
                     <rect x="<?= $x - 22 ?>" y="<?= $y - 32 ?>" width="44" height="22" rx="4" fill="#1e293b" class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 dark:fill-slate-700 pointer-events-none"/>
-                    <text x="<?= $x ?>" y="<?= $y - 17 ?>" font-size="10" fill="#fff" text-anchor="middle" font-weight="bold" font-family="Plus Jakarta Sans,sans-serif" class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"><?= $chartValues[$i] ?> mobil</text>
+                    <text x="<?= $x ?>" y="<?= $y - 17 ?>" font-size="10" fill="#fff" text-anchor="middle" font-weight="bold" font-family="Plus Jakarta Sans,sans-serif" class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"><?= $dailyValues[$i] ?> mobil</text>
                 </g>
             <?php endforeach; ?>
           </svg>
@@ -299,6 +338,39 @@ $stepW = $maxWeekValue / 4;
                 </g>
             <?php endforeach; ?>
           </svg>
+
+          <svg x-show="chartMode === 'monthly'" viewBox="0 0 <?= $svgWidth ?> 180" class="h-full" style="width: <?= $svgWidth ?>px; min-width: 100%; display: none;">
+            <defs>
+              <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#3b82f6" stop-opacity=".12"/>
+                <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <line x1="0" y1="20" x2="<?= $svgWidth ?>" y2="20" stroke="#f1f5f9" stroke-width="1.2" class="dark:stroke-slate-700"/>
+            <line x1="0" y1="52.5" x2="<?= $svgWidth ?>" y2="52.5" stroke="#f1f5f9" stroke-width="1.2" class="dark:stroke-slate-700"/>
+            <line x1="0" y1="85" x2="<?= $svgWidth ?>" y2="85" stroke="#f1f5f9" stroke-width="1.2" class="dark:stroke-slate-700"/>
+            <line x1="0" y1="117.5" x2="<?= $svgWidth ?>" y2="117.5" stroke="#f1f5f9" stroke-width="1.2" class="dark:stroke-slate-700"/>
+            <line x1="0" y1="150" x2="<?= $svgWidth ?>" y2="150" stroke="#f1f5f9" stroke-width="1.2" class="dark:stroke-slate-700"/>
+            
+            <path class="chart-gradient" d="<?= $bgPathD ?>" fill="url(#g1)"/>
+            <path class="chart-path" d="<?= $pathD ?>" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            
+            <?php foreach ($xCoords as $i => $x): ?>
+                <text x="<?= $x ?>" y="172" font-size="10" fill="<?= $i == $numPoints - 1 ? '#1e293b' : '#94a3b8' ?>" font-weight="<?= $i == $numPoints - 1 ? '700' : '400' ?>" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" class="<?= $i == $numPoints - 1 ? 'dark:fill-slate-200' : '' ?>"><?= $chartMonths[$i] ?></text>
+            <?php endforeach; ?>
+
+            <?php foreach ($xCoords as $i => $x): $y = getSvgY($chartValues[$i], $maxValue); ?>
+                <g class="group cursor-pointer">
+                    <circle cx="<?= $x ?>" cy="<?= $y ?>" r="15" fill="transparent"/>
+                    <circle class="chart-gradient" cx="<?= $x ?>" cy="<?= $y ?>" r="4" fill="#fff" stroke="#3b82f6" stroke-width="2.5" class="transition-all duration-300 group-hover:stroke-[4px] dark:fill-slate-800"/>
+                    
+                    <line x1="<?= $x ?>" y1="<?= $y + 5 ?>" x2="<?= $x ?>" y2="150" stroke="#cbd5e1" stroke-dasharray="3,3" stroke-width="1" class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 dark:stroke-slate-600 pointer-events-none"/>
+                    <rect x="<?= $x - 22 ?>" y="<?= $y - 32 ?>" width="44" height="22" rx="4" fill="#1e293b" class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 dark:fill-slate-700 pointer-events-none"/>
+                    <text x="<?= $x ?>" y="<?= $y - 17 ?>" font-size="10" fill="#fff" text-anchor="middle" font-weight="bold" font-family="Plus Jakarta Sans,sans-serif" class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"><?= $chartValues[$i] ?> mobil</text>
+                </g>
+            <?php endforeach; ?>
+          </svg>
+
         </div>
       </div>
     </div>
