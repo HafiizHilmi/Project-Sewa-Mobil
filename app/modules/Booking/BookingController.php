@@ -125,7 +125,7 @@ class BookingController {
                 $dist = $haversine($pickup_lat, $pickup_lon, $gfLat, $gfLng);
                 if ($dist <= $gfRad) {
                     $is_blocked = true;
-                    $block_reason = "Lokasi pengambilan kendaraan Anda berada di dalam zona blacklist: " . $locationName;
+                    $block_reason = "Lokasi pengambilan kendaraan Anda berada di wilayah tidak terjangkau.";
                     break;
                 }
             }
@@ -135,7 +135,7 @@ class BookingController {
                 $dist = $haversine($return_lat, $return_lon, $gfLat, $gfLng);
                 if ($dist <= $gfRad) {
                     $is_blocked = true;
-                    $block_reason = "Lokasi pengembalian kendaraan Anda berada di dalam zona blacklist: " . $locationName;
+                    $block_reason = "Lokasi pengembalian kendaraan Anda berada di wilayah tidak terjangkau.";
                     break;
                 }
             }
@@ -145,7 +145,7 @@ class BookingController {
                 $dist = $haversine($address_lat, $address_lon, $gfLat, $gfLng);
                 if ($dist <= $gfRad) {
                     $is_blocked = true;
-                    $block_reason = "Alamat lengkap Anda berada di dalam zona blacklist: " . $locationName;
+                    $block_reason = "Alamat lengkap Anda berada di wilayah tidak terjangkau.";
                     break;
                 }
             }

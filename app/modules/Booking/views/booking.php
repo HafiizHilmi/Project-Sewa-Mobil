@@ -1,3 +1,11 @@
+<?php
+if (!isset($pdo)) {
+    require_once __DIR__ . '/../../../include/db_config.php';
+    $pdo = getPDO();
+}
+$stmtBL = $pdo->query("SELECT * FROM blacklisted_locations WHERE latitude IS NOT NULL AND longitude IS NOT NULL");
+$geofences = $stmtBL ? $stmtBL->fetchAll(PDO::FETCH_ASSOC) : [];
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -202,6 +210,17 @@
     </nav>
 
     <main class="max-w-7xl mx-auto px-6 py-10">
+        <?php if (isset($_SESSION['flash'])): ?>
+            <div id="flash-alert" class="mb-6 p-4 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-300 flex items-center justify-center gap-3 shadow-sm transition-all relative">
+                <i class="bi bi-exclamation-triangle-fill text-lg shrink-0"></i>
+                <p class="text-sm font-semibold text-center pr-6"><?= htmlspecialchars($_SESSION['flash']) ?></p>
+                <button type="button" onclick="document.getElementById('flash-alert').remove()" class="absolute right-4 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-700 dark:hover:text-red-400 flex items-center justify-center">
+                    <i class="bi bi-x-lg text-sm"></i>
+                </button>
+            </div>
+            <?php unset($_SESSION['flash']); ?>
+        <?php endif; ?>
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             <div class="lg:col-span-2 space-y-6">
@@ -212,6 +231,13 @@
                         </div>
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white">Detail Lokasi</h2>
                     </div>
+
+                    <!-- Real-time Geofence Warning Container -->
+                    <div id="geofence-warning-box" class="mb-6 p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-300 flex items-center justify-center gap-3 shadow-sm hidden">
+                        <i class="bi bi-exclamation-triangle-fill text-lg shrink-0"></i>
+                        <p class="text-sm font-semibold text-center" id="geofence-warning-text"></p>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="input-floating-label flex items-center justify-between">
                             <div class="w-full">
@@ -421,11 +447,29 @@
         document.getElementById('input-pickup').addEventListener('input', function(e) {
             sumPickup.textContent = e.target.value || 'Lokasi belum ditentukan';
             sumPickup.title = e.target.value || 'Lokasi belum ditentukan';
+            if (!e.target.value.trim()) {
+                document.getElementById('pickup-lat-input').value = "";
+                document.getElementById('pickup-lon-input').value = "";
+            }
+            if (typeof checkGeofencesRealtime === 'function') checkGeofencesRealtime();
         });
 
         document.getElementById('input-return').addEventListener('input', function(e) {
             sumReturn.textContent = e.target.value || 'Sama dengan lokasi pengambilan';
             sumReturn.title = e.target.value || 'Sama dengan lokasi pengambilan';
+            if (!e.target.value.trim()) {
+                document.getElementById('return-lat-input').value = "";
+                document.getElementById('return-lon-input').value = "";
+            }
+            if (typeof checkGeofencesRealtime === 'function') checkGeofencesRealtime();
+        });
+
+        document.getElementById('input-address').addEventListener('input', function(e) {
+            if (!e.target.value.trim()) {
+                document.getElementById('address-lat-input').value = "";
+                document.getElementById('address-lon-input').value = "";
+            }
+            if (typeof checkGeofencesRealtime === 'function') checkGeofencesRealtime();
         });
 
         const formatRupiah = (angka) => {
@@ -758,6 +802,81 @@
             });
         }
 
+        // ==================== REAL-TIME GEOFENCE CHECKER ====================
+        const geofences = <?= json_encode($geofences) ?>;
+        let isGeofenceBlocked = false;
+
+        function haversine(lat1, lon1, lat2, lon2) {
+            const earthRadius = 6371000; // in meters
+            const latDelta = (lat2 - lat1) * Math.PI / 180;
+            const lonDelta = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(latDelta / 2) * Math.sin(latDelta / 2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(lonDelta / 2) * Math.sin(lonDelta / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return earthRadius * c;
+        }
+
+        function checkGeofencesRealtime() {
+            const pickupLat = parseFloat(document.getElementById('pickup-lat-input').value) || null;
+            const pickupLon = parseFloat(document.getElementById('pickup-lon-input').value) || null;
+            const returnLat = parseFloat(document.getElementById('return-lat-input').value) || null;
+            const returnLon = parseFloat(document.getElementById('return-lon-input').value) || null;
+            const addressLat = parseFloat(document.getElementById('address-lat-input').value) || null;
+            const addressLon = parseFloat(document.getElementById('address-lon-input').value) || null;
+
+            isGeofenceBlocked = false;
+            let blockReason = "";
+
+            if (!geofences || geofences.length === 0) return;
+
+            for (const gf of geofences) {
+                const gfLat = parseFloat(gf.latitude);
+                const gfLng = parseFloat(gf.longitude);
+                const gfRad = parseInt(gf.radius);
+
+                // 1. Cek Lokasi Pengambilan
+                if (pickupLat && pickupLon) {
+                    const dist = haversine(pickupLat, pickupLon, gfLat, gfLng);
+                    if (dist <= gfRad) {
+                        isGeofenceBlocked = true;
+                        blockReason = "Lokasi pengambilan kendaraan Anda berada di wilayah tidak terjangkau.";
+                        break;
+                    }
+                }
+
+                // 2. Cek Lokasi Pengembalian
+                if (returnLat && returnLon) {
+                    const dist = haversine(returnLat, returnLon, gfLat, gfLng);
+                    if (dist <= gfRad) {
+                        isGeofenceBlocked = true;
+                        blockReason = "Lokasi pengembalian kendaraan Anda berada di wilayah tidak terjangkau.";
+                        break;
+                    }
+                }
+
+                // 3. Cek Alamat Lengkap
+                if (addressLat && addressLon) {
+                    const dist = haversine(addressLat, addressLon, gfLat, gfLng);
+                    if (dist <= gfRad) {
+                        isGeofenceBlocked = true;
+                        blockReason = "Alamat lengkap Anda berada di wilayah tidak terjangkau.";
+                        break;
+                    }
+                }
+            }
+
+            const warningBox = document.getElementById('geofence-warning-box');
+            const warningText = document.getElementById('geofence-warning-text');
+            if (isGeofenceBlocked) {
+                warningText.textContent = blockReason;
+                warningBox.classList.remove('hidden');
+            } else {
+                warningBox.classList.add('hidden');
+                warningText.textContent = "";
+            }
+        }
+
         // Initialize Auto-suggest
         initAutocomplete('input-pickup', 'dropdown-pickup', function(place) {
             const val = place.display_name;
@@ -765,6 +884,7 @@
             sumPickup.title = val || 'Lokasi belum ditentukan';
             document.getElementById('pickup-lat-input').value = place.lat;
             document.getElementById('pickup-lon-input').value = place.lon;
+            checkGeofencesRealtime();
         });
         initAutocomplete('input-return', 'dropdown-return', function(place) {
             const val = place.display_name;
@@ -772,10 +892,12 @@
             sumReturn.title = val || 'Sama dengan lokasi pengambilan';
             document.getElementById('return-lat-input').value = place.lat;
             document.getElementById('return-lon-input').value = place.lon;
+            checkGeofencesRealtime();
         });
         initAutocomplete('input-address', 'dropdown-address', function(place) {
             document.getElementById('address-lat-input').value = place.lat;
             document.getElementById('address-lon-input').value = place.lon;
+            checkGeofencesRealtime();
         });
 
         bookingForm.addEventListener('submit', function(e) {
@@ -787,6 +909,12 @@
 
             if (sumPickup.textContent === 'Lokasi belum ditentukan') {
                 alert('Masukkan lokasi pengambilan.');
+                e.preventDefault();
+                return;
+            }
+
+            if (isGeofenceBlocked) {
+                alert('Pemesanan tidak dapat dilanjutkan karena lokasi yang dipilih berada di wilayah tidak terjangkau.');
                 e.preventDefault();
                 return;
             }
