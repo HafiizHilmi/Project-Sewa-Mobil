@@ -119,7 +119,17 @@ $customers = $stmtCustomers->fetchAll(PDO::FETCH_ASSOC);
 </head>
 
 <body x-data="appData()" 
-      x-init="const p = new URLSearchParams(window.location.search); if(p.has('page')) activePage = p.get('page');" 
+      x-init="
+        const p = new URLSearchParams(window.location.search); 
+        if(p.has('page')) activePage = p.get('page');
+        
+        // Memantau setiap perubahan halaman, dan mencatatnya ke address bar browser
+        $watch('activePage', val => {
+            const url = new URL(window.location);
+            url.searchParams.set('page', val);
+            window.history.replaceState(null, '', url);
+        });
+      " 
       x-cloak 
       class="font-sans antialiased bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-200">
 
@@ -135,7 +145,6 @@ $customers = $stmtCustomers->fetchAll(PDO::FETCH_ASSOC);
 
 <div class="flex h-screen overflow-hidden">
 
-  <!-- Overlay Mobile Sidebar -->
   <div x-show="sidebarOpen"
        @click="sidebarOpen = false"
        class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden"
