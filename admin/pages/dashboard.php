@@ -1,4 +1,38 @@
 <?php
+// ====================================================================================
+// FITUR BARU: API AJAX UNTUK NOTIFIKASI REAL-TIME
+// Bagian ini akan mencegat request dari Javascript dan membalasnya dengan JSON
+// ====================================================================================
+if (isset($_GET['ajax_alerts'])) {
+    if (ob_get_length()) ob_clean(); // Bersihkan HTML (header/nav/sidebar) yang terlanjur di-print index.php
+    header('Content-Type: application/json');
+    
+    $alertsStmt = $pdo->query("
+        SELECT b.id, b.created_at, b.full_name, c.make, c.model 
+        FROM bookings b 
+        LEFT JOIN cars c ON b.car_id = c.id 
+        WHERE b.status = 'pending' 
+        ORDER BY b.created_at DESC
+    ");
+    $pendingOrders = $alertsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $dynamicAlerts = [];
+    foreach($pendingOrders as $order) {
+        $carName = trim(($order['make'] ?? '') . ' ' . ($order['model'] ?? ''));
+        $custName = $order['full_name'] ?? 'Pelanggan';
+        $dynamicAlerts[] = [
+            'id' => $order['id'],
+            'title' => 'Pesanan Masuk #' . $order['id'],
+            'desc' => $custName . ' ingin menyewa ' . ($carName ?: 'mobil'),
+            'time' => date('d M Y, H:i', strtotime($order['created_at']))
+        ];
+    }
+    echo json_encode($dynamicAlerts);
+    exit; // Stop render sisa halaman dashboard
+}
+// ====================================================================================
+
+
 $stockStmt = $pdo->query("SELECT IFNULL(SUM(CASE WHEN IFNULL(is_type,0)=0 THEN 1 ELSE 0 END), 0) AS total_cars, IFNULL(SUM(CASE WHEN IFNULL(is_type,0)=0 THEN stock ELSE 0 END), 0) AS total_stock, IFNULL(SUM(CASE WHEN available = 1 AND IFNULL(is_type,0)=0 THEN stock ELSE 0 END), 0) AS available_stock FROM cars");
 $stockStats = $stockStmt->fetch(PDO::FETCH_ASSOC);
 $totalStock = $stockStats['total_stock'] ?? 0;
@@ -19,15 +53,14 @@ $totalRevenue = $stats['total_revenue'] ?? 0;
 // FITUR: KALKULASI GRAFIK DYNAMIC DENGAN FITUR SLIDE / SCROLL & TOOLTIP
 // ====================================================================================
 
-// Helper untuk format Y koordinat SVG (mencegah bug koma di locale Indonesia)
 function getSvgY($val, $max) {
-    if ($max == 0) $max = 1; // Cegah division by zero
+    if ($max == 0) $max = 1; 
     return number_format(150 - (($val / $max) * 130), 2, '.', '');
 }
 
-$numPoints = 12; // Menarik 12 titik data ke belakang (12 hari / minggu / bulan)
-$pointSpacing = 100; // Jarak antar titik diperlebar agar tidak sesak
-$svgWidth = 40 + (($numPoints - 1) * $pointSpacing) + 40; // Total lebar SVG memanjang
+$numPoints = 12; 
+$pointSpacing = 100; 
+$svgWidth = 40 + (($numPoints - 1) * $pointSpacing) + 40; 
 
 // 1. Data Bulan
 $chartMonths = [];
@@ -36,7 +69,7 @@ $maxValue = 10;
 
 for ($i = $numPoints - 1; $i >= 0; $i--) {
     $monthStr = date('Y-m', strtotime("-$i months"));
-    $monthLabel = date('M Y', strtotime("-$i months")); // Contoh: Jan 2026
+    $monthLabel = date('M Y', strtotime("-$i months")); 
     
     $stmtChart = $pdo->prepare("SELECT COUNT(*) FROM bookings WHERE DATE_FORMAT(created_at, '%Y-%m') = ?");
     $stmtChart->execute([$monthStr]);
@@ -58,7 +91,7 @@ $maxWeekValue = 10;
 for ($i = $numPoints - 1; $i >= 0; $i--) {
     $startOfWeek = date('Y-m-d', strtotime("-$i weeks -".date('w')." days"));
     $endOfWeek = date('Y-m-d', strtotime("-$i weeks +".(6-date('w'))." days"));
-    $weekLabel = date('d M', strtotime($startOfWeek)); // Contoh: 12 Apr
+    $weekLabel = date('d M', strtotime($startOfWeek)); 
     
     $stmtW = $pdo->prepare("SELECT COUNT(*) FROM bookings WHERE DATE(created_at) >= ? AND DATE(created_at) <= ?");
     $stmtW->execute([$startOfWeek, $endOfWeek]);
@@ -79,7 +112,7 @@ $maxDailyValue = 10;
 
 for ($i = $numPoints - 1; $i >= 0; $i--) {
     $dayStr = date('Y-m-d', strtotime("-$i days"));
-    $dayLabel = date('d M', strtotime("-$i days")); // Contoh: 25 May
+    $dayLabel = date('d M', strtotime("-$i days")); 
     
     $stmtD = $pdo->prepare("SELECT COUNT(*) FROM bookings WHERE DATE(created_at) = ?");
     $stmtD->execute([$dayStr]);
@@ -140,8 +173,7 @@ $bgPathDD = $pathDD . " L " . end($xCoords) . ",150 L " . $xCoords[0] . ",150 Z"
 $stepD = $maxDailyValue / 4;
 
 // ====================================================================================
-// FITUR BARU: PESANAN MASUK (RECENT ALERTS)
-// Menarik data pesanan yang baru masuk (Pending) langsung dari Database
+// PESANAN MASUK (INITIAL LOAD)
 // ====================================================================================
 $alertsStmt = $pdo->query("
     SELECT b.id, b.created_at, b.full_name, c.make, c.model 
@@ -193,6 +225,11 @@ foreach($pendingOrders as $order) {
     to { opacity: 1; }
 }
 </style>
+
+<!-- ELEMEN AUDIO UNTUK NOTIFIKASI -->
+<audio id="notifSound" preload="auto">
+    <source src="https://actions.google.com/sounds/v1/ui_components/notification_alert.ogg" type="audio/ogg">
+</audio>
 
 <!-- ====================================================
      PAGE: DASHBOARD
@@ -250,7 +287,6 @@ foreach($pendingOrders as $order) {
     </div>
   </div>
 
-  <!-- Chart + Alerts -->
   <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-4">
     <!-- CHART SECTION -->
     <div x-data="{ chartMode: 'daily' }" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 flex flex-col">
@@ -402,10 +438,39 @@ foreach($pendingOrders as $order) {
       </div>
     </div>
 
-    <!-- PESANAN MASUK (RECENT ALERTS) -->
-    <div x-data="{ incomingOrders: <?= htmlspecialchars(json_encode($dynamicAlerts), ENT_QUOTES, 'UTF-8') ?>, showAllModal: false }" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 flex flex-col">
+    <!-- ============================================================================== -->
+    <!-- FITUR: PESANAN MASUK (RECENT ALERTS) - Real-time via AJAX Polling AlpineJS     -->
+    <!-- ============================================================================== -->
+    <div x-data="{ 
+            incomingOrders: <?= htmlspecialchars(json_encode($dynamicAlerts), ENT_QUOTES, 'UTF-8') ?>, 
+            showAllModal: false,
+            init() {
+                // Melakukan pengecekan database via AJAX setiap 5 detik (5000ms)
+                setInterval(() => {
+                    fetch('index.php?page=dashboard&ajax_alerts=1')
+                    .then(res => res.json())
+                    .then(data => {
+                        // Jika ada data pesanan baru
+                        if (data.length > 0) {
+                            let oldTopId = this.incomingOrders.length > 0 ? this.incomingOrders[0].id : 0;
+                            let newTopId = data[0].id;
+                            
+                            // Bandingkan ID, jika ID baru lebih besar, berarti ada pesanan benar-benar baru
+                            if (newTopId > oldTopId) {
+                                let audio = document.getElementById('notifSound');
+                                if (audio) audio.play().catch(e => console.log('Autoplay ditahan oleh browser'));
+                            }
+                        }
+                        // Update tampilan tanpa reload
+                        this.incomingOrders = data;
+                    })
+                    .catch(err => console.error('Fetch error:', err));
+                }, 5000);
+            }
+        }" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 flex flex-col">
+      
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-sm font-bold text-slate-800 dark:text-white">Pesanan Masuk</h2>
+        <h2 class="text-sm font-bold text-slate-800 dark:text-white">Pesanan Masuk <span x-show="incomingOrders.length > 0" class="ml-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full" x-text="incomingOrders.length"></span></h2>
         <button @click="showAllModal = true" class="text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400">View All</button>
       </div>
       
@@ -417,8 +482,13 @@ foreach($pendingOrders as $order) {
         <template x-for="(a, i) in incomingOrders.slice(0, 4)" :key="a.id">
           <div>
             <div @click="activePage = 'orders'" class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer group">
-              <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 bg-blue-50 dark:bg-blue-900/30">
-                <i class="fa-solid fa-bell text-xs text-blue-500"></i>
+              <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 bg-blue-50 dark:bg-blue-900/30 relative">
+                <!-- Ping indikator kalau belum dibuka -->
+                <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500 border-2 border-white dark:border-slate-800"></span>
+                </span>
+                <i class="fa-solid fa-bell text-xs text-blue-500 animate-pulse"></i>
               </div>
               <div class="min-w-0 flex-1">
                 <p class="text-xs font-semibold text-slate-800 dark:text-slate-100 leading-snug group-hover:text-blue-600 transition-colors" x-text="a.title"></p>
