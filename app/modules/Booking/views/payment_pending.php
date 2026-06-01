@@ -150,7 +150,7 @@ $snapScriptUrl = $isProduction ? 'https://app.midtrans.com/snap/snap.js' : 'http
 <body class="flex flex-col items-center justify-center py-10 px-4 relative transition-colors duration-200">
  
     <div class="z-10 flex flex-col items-center text-center mb-6">
-        <div class="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-3xl shadow-lg shadow-blue-500/40 mb-4 animate-pulse">
+        <div class="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-3xl shadow-lg shadow-blue-500/40 mb-4">
             <i class="bi bi-credit-card-2-front"></i>
         </div>
         <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">Selesaikan Pembayaran Anda!</h1>
@@ -266,7 +266,7 @@ $snapScriptUrl = $isProduction ? 'https://app.midtrans.com/snap/snap.js' : 'http
                     <p class="text-[0.65rem] font-medium text-blue-800 dark:text-blue-300 leading-relaxed">Pembayaran instan dan otomatis terverifikasi secara real-time melalui jaringan <?= $methodLabel ?>.</p>
                 </div>
                 
-                <button id="pay-button" class="w-full bg-gradient-to-r from-blue-600 to-indigo-650 hover:from-blue-750 hover:to-indigo-750 text-white py-3 rounded-full font-bold shadow-lg shadow-blue-600/30 transition duration-200 text-center text-xs flex items-center justify-center gap-2 animate-bounce">
+                <button id="pay-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-full font-bold shadow-lg shadow-blue-600/30 transition duration-200 text-center text-xs flex items-center justify-center gap-2">
                     <i class="bi bi-wallet2"></i> BAYAR SEKARANG
                 </button>
             </div>
@@ -312,9 +312,9 @@ $snapScriptUrl = $isProduction ? 'https://app.midtrans.com/snap/snap.js' : 'http
             
             if (minutes < 3) {
                 timerElement.classList.remove('text-amber-500', 'text-gray-900', 'dark:text-white');
-                timerElement.classList.add('text-red-500', 'animate-pulse');
+                timerElement.classList.add('text-red-500');
             } else {
-                timerElement.classList.remove('text-red-500', 'animate-pulse');
+                timerElement.classList.remove('text-red-500');
                 timerElement.classList.add('text-amber-500');
             }
         }
