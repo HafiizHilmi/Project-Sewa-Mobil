@@ -5,6 +5,20 @@ if (!isset($pdo)) {
 }
 $stmtBL = $pdo->query("SELECT * FROM blacklisted_locations");
 $geofences = $stmtBL ? $stmtBL->fetchAll(PDO::FETCH_ASSOC) : [];
+
+// QUERY SUCCESFUL BOOKINGS FOR THIS CAR TO CALCULATE DATES STOCK
+$bookedRanges = [];
+if (isset($car['id'])) {
+    $stmtBooked = $pdo->prepare("
+        SELECT start_date, end_date 
+        FROM bookings 
+        WHERE car_id = :car_id 
+          AND status = 'confirmed'
+    ");
+    $stmtBooked->execute(['car_id' => $car['id']]);
+    $bookedRanges = $stmtBooked->fetchAll(PDO::FETCH_ASSOC);
+}
+$carStock = intval($car['stock'] ?? 1);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -425,6 +439,8 @@ $geofences = $stmtBL ? $stmtBL->fetchAll(PDO::FETCH_ASSOC) : [];
 
     <script>
         const CAR_BASE_PRICE = <?= intval($car['price_per_day']) ?>; 
+        const bookedRanges = <?= json_encode($bookedRanges) ?>;
+        const carStock = <?= $carStock ?>;
         let driverPrice = 0;
         let totalDays = 0;
 
@@ -556,9 +572,21 @@ $geofences = $stmtBL ? $stmtBL->fetchAll(PDO::FETCH_ASSOC) : [];
                 dateCell.setAttribute('data-date', fullDateStr);
                 dateCell.textContent = i;
                 
+                // Hitung jumlah booking yang menutup tanggal ini
+                let activeBookingsCount = 0;
+                for (const range of bookedRanges) {
+                    if (fullDateStr >= range.start_date && fullDateStr <= range.end_date) {
+                        activeBookingsCount++;
+                    }
+                }
+                
                 const cellDate = new Date(year, month, i);
                 if (cellDate < today) {
                     dateCell.classList.add('text-gray-350', 'cursor-not-allowed', 'opacity-30', 'pointer-events-none');
+                } else if (activeBookingsCount >= carStock) {
+                    // Jika stok habis (warna abu-abu disabled)
+                    dateCell.classList.add('text-gray-350', 'dark:text-slate-600', 'cursor-not-allowed', 'opacity-30', 'pointer-events-none');
+                    dateCell.title = "Stok Mobil Habis pada Tanggal Ini";
                 } else {
                     dateCell.addEventListener('click', handleDateClick);
                 }
@@ -584,15 +612,66 @@ $geofences = $stmtBL ? $stmtBL->fetchAll(PDO::FETCH_ASSOC) : [];
             updateSummaryDates();
         }
 
+        function isDateOutOfStock(dateStr) {
+            let activeBookingsCount = 0;
+            for (const range of bookedRanges) {
+                if (dateStr >= range.start_date && dateStr <= range.end_date) {
+                    activeBookingsCount++;
+                }
+            }
+            return activeBookingsCount >= carStock;
+        }
+
         function handleDateClick(event) {
             const val = event.currentTarget.getAttribute('data-date');
+            
             if (!startDate || (startDate && endDate)) {
+                if (isDateOutOfStock(val)) {
+                    alert('Tanggal ini sudah habis dipesan.');
+                    return;
+                }
                 startDate = val; endDate = null;
             } else if (val === startDate) {
                 startDate = null;
             } else if (val < startDate) {
+                // Cek apakah ada tanggal out of stock di antara val dan startDate
+                let hasOutOfStock = false;
+                let cur = new Date(val);
+                let end = new Date(startDate);
+                while (cur <= end) {
+                    let curStr = cur.toISOString().split('T')[0];
+                    if (isDateOutOfStock(curStr)) {
+                        hasOutOfStock = true;
+                        break;
+                    }
+                    cur.setDate(cur.getDate() + 1);
+                }
+                
+                if (hasOutOfStock) {
+                    alert('Rentang tanggal yang Anda pilih mengandung tanggal yang sudah habis dipesan.');
+                    return;
+                }
+                
                 endDate = startDate; startDate = val;
             } else {
+                // Cek apakah ada tanggal out of stock di antara startDate dan val
+                let hasOutOfStock = false;
+                let cur = new Date(startDate);
+                let end = new Date(val);
+                while (cur <= end) {
+                    let curStr = cur.toISOString().split('T')[0];
+                    if (isDateOutOfStock(curStr)) {
+                        hasOutOfStock = true;
+                        break;
+                    }
+                    cur.setDate(cur.getDate() + 1);
+                }
+                
+                if (hasOutOfStock) {
+                    alert('Rentang tanggal yang Anda pilih mengandung tanggal yang sudah habis dipesan.');
+                    return;
+                }
+                
                 endDate = val;
             }
             renderCalendar();
