@@ -284,7 +284,9 @@ function appData() {
         assignedPlate: o.assigned_plate || null,
         additionalCost: o.additional_cost ? parseFloat(o.additional_cost) : 0,
         damageImage: o.damage_image || null,
-        damageDescription: o.damage_description || null
+        damageDescription: o.damage_description || null,
+        pickupLocation: o.pickup_location || '-',
+        returnLocation: o.return_location || 'Sama dengan lokasi pengambilan'
       };
     }),
     get filteredOrders() {

@@ -8,7 +8,7 @@ function getBusinessSettings() {
     try {
         $pdo = getPDO();
         if (!$pdo) {
-            $cachedBS = ['company_name' => 'Sewa Mobil SBY', 'phone' => '', 'social_media' => '', 'address' => ''];
+            $cachedBS = ['company_name' => 'SewaMobil', 'phone' => '', 'social_media' => '', 'address' => ''];
             return $cachedBS;
         }
 
@@ -24,7 +24,7 @@ function getBusinessSettings() {
         $checkSeed = $pdo->query("SELECT COUNT(*) FROM business_settings WHERE setting_key = 'company_name'");
         if ($checkSeed->fetchColumn() == 0) {
             $pdo->exec("INSERT IGNORE INTO business_settings (setting_key, setting_value) VALUES 
-                ('company_name', 'Sewa Mobil SBY'),
+                ('company_name', 'SewaMobil'),
                 ('phone', '08123456789'),
                 ('social_media', '@sewamobilsby'),
                 ('address', 'Jl. Ketintang Baru, Surabaya, Jawa Timur')");
@@ -39,7 +39,7 @@ function getBusinessSettings() {
         $cachedBS = $settings;
         return $settings;
     } catch (Exception $e) {
-        $cachedBS = ['company_name' => 'Sewa Mobil SBY', 'phone' => '', 'social_media' => '', 'address' => ''];
+        $cachedBS = ['company_name' => 'SewaMobil', 'phone' => '', 'social_media' => '', 'address' => ''];
         return $cachedBS;
     }
 }

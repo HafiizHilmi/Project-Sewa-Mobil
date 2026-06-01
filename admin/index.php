@@ -1,12 +1,11 @@
 <?php
 session_start();
 
-// --- KUNCI HALAMAN UTAMA ADMIN ---
 if (!isset($_SESSION['admin_id'])) {
     header("Location: login.php");
     exit();
 }
-$role = $_SESSION['admin_role'] ?? 'staff'; // Ambil role hak akses
+$role = $_SESSION['admin_role'] ?? 'staff';
 // ---------------------------------
 
 require_once __DIR__ . '/../include/db_config.php';
@@ -32,6 +31,26 @@ if ($checkDamageDesc->rowCount() === 0) {
     $pdo->exec("ALTER TABLE bookings ADD COLUMN damage_description TEXT NULL");
 }
 
+// Upgrade Midtrans columns
+try {
+    $pdo->exec("ALTER TABLE bookings ADD COLUMN payment_token VARCHAR(255) DEFAULT NULL");
+} catch (Exception $e) {}
+try {
+    $pdo->exec("ALTER TABLE bookings ADD COLUMN payment_url VARCHAR(255) DEFAULT NULL");
+} catch (Exception $e) {}
+try {
+    $pdo->exec("ALTER TABLE bookings ADD COLUMN payment_expiry TIMESTAMP NULL DEFAULT NULL");
+} catch (Exception $e) {}
+try {
+    $pdo->exec("ALTER TABLE bookings ADD COLUMN midtrans_order_id VARCHAR(100) DEFAULT NULL");
+} catch (Exception $e) {}
+
+// Otomatis batalkan pesanan pending yang sudah melewati batas waktu pembayaran
+try {
+    $pdo->exec("UPDATE bookings SET status = 'cancelled' WHERE status = 'pending' AND payment_expiry IS NOT NULL AND payment_expiry < NOW()");
+} catch (Exception $e) {}
+
+
 // Ambil data user yang memiliki status verifikasi selain unverified (pending, verified, rejected)
 $stmt = $pdo->query("SELECT id, name, email, verification_status, ktp_file, sim_file, created_at FROM users WHERE verification_status != 'unverified' ORDER BY FIELD(verification_status, 'pending') DESC, id DESC");
 $verifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -52,6 +71,8 @@ $stmtOrders = $pdo->query("
         b.additional_cost,
         b.damage_image,
         b.damage_description,
+        b.pickup_location,
+        b.return_location,
         c.make,
         c.model,
         c.category,
@@ -94,8 +115,8 @@ $customers = $stmtCustomers->fetchAll(PDO::FETCH_ASSOC);
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sewa Mobil SBY — Admin Panel</title>
-  <meta name="description" content="Sistem Admin Dashboard Sewa Mobil SBY — Customers, Settings, dan manajemen armada."/>
+  <title>SewaMobil — Admin Panel</title>
+  <meta name="description" content="Sistem Admin Dashboard SewaMobil — Customers, Settings, dan manajemen armada."/>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
@@ -177,7 +198,7 @@ $customers = $stmtCustomers->fetchAll(PDO::FETCH_ASSOC);
   window.SERVER_ORDERS = <?= json_encode($orders) ?>;
   window.SERVER_CUSTOMERS = <?= json_encode($customers) ?>;
 </script>
-<script src="assets/js/app.js"></script>
+<script src="assets/js/app.js?v=<?= time() ?>"></script>
 
 </body>
 </html>

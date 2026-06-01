@@ -1,3 +1,25 @@
+<?php
+if (!isset($pdo)) {
+    require_once __DIR__ . '/../../../include/db_config.php';
+    $pdo = getPDO();
+}
+$stmtBL = $pdo->query("SELECT * FROM blacklisted_locations");
+$geofences = $stmtBL ? $stmtBL->fetchAll(PDO::FETCH_ASSOC) : [];
+
+// QUERY SUCCESFUL BOOKINGS FOR THIS CAR TO CALCULATE DATES STOCK
+$bookedRanges = [];
+if (isset($car['id'])) {
+    $stmtBooked = $pdo->prepare("
+        SELECT start_date, end_date 
+        FROM bookings 
+        WHERE car_id = :car_id 
+          AND status = 'confirmed'
+    ");
+    $stmtBooked->execute(['car_id' => $car['id']]);
+    $bookedRanges = $stmtBooked->fetchAll(PDO::FETCH_ASSOC);
+}
+$carStock = intval($car['stock'] ?? 1);
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -202,6 +224,17 @@
     </nav>
 
     <main class="max-w-7xl mx-auto px-6 py-10">
+        <?php if (isset($_SESSION['flash'])): ?>
+            <div id="flash-alert" class="mb-6 p-4 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-300 flex items-center justify-center gap-3 shadow-sm transition-all relative">
+                <i class="bi bi-exclamation-triangle-fill text-lg shrink-0"></i>
+                <p class="text-sm font-semibold text-center pr-6"><?= htmlspecialchars($_SESSION['flash']) ?></p>
+                <button type="button" onclick="document.getElementById('flash-alert').remove()" class="absolute right-4 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-700 dark:hover:text-red-400 flex items-center justify-center">
+                    <i class="bi bi-x-lg text-sm"></i>
+                </button>
+            </div>
+            <?php unset($_SESSION['flash']); ?>
+        <?php endif; ?>
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             <div class="lg:col-span-2 space-y-6">
@@ -212,6 +245,13 @@
                         </div>
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white">Detail Lokasi</h2>
                     </div>
+
+                    <!-- Real-time Geofence Warning Container -->
+                    <div id="geofence-warning-box" class="mb-6 p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-300 flex items-center justify-center gap-3 shadow-sm hidden">
+                        <i class="bi bi-exclamation-triangle-fill text-lg shrink-0"></i>
+                        <p class="text-sm font-semibold text-center" id="geofence-warning-text"></p>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="input-floating-label flex items-center justify-between">
                             <div class="w-full">
@@ -399,6 +439,8 @@
 
     <script>
         const CAR_BASE_PRICE = <?= intval($car['price_per_day']) ?>; 
+        const bookedRanges = <?= json_encode($bookedRanges) ?>;
+        const carStock = <?= $carStock ?>;
         let driverPrice = 0;
         let totalDays = 0;
 
@@ -421,11 +463,29 @@
         document.getElementById('input-pickup').addEventListener('input', function(e) {
             sumPickup.textContent = e.target.value || 'Lokasi belum ditentukan';
             sumPickup.title = e.target.value || 'Lokasi belum ditentukan';
+            if (!e.target.value.trim()) {
+                document.getElementById('pickup-lat-input').value = "";
+                document.getElementById('pickup-lon-input').value = "";
+            }
+            if (typeof checkGeofencesRealtime === 'function') checkGeofencesRealtime();
         });
 
         document.getElementById('input-return').addEventListener('input', function(e) {
             sumReturn.textContent = e.target.value || 'Sama dengan lokasi pengambilan';
             sumReturn.title = e.target.value || 'Sama dengan lokasi pengambilan';
+            if (!e.target.value.trim()) {
+                document.getElementById('return-lat-input').value = "";
+                document.getElementById('return-lon-input').value = "";
+            }
+            if (typeof checkGeofencesRealtime === 'function') checkGeofencesRealtime();
+        });
+
+        document.getElementById('input-address').addEventListener('input', function(e) {
+            if (!e.target.value.trim()) {
+                document.getElementById('address-lat-input').value = "";
+                document.getElementById('address-lon-input').value = "";
+            }
+            if (typeof checkGeofencesRealtime === 'function') checkGeofencesRealtime();
         });
 
         const formatRupiah = (angka) => {
@@ -512,9 +572,21 @@
                 dateCell.setAttribute('data-date', fullDateStr);
                 dateCell.textContent = i;
                 
+                // Hitung jumlah booking yang menutup tanggal ini
+                let activeBookingsCount = 0;
+                for (const range of bookedRanges) {
+                    if (fullDateStr >= range.start_date && fullDateStr <= range.end_date) {
+                        activeBookingsCount++;
+                    }
+                }
+                
                 const cellDate = new Date(year, month, i);
                 if (cellDate < today) {
                     dateCell.classList.add('text-gray-350', 'cursor-not-allowed', 'opacity-30', 'pointer-events-none');
+                } else if (activeBookingsCount >= carStock) {
+                    // Jika stok habis (warna abu-abu disabled)
+                    dateCell.classList.add('text-gray-350', 'dark:text-slate-600', 'cursor-not-allowed', 'opacity-30', 'pointer-events-none');
+                    dateCell.title = "Stok Mobil Habis pada Tanggal Ini";
                 } else {
                     dateCell.addEventListener('click', handleDateClick);
                 }
@@ -540,15 +612,66 @@
             updateSummaryDates();
         }
 
+        function isDateOutOfStock(dateStr) {
+            let activeBookingsCount = 0;
+            for (const range of bookedRanges) {
+                if (dateStr >= range.start_date && dateStr <= range.end_date) {
+                    activeBookingsCount++;
+                }
+            }
+            return activeBookingsCount >= carStock;
+        }
+
         function handleDateClick(event) {
             const val = event.currentTarget.getAttribute('data-date');
+            
             if (!startDate || (startDate && endDate)) {
+                if (isDateOutOfStock(val)) {
+                    alert('Tanggal ini sudah habis dipesan.');
+                    return;
+                }
                 startDate = val; endDate = null;
             } else if (val === startDate) {
                 startDate = null;
             } else if (val < startDate) {
+                // Cek apakah ada tanggal out of stock di antara val dan startDate
+                let hasOutOfStock = false;
+                let cur = new Date(val);
+                let end = new Date(startDate);
+                while (cur <= end) {
+                    let curStr = cur.toISOString().split('T')[0];
+                    if (isDateOutOfStock(curStr)) {
+                        hasOutOfStock = true;
+                        break;
+                    }
+                    cur.setDate(cur.getDate() + 1);
+                }
+                
+                if (hasOutOfStock) {
+                    alert('Rentang tanggal yang Anda pilih mengandung tanggal yang sudah habis dipesan.');
+                    return;
+                }
+                
                 endDate = startDate; startDate = val;
             } else {
+                // Cek apakah ada tanggal out of stock di antara startDate dan val
+                let hasOutOfStock = false;
+                let cur = new Date(startDate);
+                let end = new Date(val);
+                while (cur <= end) {
+                    let curStr = cur.toISOString().split('T')[0];
+                    if (isDateOutOfStock(curStr)) {
+                        hasOutOfStock = true;
+                        break;
+                    }
+                    cur.setDate(cur.getDate() + 1);
+                }
+                
+                if (hasOutOfStock) {
+                    alert('Rentang tanggal yang Anda pilih mengandung tanggal yang sudah habis dipesan.');
+                    return;
+                }
+                
                 endDate = val;
             }
             renderCalendar();
@@ -758,6 +881,115 @@
             });
         }
 
+        // ==================== REAL-TIME GEOFENCE CHECKER ====================
+        const geofences = <?= json_encode($geofences) ?>;
+        let isGeofenceBlocked = false;
+
+        function haversine(lat1, lon1, lat2, lon2) {
+            const earthRadius = 6371000; // in meters
+            const latDelta = (lat2 - lat1) * Math.PI / 180;
+            const lonDelta = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(latDelta / 2) * Math.sin(latDelta / 2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(lonDelta / 2) * Math.sin(lonDelta / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return earthRadius * c;
+        }
+
+        function checkGeofencesRealtime() {
+            const pickupLat = parseFloat(document.getElementById('pickup-lat-input').value) || null;
+            const pickupLon = parseFloat(document.getElementById('pickup-lon-input').value) || null;
+            const returnLat = parseFloat(document.getElementById('return-lat-input').value) || null;
+            const returnLon = parseFloat(document.getElementById('return-lon-input').value) || null;
+            const addressLat = parseFloat(document.getElementById('address-lat-input').value) || null;
+            const addressLon = parseFloat(document.getElementById('address-lon-input').value) || null;
+
+            // Ambil teks yang diinput secara manual (ubah ke huruf kecil untuk perbandingan case-insensitive)
+            const pickupText = document.getElementById('input-pickup').value.trim().toLowerCase();
+            const returnText = document.getElementById('input-return').value.trim().toLowerCase();
+            const addressText = document.getElementById('input-address').value.trim().toLowerCase();
+
+            isGeofenceBlocked = false;
+            let blockReason = "";
+
+            if (!geofences || geofences.length === 0) return;
+
+            for (const gf of geofences) {
+                const gfLat = parseFloat(gf.latitude);
+                const gfLng = parseFloat(gf.longitude);
+                const gfRad = parseInt(gf.radius);
+                const gfName = gf.location_name ? gf.location_name.trim().toLowerCase() : "";
+
+                // A. Pengecekan berbasis Pencocokan Teks (Manual Input)
+                if (gfName !== "") {
+                    // Bersihkan nama lokasi dari suffix angka dan kata "point"
+                    const cleanGfName = gfName.replace(/\s*\d+$/, '').replace(/\s*point\s*$/, '').trim();
+                    
+                    // Pecah menjadi bagian-bagian kata kunci (misal: "ntt - ntb" -> ["ntt", "ntb"])
+                    const parts = cleanGfName.split(/[\s\-\,]+/).filter(part => part.length >= 3);
+                    if (cleanGfName.length >= 3 && !parts.includes(cleanGfName)) {
+                        parts.push(cleanGfName);
+                    }
+
+                    // Cek apakah ada bagian dari nama lokasi blacklist yang terkandung dalam input user
+                    let isTextMatched = false;
+                    for (const part of parts) {
+                        if (pickupText.includes(part) || returnText.includes(part) || addressText.includes(part)) {
+                            isTextMatched = true;
+                            break;
+                        }
+                    }
+
+                    if (isTextMatched) {
+                        isGeofenceBlocked = true;
+                        blockReason = `Lokasi Anda berada di wilayah tidak terjangkau (${gf.location_name}).`;
+                        break;
+                    }
+                }
+
+                // B. Pengecekan berbasis Radius Geofence (Auto-suggest terpilih)
+                // 1. Cek Lokasi Pengambilan
+                if (pickupLat && pickupLon) {
+                    const dist = haversine(pickupLat, pickupLon, gfLat, gfLng);
+                    if (dist <= gfRad) {
+                        isGeofenceBlocked = true;
+                        blockReason = `Lokasi pengambilan kendaraan Anda berada di wilayah tidak terjangkau (${gf.location_name}).`;
+                        break;
+                    }
+                }
+
+                // 2. Cek Lokasi Pengembalian
+                if (returnLat && returnLon) {
+                    const dist = haversine(returnLat, returnLon, gfLat, gfLng);
+                    if (dist <= gfRad) {
+                        isGeofenceBlocked = true;
+                        blockReason = `Lokasi pengembalian kendaraan Anda berada di wilayah tidak terjangkau (${gf.location_name}).`;
+                        break;
+                    }
+                }
+
+                // 3. Cek Alamat Lengkap
+                if (addressLat && addressLon) {
+                    const dist = haversine(addressLat, addressLon, gfLat, gfLng);
+                    if (dist <= gfRad) {
+                        isGeofenceBlocked = true;
+                        blockReason = `Alamat lengkap Anda berada di wilayah tidak terjangkau (${gf.location_name}).`;
+                        break;
+                    }
+                }
+            }
+
+            const warningBox = document.getElementById('geofence-warning-box');
+            const warningText = document.getElementById('geofence-warning-text');
+            if (isGeofenceBlocked) {
+                warningText.textContent = blockReason;
+                warningBox.classList.remove('hidden');
+            } else {
+                warningBox.classList.add('hidden');
+                warningText.textContent = "";
+            }
+        }
+
         // Initialize Auto-suggest
         initAutocomplete('input-pickup', 'dropdown-pickup', function(place) {
             const val = place.display_name;
@@ -765,6 +997,7 @@
             sumPickup.title = val || 'Lokasi belum ditentukan';
             document.getElementById('pickup-lat-input').value = place.lat;
             document.getElementById('pickup-lon-input').value = place.lon;
+            checkGeofencesRealtime();
         });
         initAutocomplete('input-return', 'dropdown-return', function(place) {
             const val = place.display_name;
@@ -772,10 +1005,12 @@
             sumReturn.title = val || 'Sama dengan lokasi pengambilan';
             document.getElementById('return-lat-input').value = place.lat;
             document.getElementById('return-lon-input').value = place.lon;
+            checkGeofencesRealtime();
         });
         initAutocomplete('input-address', 'dropdown-address', function(place) {
             document.getElementById('address-lat-input').value = place.lat;
             document.getElementById('address-lon-input').value = place.lon;
+            checkGeofencesRealtime();
         });
 
         bookingForm.addEventListener('submit', function(e) {
@@ -787,6 +1022,12 @@
 
             if (sumPickup.textContent === 'Lokasi belum ditentukan') {
                 alert('Masukkan lokasi pengambilan.');
+                e.preventDefault();
+                return;
+            }
+
+            if (isGeofenceBlocked) {
+                alert('Pemesanan tidak dapat dilanjutkan karena lokasi yang dipilih berada di wilayah tidak terjangkau.');
                 e.preventDefault();
                 return;
             }

@@ -18,17 +18,17 @@ foreach ($blacklists as $b_area) {
     
     if (strpos(strtolower($asal_pelanggan), $b_area) !== false) {
         $is_blacklisted = true;
-        $blocked_reason = "Asal pelanggan berada di zona blacklist: " . ucwords($b_area);
+        $blocked_reason = "Asal pelanggan berada di wilayah tidak terjangkau.";
         break;
     }
     if (strpos(strtolower($tujuan_penyewa), $b_area) !== false) {
         $is_blacklisted = true;
-        $blocked_reason = "Tujuan perjalanan berada di zona blacklist: " . ucwords($b_area);
+        $blocked_reason = "Tujuan perjalanan berada di wilayah tidak terjangkau.";
         break;
     }
     if (strpos(strtolower($lokasi_ambil), $b_area) !== false) {
         $is_blacklisted = true;
-        $blocked_reason = "Lokasi pengambilan mobil berada di zona blacklist: " . ucwords($b_area);
+        $blocked_reason = "Lokasi pengambilan mobil berada di wilayah tidak terjangkau.";
         break;
     }
 }

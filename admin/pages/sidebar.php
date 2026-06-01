@@ -94,7 +94,7 @@
   </nav>
 
   <div class="mx-4 mb-5 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-    <p class="text-xs font-semibold text-blue-600">Sewa Mobil SBY</p>
+    <p class="text-xs font-semibold text-blue-600">SewaMobil</p>
     <p class="text-[10px] text-blue-400 mt-0.5">v2.0.0 · 2026</p>
   </div>
 </aside>

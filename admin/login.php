@@ -70,7 +70,7 @@ if (isset($_POST['login'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Admin - Sewa Mobil SBY</title>
+    <title>Login Admin - SewaMobil</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -119,7 +119,7 @@ if (isset($_POST['login'])) {
         </form>
 
         <div class="mt-8 text-center text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-            &copy; 2026 Sewa Mobil SBY
+            &copy; 2026 SewaMobil
         </div>
     </div>
 

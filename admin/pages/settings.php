@@ -125,7 +125,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
         <div>
           <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Nama Perusahaan / Toko</label>
-          <input type="text" value="Sewa Mobil SBY" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:border-blue-400"/>
+          <input type="text" value="SewaMobil" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:border-blue-400"/>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">No Telp / WhatsApp</label>
@@ -174,7 +174,7 @@
   ?>
 
   <div x-show="activeTab === 'blacklist'"
-       x-data="{ showAddForm: false, selectedLat: '', selectedLng: '', selectedRadius: 5000, selectedName: '' }"
+       x-data="{ showAddForm: false, selectedLat: '', selectedLng: '', selectedRadius: 5000, selectedName: '', blacklistType: 'geofence' }"
        x-init="
           $watch('activeTab', value => {
               if (value === 'blacklist') {
@@ -189,11 +189,11 @@
        
     <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
       <div>
-        <h2 class="text-sm font-bold text-slate-800 dark:text-white">Geofencing Blacklist Area</h2>
-        <p class="text-xs text-slate-400 mt-0.5">Blokir otomatis transaksi sewa dari/ke zona merah rawan</p>
+        <h2 class="text-sm font-bold text-slate-800 dark:text-white">Geofencing & Kata Kunci Blacklist</h2>
+        <p class="text-xs text-slate-400 mt-0.5">Blokir otomatis transaksi sewa dari/ke wilayah rawan terlarang</p>
       </div>
       <div class="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-xl border dark:border-slate-700 flex items-center gap-1.5 font-medium shrink-0">
-        <i class="fa-solid fa-circle-info text-blue-500"></i> Klik lokasi di peta untuk membuat Geofence baru
+        <i class="fa-solid fa-circle-info text-blue-500"></i> Klik lokasi di peta atau klik 'Tambah Kata Kunci'
       </div>
     </div>
 
@@ -215,11 +215,11 @@
       
       <!-- CONTROL PANEL -->
       <div class="lg:col-span-1 flex flex-col gap-4">
-        <!-- FORM TAMBAH GEOFENCE -->
+        <!-- FORM TAMBAH GEOFENCE / KATA KUNCI -->
         <div x-show="showAddForm" x-transition.opacity class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5">
           <div class="flex items-center gap-2 mb-4">
             <div class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400"><i class="fa-solid fa-plus text-xs"></i></div>
-            <h3 class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">Geofence Baru</h3>
+            <h3 class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider" x-text="blacklistType === 'keyword' ? 'Blokir Kata Kunci Baru' : 'Geofence Baru'"></h3>
           </div>
           
           <form action="admin_action.php" method="POST" id="geofence-form">
@@ -229,11 +229,11 @@
             
             <div class="space-y-4">
               <div>
-                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Nama Wilayah / Keterangan</label>
-                <input type="text" name="location_name" x-model="selectedName" required placeholder="Cth: Zona Rawan Pati" class="w-full border dark:border-slate-600 rounded-xl px-4 py-2.5 text-xs bg-white dark:bg-slate-700 dark:text-white outline-none focus:border-red-500"/>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5" x-text="blacklistType === 'keyword' ? 'Kata Kunci Wilayah (Cth: Madura, Bali, Papua)' : 'Nama Wilayah / Keterangan'"></label>
+                <input type="text" name="location_name" x-model="selectedName" required :placeholder="blacklistType === 'keyword' ? 'Cth: Madura' : 'Cth: Zona Rawan Pati'" class="w-full border dark:border-slate-600 rounded-xl px-4 py-2.5 text-xs bg-white dark:bg-slate-700 dark:text-white outline-none focus:border-red-500"/>
               </div>
               
-              <div>
+              <div x-show="blacklistType === 'geofence'">
                 <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5 flex justify-between">
                   <span>Radius Geofence</span>
                   <span class="text-red-500 font-bold" x-text="selectedRadius >= 1000 ? (selectedRadius/1000).toFixed(1) + ' km' : selectedRadius + ' meter'"></span>
@@ -244,9 +244,14 @@
                 </div>
               </div>
               
-              <div class="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-3 text-[10px] text-slate-500 dark:text-slate-400 space-y-1">
+              <div x-show="blacklistType === 'geofence'" class="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-3 text-[10px] text-slate-500 dark:text-slate-400 space-y-1">
                 <div class="flex justify-between"><span>Latitude:</span><span class="font-mono text-slate-700 dark:text-slate-300" x-text="parseFloat(selectedLat || 0).toFixed(6)"></span></div>
                 <div class="flex justify-between"><span>Longitude:</span><span class="font-mono text-slate-700 dark:text-slate-300" x-text="parseFloat(selectedLng || 0).toFixed(6)"></span></div>
+              </div>
+
+              <div x-show="blacklistType === 'keyword'" class="bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/50 rounded-xl p-3 text-[10px] text-amber-800 dark:text-amber-300 space-y-1 leading-relaxed">
+                <i class="fa-solid fa-triangle-exclamation mr-1 text-amber-500"></i>
+                Transaksi dari/ke alamat yang mengandung kata kunci ini akan diblokir otomatis tanpa batasan radius Map.
               </div>
               
               <div class="flex gap-2 pt-2">
@@ -262,30 +267,44 @@
           <div class="flex items-center justify-between mb-4 shrink-0">
             <div class="flex items-center gap-2">
               <div class="w-7 h-7 rounded-lg bg-red-50 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400"><i class="fa-solid fa-ban text-xs"></i></div>
-              <h3 class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">Geofence Aktif</h3>
+              <h3 class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">Blacklist Aktif</h3>
             </div>
-            <span class="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold px-2 py-0.5 rounded-md" x-text="'Total: ' + <?= count($blacklists) ?>"></span>
+            <button @click="blacklistType = 'keyword'; selectedName = ''; selectedLat = ''; selectedLng = ''; selectedRadius = ''; showAddForm = true;" class="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 text-[10px] font-bold px-2.5 py-1.5 rounded-lg border border-red-200/50 dark:border-red-900/50 transition-colors">
+              <i class="fa-solid fa-plus"></i> Kata Kunci
+            </button>
           </div>
           
           <div class="space-y-3 overflow-y-auto max-h-[320px] pr-1 flex-1 custom-scrollbar">
             <?php if (count($blacklists) > 0): ?>
-              <?php foreach ($blacklists as $bl): ?>
+              <?php foreach ($blacklists as $bl): 
+                $isGeofence = ($bl['latitude'] !== null && $bl['longitude'] !== null);
+              ?>
                 <div class="border border-slate-100 dark:border-slate-700/80 rounded-xl p-3 hover:border-slate-200 dark:hover:border-slate-600 hover:shadow-sm transition-all group">
                   <div class="flex justify-between items-start">
                     <div class="min-w-0 flex-1">
-                      <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate"><?= htmlspecialchars($bl['location_name']) ?></h4>
-                      <p class="text-[10px] text-slate-400 mt-1">Radius: <span class="font-semibold text-slate-600 dark:text-slate-300"><?= $bl['radius'] >= 1000000 ? '1000 km' : ($bl['radius'] >= 1000 ? ($bl['radius']/1000) . ' km' : $bl['radius'] . ' m') ?></span></p>
-                      <?php if($bl['latitude'] && $bl['longitude']): ?>
+                      <div class="flex items-center gap-1.5">
+                        <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate"><?= htmlspecialchars($bl['location_name']) ?></h4>
+                        <?php if (!$isGeofence): ?>
+                          <span class="text-[8px] bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400 font-bold px-1.5 py-0.5 rounded-md uppercase shrink-0">Kata Kunci</span>
+                        <?php endif; ?>
+                      </div>
+                      
+                      <?php if ($isGeofence): ?>
+                        <p class="text-[10px] text-slate-400 mt-1">Radius: <span class="font-semibold text-slate-600 dark:text-slate-300"><?= $bl['radius'] >= 1000000 ? '1000 km' : ($bl['radius'] >= 1000 ? ($bl['radius']/1000) . ' km' : $bl['radius'] . ' m') ?></span></p>
                         <p class="text-[9px] text-slate-400 font-mono mt-0.5"><?= number_format($bl['latitude'], 4) ?>, <?= number_format($bl['longitude'], 4) ?></p>
+                      <?php else: ?>
+                        <p class="text-[10px] text-slate-400 mt-1">Blokir wilayah tanpa radius</p>
                       <?php endif; ?>
                     </div>
                     
                     <div class="flex gap-1 shrink-0 ml-2">
-                      <button onclick="zoomToGeofence(<?= $bl['latitude'] ?>, <?= $bl['longitude'] ?>, <?= $bl['radius'] ?>)" title="Pusatkan Peta" class="w-7 h-7 rounded-lg flex items-center justify-center text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
-                        <i class="fa-solid fa-crosshairs text-[10px]"></i>
-                      </button>
+                      <?php if ($isGeofence): ?>
+                        <button onclick="zoomToGeofence(<?= $bl['latitude'] ?>, <?= $bl['longitude'] ?>, <?= $bl['radius'] ?>)" title="Pusatkan Peta" class="w-7 h-7 rounded-lg flex items-center justify-center text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                          <i class="fa-solid fa-crosshairs text-[10px]"></i>
+                        </button>
+                      <?php endif; ?>
                       
-                      <form action="admin_action.php" method="POST" class="m-0 p-0" onsubmit="return confirm('Hapus geofence ini?');">
+                      <form action="admin_action.php" method="POST" class="m-0 p-0" onsubmit="return confirm('Hapus <?= $isGeofence ? 'geofence' : 'kata kunci' ?> blacklist ini?');">
                         <input type="hidden" name="action" value="delete_blacklist">
                         <input type="hidden" name="id" value="<?= $bl['id'] ?>">
                         <button type="submit" title="Hapus Blacklist" class="w-7 h-7 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
@@ -299,7 +318,7 @@
             <?php else: ?>
               <div class="p-8 text-center text-slate-400 text-xs flex-1 flex flex-col items-center justify-center">
                 <i class="fa-solid fa-map-location-dot text-2xl text-slate-300 dark:text-slate-600 mb-2"></i>
-                <span>Belum ada geofence terdaftar.</span>
+                <span>Belum ada blacklist terdaftar.</span>
               </div>
             <?php endif; ?>
           </div>
@@ -545,6 +564,7 @@
                   
                   alpineData.selectedLat = lat;
                   alpineData.selectedLng = lng;
+                  alpineData.blacklistType = 'geofence';
                   alpineData.showAddForm = true;
                   
                   // Gambar Marker & Circle sementara
@@ -696,6 +716,7 @@
               alpineData.selectedLat = lat;
               alpineData.selectedLng = lon;
               alpineData.selectedName = mainName;
+              alpineData.blacklistType = 'geofence';
               alpineData.showAddForm = true;
               
               // Gambar Marker & Circle sementara
@@ -740,10 +761,11 @@
           const blacklistTab = document.querySelector('[x-show="activeTab === \'blacklist\'"]');
           if (blacklistTab) {
               const alpineData = Alpine.$data(blacklistTab);
-              alpineData.showAddForm = false;
-              alpineData.selectedName = '';
-              alpineData.selectedLat = '';
-              alpineData.selectedLng = '';
+               alpineData.showAddForm = false;
+               alpineData.selectedName = '';
+               alpineData.selectedLat = '';
+               alpineData.selectedLng = '';
+               alpineData.blacklistType = 'geofence';
               
               if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
               if (tempCircle) { map.removeLayer(tempCircle); tempCircle = null; }

@@ -13,7 +13,7 @@
       </div>
 
       <div class="flex items-center gap-2 flex-wrap">
-        <template x-for="tab in ['All Orders','Pending','Confirmed','Completed']" :key="tab">
+        <template x-for="tab in ['All Orders','Pending','Confirmed','Completed','Cancelled']" :key="tab">
           <button @click="orderFilter = tab"
                   :class="orderFilter === tab
                     ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
@@ -117,6 +117,7 @@
                             'bg-blue-600 text-white' : order.status === 'Confirmed',
                             'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400': order.status === 'Pending',
                             'bg-emerald-500 text-white' : order.status === 'Completed',
+                            'bg-rose-100 text-rose-650 dark:bg-rose-950/40 dark:text-rose-450': order.status === 'Cancelled',
                           }"
                           x-text="order.status">
                     </span>
@@ -178,6 +179,7 @@
                               'bg-blue-600 text-white' : order.status === 'Confirmed',
                               'bg-orange-100 text-orange-600': order.status === 'Pending',
                               'bg-emerald-500 text-white' : order.status === 'Completed',
+                              'bg-rose-100 text-rose-650 dark:bg-rose-950/40 dark:text-rose-450': order.status === 'Cancelled',
                             }" x-text="order.status"></span>
                     </div>
                     <p class="text-sm font-bold text-slate-800 dark:text-white" x-text="order.customer.name"></p>
@@ -266,6 +268,22 @@
         <div class="bg-blue-600 rounded-xl p-4 flex justify-between items-center text-white mb-4">
           <p class="text-sm font-semibold">Total Pembayaran</p>
           <p class="text-base font-extrabold" x-text="'Rp ' + selectedOrder.totalFormatted"></p>
+        </div>
+
+        <div class="bg-slate-50 dark:bg-slate-700/30 border border-slate-100 dark:border-slate-700/50 rounded-xl p-4 mb-4 space-y-3">
+          <div>
+            <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              <i class="fa-solid fa-map-pin text-blue-500 text-[9px]"></i> Lokasi Pengambilan
+            </span>
+            <p class="text-xs font-semibold text-slate-700 dark:text-slate-200 mt-1 leading-relaxed" x-text="selectedOrder.pickupLocation"></p>
+          </div>
+          <div class="border-t border-slate-100 dark:border-slate-700/50 my-1"></div>
+          <div>
+            <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              <i class="fa-solid fa-location-dot text-rose-500 text-[9px]"></i> Lokasi Pengembalian
+            </span>
+            <p class="text-xs font-semibold text-slate-700 dark:text-slate-200 mt-1 leading-relaxed" x-text="selectedOrder.returnLocation"></p>
+          </div>
         </div>
 
         <template x-if="selectedOrder.status === 'Completed' && (selectedOrder.additionalCost > 0 || selectedOrder.damageDescription)">
