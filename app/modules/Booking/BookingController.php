@@ -88,7 +88,7 @@ class BookingController {
         }
 
         // ----------------- GEOFENCING BLACKLIST CHECK -----------------
-        $stmtBL = $pdo->query("SELECT * FROM blacklisted_locations WHERE latitude IS NOT NULL AND longitude IS NOT NULL");
+        $stmtBL = $pdo->query("SELECT * FROM blacklisted_locations");
         $geofences = $stmtBL->fetchAll(PDO::FETCH_ASSOC);
 
         $pickup_lat = isset($_POST['pickup_lat']) && $_POST['pickup_lat'] !== '' ? floatval($_POST['pickup_lat']) : null;
@@ -102,6 +102,10 @@ class BookingController {
 
         $is_blocked = false;
         $block_reason = "";
+
+        $pickup_location_lower = strtolower($pickup_location);
+        $return_location_lower = strtolower($return_location);
+        $address_lower = strtolower($address);
 
         $haversine = function($lat1, $lon1, $lat2, $lon2) {
             $earthRadius = 6371000; // in meters
@@ -119,13 +123,51 @@ class BookingController {
             $gfLng = floatval($gf['longitude']);
             $gfRad = intval($gf['radius']);
             $locationName = $gf['location_name'];
+            $locationNameLower = strtolower(trim($locationName));
 
+            // A. Pengecekan berbasis Pencocokan Teks (Manual Input)
+            if ($locationNameLower !== '') {
+                // Bersihkan nama lokasi dari suffix angka dan kata "point"
+                $cleanGfName = preg_replace('/\s*\d+$/', '', $locationNameLower);
+                $cleanGfName = preg_replace('/\s*point\s*$/', '', $cleanGfName);
+                $cleanGfName = trim($cleanGfName);
+
+                // Pecah menjadi bagian-bagian kata kunci (misal: "ntt - ntb" -> ["ntt", "ntb"])
+                $parts = preg_split('/[\s\-,]+/', $cleanGfName);
+                $parts = array_filter($parts, function($part) {
+                    return strlen(trim($part)) >= 3;
+                });
+                $parts = array_map('trim', $parts);
+
+                if (strlen($cleanGfName) >= 3 && !in_array($cleanGfName, $parts)) {
+                    $parts[] = $cleanGfName;
+                }
+
+                // Cek apakah ada bagian dari nama lokasi blacklist yang terkandung dalam input user
+                $text_blocked = false;
+                foreach ($parts as $part) {
+                    if (strpos($pickup_location_lower, $part) !== false ||
+                        strpos($return_location_lower, $part) !== false ||
+                        strpos($address_lower, $part) !== false) {
+                        $text_blocked = true;
+                        break;
+                    }
+                }
+
+                if ($text_blocked) {
+                    $is_blocked = true;
+                    $block_reason = "Lokasi yang Anda masukkan berada di wilayah tidak terjangkau ($locationName).";
+                    break;
+                }
+            }
+
+            // B. Pengecekan berbasis Geofencing Radius (Koordinat)
             // Cek Lokasi Pengambilan
             if ($pickup_lat && $pickup_lon) {
                 $dist = $haversine($pickup_lat, $pickup_lon, $gfLat, $gfLng);
                 if ($dist <= $gfRad) {
                     $is_blocked = true;
-                    $block_reason = "Lokasi pengambilan kendaraan Anda berada di wilayah tidak terjangkau.";
+                    $block_reason = "Lokasi pengambilan kendaraan Anda berada di wilayah tidak terjangkau ($locationName).";
                     break;
                 }
             }
@@ -135,7 +177,7 @@ class BookingController {
                 $dist = $haversine($return_lat, $return_lon, $gfLat, $gfLng);
                 if ($dist <= $gfRad) {
                     $is_blocked = true;
-                    $block_reason = "Lokasi pengembalian kendaraan Anda berada di wilayah tidak terjangkau.";
+                    $block_reason = "Lokasi pengembalian kendaraan Anda berada di wilayah tidak terjangkau ($locationName).";
                     break;
                 }
             }
@@ -145,7 +187,7 @@ class BookingController {
                 $dist = $haversine($address_lat, $address_lon, $gfLat, $gfLng);
                 if ($dist <= $gfRad) {
                     $is_blocked = true;
-                    $block_reason = "Alamat lengkap Anda berada di wilayah tidak terjangkau.";
+                    $block_reason = "Alamat lengkap Anda berada di wilayah tidak terjangkau ($locationName).";
                     break;
                 }
             }

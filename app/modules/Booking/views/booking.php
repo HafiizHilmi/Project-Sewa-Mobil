@@ -3,7 +3,7 @@ if (!isset($pdo)) {
     require_once __DIR__ . '/../../../include/db_config.php';
     $pdo = getPDO();
 }
-$stmtBL = $pdo->query("SELECT * FROM blacklisted_locations WHERE latitude IS NOT NULL AND longitude IS NOT NULL");
+$stmtBL = $pdo->query("SELECT * FROM blacklisted_locations");
 $geofences = $stmtBL ? $stmtBL->fetchAll(PDO::FETCH_ASSOC) : [];
 ?>
 <!DOCTYPE html>
@@ -825,6 +825,11 @@ $geofences = $stmtBL ? $stmtBL->fetchAll(PDO::FETCH_ASSOC) : [];
             const addressLat = parseFloat(document.getElementById('address-lat-input').value) || null;
             const addressLon = parseFloat(document.getElementById('address-lon-input').value) || null;
 
+            // Ambil teks yang diinput secara manual (ubah ke huruf kecil untuk perbandingan case-insensitive)
+            const pickupText = document.getElementById('input-pickup').value.trim().toLowerCase();
+            const returnText = document.getElementById('input-return').value.trim().toLowerCase();
+            const addressText = document.getElementById('input-address').value.trim().toLowerCase();
+
             isGeofenceBlocked = false;
             let blockReason = "";
 
@@ -834,13 +839,42 @@ $geofences = $stmtBL ? $stmtBL->fetchAll(PDO::FETCH_ASSOC) : [];
                 const gfLat = parseFloat(gf.latitude);
                 const gfLng = parseFloat(gf.longitude);
                 const gfRad = parseInt(gf.radius);
+                const gfName = gf.location_name ? gf.location_name.trim().toLowerCase() : "";
 
+                // A. Pengecekan berbasis Pencocokan Teks (Manual Input)
+                if (gfName !== "") {
+                    // Bersihkan nama lokasi dari suffix angka dan kata "point"
+                    const cleanGfName = gfName.replace(/\s*\d+$/, '').replace(/\s*point\s*$/, '').trim();
+                    
+                    // Pecah menjadi bagian-bagian kata kunci (misal: "ntt - ntb" -> ["ntt", "ntb"])
+                    const parts = cleanGfName.split(/[\s\-\,]+/).filter(part => part.length >= 3);
+                    if (cleanGfName.length >= 3 && !parts.includes(cleanGfName)) {
+                        parts.push(cleanGfName);
+                    }
+
+                    // Cek apakah ada bagian dari nama lokasi blacklist yang terkandung dalam input user
+                    let isTextMatched = false;
+                    for (const part of parts) {
+                        if (pickupText.includes(part) || returnText.includes(part) || addressText.includes(part)) {
+                            isTextMatched = true;
+                            break;
+                        }
+                    }
+
+                    if (isTextMatched) {
+                        isGeofenceBlocked = true;
+                        blockReason = `Lokasi Anda berada di wilayah tidak terjangkau (${gf.location_name}).`;
+                        break;
+                    }
+                }
+
+                // B. Pengecekan berbasis Radius Geofence (Auto-suggest terpilih)
                 // 1. Cek Lokasi Pengambilan
                 if (pickupLat && pickupLon) {
                     const dist = haversine(pickupLat, pickupLon, gfLat, gfLng);
                     if (dist <= gfRad) {
                         isGeofenceBlocked = true;
-                        blockReason = "Lokasi pengambilan kendaraan Anda berada di wilayah tidak terjangkau.";
+                        blockReason = `Lokasi pengambilan kendaraan Anda berada di wilayah tidak terjangkau (${gf.location_name}).`;
                         break;
                     }
                 }
@@ -850,7 +884,7 @@ $geofences = $stmtBL ? $stmtBL->fetchAll(PDO::FETCH_ASSOC) : [];
                     const dist = haversine(returnLat, returnLon, gfLat, gfLng);
                     if (dist <= gfRad) {
                         isGeofenceBlocked = true;
-                        blockReason = "Lokasi pengembalian kendaraan Anda berada di wilayah tidak terjangkau.";
+                        blockReason = `Lokasi pengembalian kendaraan Anda berada di wilayah tidak terjangkau (${gf.location_name}).`;
                         break;
                     }
                 }
@@ -860,7 +894,7 @@ $geofences = $stmtBL ? $stmtBL->fetchAll(PDO::FETCH_ASSOC) : [];
                     const dist = haversine(addressLat, addressLon, gfLat, gfLng);
                     if (dist <= gfRad) {
                         isGeofenceBlocked = true;
-                        blockReason = "Alamat lengkap Anda berada di wilayah tidak terjangkau.";
+                        blockReason = `Alamat lengkap Anda berada di wilayah tidak terjangkau (${gf.location_name}).`;
                         break;
                     }
                 }
