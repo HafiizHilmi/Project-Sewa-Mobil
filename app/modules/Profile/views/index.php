@@ -1182,7 +1182,7 @@
                     
                     <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 shadow-sm space-y-2">
                         <h3 class="text-sm font-bold text-slate-800 dark:text-white">Bagaimana cara memverifikasi akun?</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Buka tab <strong class="text-slate-700 dark:text-slate-200">Dokumen Identitas</strong> di sidebar, kemudian unggah foto KTP dan SIM Anda yang masih berlaku. Admin akan memeriksa pengajuan maksimal dalam 1x24 jam.</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Buka tab Dokumen Identitas di sidebar, kemudian unggah foto KTP dan SIM Anda yang masih berlaku. Admin akan memeriksa pengajuan maksimal dalam 1x24 jam.</p>
                     </div>
 
                     <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 shadow-sm space-y-2">

@@ -251,7 +251,7 @@ $taxAmount = round($totalPrice - $baseSubtotal);
     </div>
 
     <div class="z-10 flex flex-col sm:flex-row gap-3 mt-8 w-full max-w-md justify-center">
-        <a href="index.php?module=Homepage&action=index" class="bg-blue-700 text-white px-6 py-3 rounded-full font-bold shadow-lg hover:bg-blue-800 transition text-center text-sm">
+        <a href="index.php?module=Profile&action=index#riwayat" class="bg-blue-700 text-white px-6 py-3 rounded-full font-bold shadow-lg hover:bg-blue-800 transition text-center text-sm">
             Lihat Riwayat Pesanan
         </a>
         <a href="index.php?module=Homepage&action=index" class="bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-400 border-2 border-blue-700 dark:border-blue-500 px-6 py-3 rounded-full font-bold hover:bg-blue-50 dark:hover:bg-slate-800 transition text-center text-sm">
