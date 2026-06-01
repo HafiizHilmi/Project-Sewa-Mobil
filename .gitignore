@@ -40,3 +40,5 @@ README_DB.md
 
 app/modules/TrackingDummy/TrackingController.php
 data_sensitive/
+
+public/assets/images
