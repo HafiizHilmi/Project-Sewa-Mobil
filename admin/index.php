@@ -31,6 +31,26 @@ if ($checkDamageDesc->rowCount() === 0) {
     $pdo->exec("ALTER TABLE bookings ADD COLUMN damage_description TEXT NULL");
 }
 
+// Upgrade Midtrans columns
+try {
+    $pdo->exec("ALTER TABLE bookings ADD COLUMN payment_token VARCHAR(255) DEFAULT NULL");
+} catch (Exception $e) {}
+try {
+    $pdo->exec("ALTER TABLE bookings ADD COLUMN payment_url VARCHAR(255) DEFAULT NULL");
+} catch (Exception $e) {}
+try {
+    $pdo->exec("ALTER TABLE bookings ADD COLUMN payment_expiry TIMESTAMP NULL DEFAULT NULL");
+} catch (Exception $e) {}
+try {
+    $pdo->exec("ALTER TABLE bookings ADD COLUMN midtrans_order_id VARCHAR(100) DEFAULT NULL");
+} catch (Exception $e) {}
+
+// Otomatis batalkan pesanan pending yang sudah melewati batas waktu pembayaran
+try {
+    $pdo->exec("UPDATE bookings SET status = 'cancelled' WHERE status = 'pending' AND payment_expiry IS NOT NULL AND payment_expiry < NOW()");
+} catch (Exception $e) {}
+
+
 // Ambil data user yang memiliki status verifikasi selain unverified (pending, verified, rejected)
 $stmt = $pdo->query("SELECT id, name, email, verification_status, ktp_file, sim_file, created_at FROM users WHERE verification_status != 'unverified' ORDER BY FIELD(verification_status, 'pending') DESC, id DESC");
 $verifications = $stmt->fetchAll(PDO::FETCH_ASSOC);

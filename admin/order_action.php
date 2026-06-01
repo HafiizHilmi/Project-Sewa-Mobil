@@ -21,8 +21,8 @@ function sendNotifAlert($phone, $email, $subject, $message) {
     $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
     @mail($email, $subject, $message, $headers);
 
-    // 2. Kirim WhatsApp (Fonnte)
-    $token = FONNTE_TOKEN; // <-- Ambil token dari file api_keys.php
+    
+    $token = FONNTE_TOKEN;
     
     $curl = curl_init();
     curl_setopt_array($curl, array(

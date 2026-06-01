@@ -13,7 +13,7 @@
       </div>
 
       <div class="flex items-center gap-2 flex-wrap">
-        <template x-for="tab in ['All Orders','Pending','Confirmed','Completed']" :key="tab">
+        <template x-for="tab in ['All Orders','Pending','Confirmed','Completed','Cancelled']" :key="tab">
           <button @click="orderFilter = tab"
                   :class="orderFilter === tab
                     ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
@@ -117,6 +117,7 @@
                             'bg-blue-600 text-white' : order.status === 'Confirmed',
                             'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400': order.status === 'Pending',
                             'bg-emerald-500 text-white' : order.status === 'Completed',
+                            'bg-rose-100 text-rose-650 dark:bg-rose-950/40 dark:text-rose-450': order.status === 'Cancelled',
                           }"
                           x-text="order.status">
                     </span>
@@ -178,6 +179,7 @@
                               'bg-blue-600 text-white' : order.status === 'Confirmed',
                               'bg-orange-100 text-orange-600': order.status === 'Pending',
                               'bg-emerald-500 text-white' : order.status === 'Completed',
+                              'bg-rose-100 text-rose-650 dark:bg-rose-950/40 dark:text-rose-450': order.status === 'Cancelled',
                             }" x-text="order.status"></span>
                     </div>
                     <p class="text-sm font-bold text-slate-800 dark:text-white" x-text="order.customer.name"></p>
