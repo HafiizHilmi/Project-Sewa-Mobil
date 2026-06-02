@@ -451,7 +451,7 @@ foreach ($types_data as $t) {
   <div x-show="showEditModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
     <div @click="showEditModal = false" class="modal-backdrop absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
     
-    <form x-ref="carForm" action="car_action.php" method="POST" enctype="multipart/form-data" class="modal-box relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden" style="max-height:92vh;">
+    <form x-ref="carForm" action="actions/car_action.php" method="POST" enctype="multipart/form-data" class="modal-box relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden" style="max-height:92vh;">
       
       <input type="hidden" name="id" x-model="editForm.id">
       <input type="hidden" name="is_type" x-bind:value="editForm.is_type ? 1 : 0" x-model="editForm.is_type">
@@ -649,7 +649,7 @@ document.addEventListener('alpine:init', () => {
 
                 let formData = new FormData(this.$refs.carForm);
                 
-                fetch('car_action.php', {
+                fetch('actions/car_action.php', {
                     method: 'POST',
                     body: formData
                 })
@@ -675,7 +675,7 @@ document.addEventListener('alpine:init', () => {
             }
             
             if (confirm(confirmMsg)) {
-                let url = 'car_action.php?delete_id=' + id;
+                let url = 'actions/car_action.php?delete_id=' + id;
                 if (isType == 1 && typeKey) {
                     url += '&delete_is_type=1&delete_type_key=' + encodeURIComponent(typeKey);
                 }

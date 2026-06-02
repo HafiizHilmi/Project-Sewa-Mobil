@@ -11,7 +11,7 @@ if (!isset($_SESSION['admin_role']) || $_SESSION['admin_role'] !== 'superuser') 
 }
 
 // Pastikan path ke database benar
-require_once '../Config/database.php';
+require_once '../../Config/database.php';
 
 $checkIsType = mysqli_query($conn, "SHOW COLUMNS FROM cars LIKE 'is_type'");
 if (mysqli_num_rows($checkIsType) === 0) {
@@ -56,7 +56,7 @@ if (isset($_POST['save_car'])) {
     // Logika Upload Foto
     if (isset($_FILES['foto_mobil']) && $_FILES['foto_mobil']['error'] == 0) {
         // Path ke folder penyimpanan gambar kamu
-        $target_dir = "../public/assets/images/";
+        $target_dir = "../../public/assets/images/";
         
         // Membuat nama file unik dengan timestamp agar tidak ada nama gambar yang bentrok
         $imageName = time() . "_" . basename($_FILES["foto_mobil"]["name"]);
@@ -115,7 +115,7 @@ if (isset($_POST['save_car'])) {
 
     // KUNCI PERBAIKAN EDIT: Tambahkan page=cars SEBELUM open_type_key
     if (!empty($type_key)) {
-        header("Location: index.php?page=cars");
+        header("Location: ../index.php?page=cars");
     }
     exit();
 }
@@ -135,7 +135,7 @@ if (isset($_GET['delete_id'])) {
         $queryImg = mysqli_query($conn, "SELECT image FROM cars WHERE type_key='$delete_type_key'");
         while($row = mysqli_fetch_assoc($queryImg)) {
             if(!empty($row['image'])) {
-                $imgPath = "../public/assets/images/" . $row['image'];
+                $imgPath = "../../public/assets/images/" . $row['image'];
                 if(file_exists($imgPath)) { unlink($imgPath); }
             }
         }
@@ -157,7 +157,7 @@ if (isset($_GET['delete_id'])) {
         $queryImg = mysqli_query($conn, "SELECT image FROM cars WHERE id='$id'");
         if($row = mysqli_fetch_assoc($queryImg)) {
             if(!empty($row['image'])) {
-                $imgPath = "../public/assets/images/" . $row['image'];
+                $imgPath = "../../public/assets/images/" . $row['image'];
                 if(file_exists($imgPath)) { unlink($imgPath); }
             }
         }
@@ -172,7 +172,7 @@ if (isset($_GET['delete_id'])) {
         }
     }
 
-    header("Location: index.php?page=cars");
+    header("Location: ../index.php?page=cars");
     exit();
 }
 ?>

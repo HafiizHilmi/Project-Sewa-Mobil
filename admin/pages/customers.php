@@ -93,7 +93,7 @@
                 <button type="button" @click="openEditCustModal(c); open = false;" class="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2">
                   <i class="fa-solid fa-pen text-slate-400 text-[10px]"></i> Edit Data
                 </button>
-                <form action="customer_action.php" method="POST" class="m-0 p-0" :onsubmit="c.status === 'Suspended' ? 'return confirm(\'Aktifkan kembali pelanggan ini?\')' : 'return confirm(\'Apakah Anda yakin ingin men-suspend pelanggan ini?\')'">
+                <form action="actions/customer_action.php" method="POST" class="m-0 p-0" :onsubmit="c.status === 'Suspended' ? 'return confirm(\'Aktifkan kembali pelanggan ini?\')' : 'return confirm(\'Apakah Anda yakin ingin men-suspend pelanggan ini?\')'">
                   <input type="hidden" name="user_id" :value="c.id">
                   <input type="hidden" name="action" :value="c.status === 'Suspended' ? 'unsuspend' : 'suspend'">
                   <button type="submit" class="w-full text-left px-4 py-2 text-xs font-semibold flex items-center gap-2" :class="c.status === 'Suspended' ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/20' : 'text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/20'">
@@ -102,7 +102,7 @@
                   </button>
                 </form>
                 <div class="h-[1px] bg-slate-100 dark:bg-slate-700 my-1"></div>
-                <form action="customer_action.php" method="POST" class="m-0 p-0" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pelanggan ini? Semua data terkait pesanan juga akan terpengaruh.')">
+                <form action="actions/customer_action.php" method="POST" class="m-0 p-0" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pelanggan ini? Semua data terkait pesanan juga akan terpengaruh.')">
                   <input type="hidden" name="user_id" :value="c.id">
                   <input type="hidden" name="action" value="delete">
                   <button type="submit" class="w-full text-left px-4 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 flex items-center gap-2">
@@ -148,7 +148,7 @@
                 <button type="button" @click="openEditCustModal(c); open = false;" class="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-750 flex items-center gap-2">
                   <i class="fa-solid fa-pen text-slate-400 text-[10px]"></i> Edit Data
                 </button>
-                <form action="customer_action.php" method="POST" class="m-0 p-0" :onsubmit="c.status === 'Suspended' ? 'return confirm(\'Aktifkan kembali pelanggan ini?\')' : 'return confirm(\'Apakah Anda yakin ingin men-suspend pelanggan ini?\')'">
+                <form action="actions/customer_action.php" method="POST" class="m-0 p-0" :onsubmit="c.status === 'Suspended' ? 'return confirm(\'Aktifkan kembali pelanggan ini?\')' : 'return confirm(\'Apakah Anda yakin ingin men-suspend pelanggan ini?\')'">
                   <input type="hidden" name="user_id" :value="c.id">
                   <input type="hidden" name="action" :value="c.status === 'Suspended' ? 'unsuspend' : 'suspend'">
                   <button type="submit" class="w-full text-left px-4 py-2 text-xs font-semibold flex items-center gap-2" :class="c.status === 'Suspended' ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/20' : 'text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/20'">
@@ -157,7 +157,7 @@
                   </button>
                 </form>
                 <div class="h-[1px] bg-slate-100 dark:bg-slate-700 my-1"></div>
-                <form action="customer_action.php" method="POST" class="m-0 p-0" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pelanggan ini? Semua data terkait pesanan juga akan terpengaruh.')">
+                <form action="actions/customer_action.php" method="POST" class="m-0 p-0" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pelanggan ini? Semua data terkait pesanan juga akan terpengaruh.')">
                   <input type="hidden" name="user_id" :value="c.id">
                   <input type="hidden" name="action" value="delete">
                   <button type="submit" class="w-full text-left px-4 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 flex items-center gap-2">
@@ -199,7 +199,7 @@
     
     <div class="flex items-center gap-2">
       <!-- Bulk Suspend Button -->
-      <form action="customer_action.php" method="POST" class="m-0 p-0" 
+      <form action="actions/customer_action.php" method="POST" class="m-0 p-0" 
             @submit="return confirm('Apakah Anda yakin ingin men-suspend ' + selectedCustIds.length + ' pelanggan terpilih?\nSemua status akun mereka akan diubah menjadi Suspended.')">
         <input type="hidden" name="action" value="bulk_suspend">
         <input type="hidden" name="user_ids" :value="selectedCustIds.join(',')">
@@ -209,7 +209,7 @@
       </form>
       
       <!-- Bulk Delete Button -->
-      <form action="customer_action.php" method="POST" class="m-0 p-0" 
+      <form action="actions/customer_action.php" method="POST" class="m-0 p-0" 
             @submit="return confirm('PERINGATAN KRITIS: Anda akan menghapus ' + selectedCustIds.length + ' pelanggan secara permanen!\nSemua data pemesanan terkait juga akan terpengaruh.\nApakah Anda benar-benar yakin?')">
         <input type="hidden" name="action" value="bulk_delete">
         <input type="hidden" name="user_ids" :value="selectedCustIds.join(',')">
@@ -336,7 +336,7 @@
 <!-- ── Modal Edit Customer ── -->
 <div x-show="showEditCustModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
   <div @click="showEditCustModal = false" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" x-transition.opacity></div>
-  <form action="customer_action.php" method="POST" class="modal-box relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md flex flex-col p-5 m-0" x-transition>
+  <form action="actions/customer_action.php" method="POST" class="modal-box relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md flex flex-col p-5 m-0" x-transition>
     <input type="hidden" name="action" value="edit">
     <input type="hidden" name="user_id" :value="editingCust ? editingCust.id : ''">
     

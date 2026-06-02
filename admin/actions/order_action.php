@@ -1,11 +1,11 @@
 <?php
 session_start();
-require_once __DIR__ . '/../include/db_config.php';
+require_once __DIR__ . '/../../include/db_config.php';
 $pdo = getPDO();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     $_SESSION['flash_msg'] = "Akses ditolak.";
-    header("Location: index.php?page=orders");
+    header("Location: ../index.php?page=orders");
     exit();
 }
 
@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // ==============================================================
 function sendNotifAlert($phone, $email, $subject, $message) {
     // Panggil file rahasia
-    require_once __DIR__ . '/../include/api_keys.php';
+    require_once __DIR__ . '/../../include/api_keys.php';
 
     // 1. Kirim Email
     $headers = "From: no-reply@sewamobil.com\r\n";
@@ -139,7 +139,7 @@ if ($booking_id && in_array($action, ['accept', 'reject', 'complete'])) {
             $damage_image = null;
 
             if (isset($_FILES['foto_kerusakan']) && $_FILES['foto_kerusakan']['error'] == 0) {
-                $target_dir = "../public/assets/images/damages/";
+                $target_dir = "../../public/assets/images/damages/";
                 if (!is_dir($target_dir)) {
                     mkdir($target_dir, 0777, true);
                 }
@@ -175,18 +175,18 @@ if ($booking_id && in_array($action, ['accept', 'reject', 'complete'])) {
         $pdo->commit();
 
         $_SESSION['flash_msg'] = "Berhasil: Status pesanan berhasil diubah.";
-        header("Location: index.php?page=orders");
+        header("Location: ../index.php?page=orders");
         exit();
 
     } catch (Exception $e) {
         $pdo->rollBack();
         $_SESSION['flash_msg'] = "Terjadi kesalahan: " . addslashes($e->getMessage());
-        header("Location: index.php?page=orders");
+        header("Location: ../index.php?page=orders");
         exit();
     }
 } else {
     $_SESSION['flash_msg'] = "Aksi tidak valid.";
-    header("Location: index.php?page=orders");
+    header("Location: ../index.php?page=orders");
     exit();
 }
 ?>

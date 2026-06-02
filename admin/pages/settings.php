@@ -100,7 +100,7 @@
               </button>
               
               <?php if(!$isSuper): ?>
-              <form action="admin_action.php" method="POST" class="m-0 p-0" onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun staff ini?');">
+              <form action="actions/admin_action.php" method="POST" class="m-0 p-0" onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun staff ini?');">
                   <input type="hidden" name="action" value="delete_admin">
                   <input type="hidden" name="id" value="<?= $admin['id'] ?>">
                   <button type="submit" title="Hapus Staff" class="w-7 h-7 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
@@ -222,7 +222,7 @@
             <h3 class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider" x-text="blacklistType === 'keyword' ? 'Blokir Kata Kunci Baru' : 'Geofence Baru'"></h3>
           </div>
           
-          <form action="admin_action.php" method="POST" id="geofence-form">
+          <form action="actions/admin_action.php" method="POST" id="geofence-form">
             <input type="hidden" name="action" value="add_blacklist">
             <input type="hidden" name="latitude" x-model="selectedLat">
             <input type="hidden" name="longitude" x-model="selectedLng">
@@ -304,7 +304,7 @@
                         </button>
                       <?php endif; ?>
                       
-                      <form action="admin_action.php" method="POST" class="m-0 p-0" onsubmit="return confirm('Hapus <?= $isGeofence ? 'geofence' : 'kata kunci' ?> blacklist ini?');">
+                      <form action="actions/admin_action.php" method="POST" class="m-0 p-0" onsubmit="return confirm('Hapus <?= $isGeofence ? 'geofence' : 'kata kunci' ?> blacklist ini?');">
                         <input type="hidden" name="action" value="delete_blacklist">
                         <input type="hidden" name="id" value="<?= $bl['id'] ?>">
                         <button type="submit" title="Hapus Blacklist" class="w-7 h-7 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
@@ -390,7 +390,7 @@
     <div @click="showAddAdminModal = false" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" x-transition.opacity></div>
     <div class="modal-box relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md flex flex-col p-5" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
       <h2 class="text-sm font-bold text-slate-800 dark:text-white mb-4">Tambah Admin Baru</h2>
-      <form action="admin_action.php" method="POST">
+      <form action="actions/admin_action.php" method="POST">
           <input type="hidden" name="action" value="add_admin">
           <div class="space-y-4 mb-5">
             <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Nama Lengkap</label><input type="text" name="nama" required class="w-full border dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-700 dark:text-white outline-none focus:border-blue-500"/></div>
@@ -415,7 +415,7 @@
     <div @click="showEditAdmin = false" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" x-transition.opacity></div>
     <div class="modal-box relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md flex flex-col p-5" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
       <h2 class="text-sm font-bold text-slate-800 dark:text-white mb-4">Edit Data Admin</h2>
-      <form action="admin_action.php" method="POST">
+      <form action="actions/admin_action.php" method="POST">
           <input type="hidden" name="action" value="edit_admin">
           <input type="hidden" name="id" x-model="editForm.id">
           
@@ -445,7 +445,7 @@
     <div @click="showChangePass = false" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" x-transition.opacity></div>
     <div class="modal-box relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm flex flex-col p-5" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
       <h2 class="text-sm font-bold text-slate-800 dark:text-white mb-4">Ganti Password</h2>
-      <form action="admin_action.php" method="POST">
+      <form action="actions/admin_action.php" method="POST">
           <input type="hidden" name="action" value="change_password">
           <div class="space-y-4 mb-5">
             <div>
@@ -540,7 +540,7 @@
                       <div class="p-2 text-slate-800 dark:text-slate-100 font-sans" style="min-width: 160px; color: #1e293b;">
                           <h4 class="font-bold text-xs mb-1" style="margin:0; color: #0f172a;">${bl.location_name}</h4>
                           <p class="text-[10px] text-slate-500" style="margin:0 0 8px 0;">Radius: ${rad >= 1000000 ? '1000 km' : (rad >= 1000 ? (rad/1000) + ' km' : rad + ' m')}</p>
-                          <form action="admin_action.php" method="POST" onsubmit="return confirm('Hapus geofence ini?');" style="margin:0;">
+                          <form action="actions/admin_action.php" method="POST" onsubmit="return confirm('Hapus geofence ini?');" style="margin:0;">
                               <input type="hidden" name="action" value="delete_blacklist">
                               <input type="hidden" name="id" value="${bl.id}">
                               <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold py-1.5 px-2 rounded-lg transition-colors border-0 cursor-pointer">Hapus Geofence</button>

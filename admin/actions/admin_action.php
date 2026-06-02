@@ -1,7 +1,7 @@
 <?php
-// admin/admin_action.php
+// admin/actions/admin_action.php
 session_start();
-require_once __DIR__ . '/../include/db_config.php';
+require_once __DIR__ . '/../../include/db_config.php';
 $pdo = getPDO();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
@@ -19,14 +19,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $checkEmail->execute([$email]);
         if ($checkEmail->rowCount() > 0) {
             $_SESSION['flash_msg'] = "Gagal! Email tersebut sudah digunakan.";
-            header("Location: index.php?page=settings");
+            header("Location: ../index.php?page=settings");
             exit();
         }
 
         $stmt = $pdo->prepare("INSERT INTO admins (nama, email, password, role) VALUES (?, ?, ?, ?)");
         if ($stmt->execute([$nama, $email, $password, $role])) {
             $_SESSION['flash_msg'] = "Berhasil! Admin/Staff baru ditambahkan.";
-            header("Location: index.php?page=settings");
+            header("Location: ../index.php?page=settings");
             exit();
         }
     }
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $stmt = $pdo->prepare("DELETE FROM admins WHERE id = ?");
         if ($stmt->execute([$id])) {
             $_SESSION['flash_msg'] = "Akun staff berhasil dihapus!";
-            header("Location: index.php?page=settings");
+            header("Location: ../index.php?page=settings");
             exit();
         }
     }
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         }
         
         $_SESSION['flash_msg'] = "Data admin berhasil diperbarui!";
-        header("Location: index.php?page=settings");
+        header("Location: ../index.php?page=settings");
         exit();
     }
 
@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         } else {
             $_SESSION['flash_msg'] = "Gagal! Password lama yang Anda masukkan salah.";
         }
-        header("Location: index.php?page=settings");
+        header("Location: ../index.php?page=settings");
         exit();
     }
 
@@ -105,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         } else {
             $_SESSION['flash_msg'] = "Gagal menambah data.";
         }
-        header("Location: index.php?page=settings&tab=blacklist");
+        header("Location: ../index.php?page=settings&tab=blacklist");
         exit();
     }
 
@@ -117,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         if ($stmt->execute([$id])) {
             $_SESSION['flash_msg'] = "Daerah dihapus dari daftar Blacklist!";
         }
-        header("Location: index.php?page=settings&tab=blacklist");
+        header("Location: ../index.php?page=settings&tab=blacklist");
         exit();
     }
 }

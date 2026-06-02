@@ -150,7 +150,7 @@
                         </button>
                     </div>
 
-                    <form method="POST" action="verify_action.php" x-show="action !== ''" x-transition.opacity class="mt-4 bg-white border border-blue-200 rounded-xl p-4 shadow-sm">
+                    <form method="POST" action="actions/verify_action.php" x-show="action !== ''" x-transition.opacity class="mt-4 bg-white border border-blue-200 rounded-xl p-4 shadow-sm">
                         <input type="hidden" name="user_id" :value="selectedVerification.id">
                         <input type="hidden" name="action" :value="action">
                         

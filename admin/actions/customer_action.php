@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once __DIR__ . '/../include/db_config.php';
+require_once __DIR__ . '/../../include/db_config.php';
 $pdo = getPDO();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -29,7 +29,7 @@ if (in_array($action, ['bulk_suspend', 'bulk_delete'])) {
 
             echo "<script>
                     alert('Berhasil men-suspend " . count($ids) . " pelanggan.');
-                    window.location.href = 'index.php?page=customers';
+                    window.location.href = '../index.php?page=customers';
                   </script>";
             exit;
         } elseif ($action === 'bulk_delete') {
@@ -39,7 +39,7 @@ if (in_array($action, ['bulk_suspend', 'bulk_delete'])) {
 
             echo "<script>
                     alert('Berhasil menghapus " . count($ids) . " pelanggan secara permanen.');
-                    window.location.href = 'index.php?page=customers';
+                    window.location.href = '../index.php?page=customers';
                   </script>";
             exit;
         }
@@ -77,7 +77,7 @@ if ($user_id && in_array($action, ['edit', 'suspend', 'unsuspend', 'delete'])) {
 
             echo "<script>
                     alert('Data pelanggan berhasil diubah.');
-                    window.location.href = 'index.php?page=customers';
+                    window.location.href = '../index.php?page=customers';
                   </script>";
             exit;
 
@@ -88,7 +88,7 @@ if ($user_id && in_array($action, ['edit', 'suspend', 'unsuspend', 'delete'])) {
 
             echo "<script>
                     alert('Pelanggan berhasil di-suspend.');
-                    window.location.href = 'index.php?page=customers';
+                    window.location.href = '../index.php?page=customers';
                   </script>";
             exit;
 
@@ -99,7 +99,7 @@ if ($user_id && in_array($action, ['edit', 'suspend', 'unsuspend', 'delete'])) {
 
             echo "<script>
                     alert('Akun pelanggan berhasil diaktifkan kembali.');
-                    window.location.href = 'index.php?page=customers';
+                    window.location.href = '../index.php?page=customers';
                   </script>";
             exit;
 
@@ -110,7 +110,7 @@ if ($user_id && in_array($action, ['edit', 'suspend', 'unsuspend', 'delete'])) {
 
             echo "<script>
                     alert('Pelanggan berhasil dihapus.');
-                    window.location.href = 'index.php?page=customers';
+                    window.location.href = '../index.php?page=customers';
                   </script>";
             exit;
         }

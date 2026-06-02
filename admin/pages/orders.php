@@ -126,14 +126,14 @@
                   <div class="flex justify-end items-center gap-2" @click.stop>
                     <template x-if="order.status === 'Pending'">
                       <div class="flex items-center gap-2">
-                        <form action="order_action.php" method="POST" class="m-0 p-0 flex">
+                        <form action="actions/order_action.php" method="POST" class="m-0 p-0 flex">
                           <input type="hidden" name="booking_id" :value="order.id">
                           <input type="hidden" name="action" value="accept">
                           <button type="submit" title="Terima Pesanan" class="w-8 h-8 rounded-xl flex items-center justify-center text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30 transition-colors shadow-sm">
                             <i class="fa-solid fa-check text-sm"></i>
                           </button>
                         </form>
-                        <form action="order_action.php" method="POST" class="m-0 p-0 flex">
+                        <form action="actions/order_action.php" method="POST" class="m-0 p-0 flex">
                           <input type="hidden" name="booking_id" :value="order.id">
                           <input type="hidden" name="action" value="reject">
                           <button type="submit" title="Tolak Pesanan" class="w-8 h-8 rounded-xl flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:hover:bg-rose-900/30 transition-colors shadow-sm">
@@ -148,7 +148,7 @@
                         <button type="button" @click="openCompleteModal(order)" title="Selesaikan Transaksi (Success)" class="w-8 h-8 rounded-xl flex items-center justify-center text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30 transition-colors shadow-sm">
                           <i class="fa-solid fa-circle-check text-sm"></i>
                         </button>
-                        <form action="order_action.php" method="POST" class="m-0 p-0 flex">
+                        <form action="actions/order_action.php" method="POST" class="m-0 p-0 flex">
                           <input type="hidden" name="booking_id" :value="order.id">
                           <input type="hidden" name="action" value="reject">
                           <button type="submit" title="Batalkan/Tolak Pesanan" class="w-8 h-8 rounded-xl flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:hover:bg-rose-900/30 transition-colors shadow-sm">
@@ -197,14 +197,14 @@
                     <div class="flex justify-end gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-700" @click.stop>
                       <template x-if="order.status === 'Pending'">
                         <div class="flex items-center gap-2">
-                          <form action="order_action.php" method="POST" class="m-0 p-0">
+                          <form action="actions/order_action.php" method="POST" class="m-0 p-0">
                             <input type="hidden" name="booking_id" :value="order.id">
                             <input type="hidden" name="action" value="accept">
                             <button type="submit" class="px-3 py-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg flex items-center gap-1">
                               <i class="fa-solid fa-check"></i> Terima
                             </button>
                           </form>
-                          <form action="order_action.php" method="POST" class="m-0 p-0">
+                          <form action="actions/order_action.php" method="POST" class="m-0 p-0">
                             <input type="hidden" name="booking_id" :value="order.id">
                             <input type="hidden" name="action" value="reject">
                             <button type="submit" class="px-3 py-1.5 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg flex items-center gap-1">
@@ -218,7 +218,7 @@
                           <button type="button" @click="openCompleteModal(order)" class="px-3 py-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg flex items-center gap-1">
                             <i class="fa-solid fa-circle-check"></i> Selesai
                           </button>
-                          <form action="order_action.php" method="POST" class="m-0 p-0">
+                          <form action="actions/order_action.php" method="POST" class="m-0 p-0">
                             <input type="hidden" name="booking_id" :value="order.id">
                             <input type="hidden" name="action" value="reject">
                             <button type="submit" class="px-3 py-1.5 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg flex items-center gap-1">
@@ -321,7 +321,7 @@
       </button>
     </div>
 
-    <form action="order_action.php" method="POST" enctype="multipart/form-data" class="space-y-4 overflow-y-auto flex-1 pr-1">
+    <form action="actions/order_action.php" method="POST" enctype="multipart/form-data" class="space-y-4 overflow-y-auto flex-1 pr-1">
       <input type="hidden" name="booking_id" :value="completingOrder ? completingOrder.id : ' '">
       <input type="hidden" name="action" value="complete">
 

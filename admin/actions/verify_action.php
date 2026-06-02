@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once __DIR__ . '/../include/db_config.php';
+require_once __DIR__ . '/../../include/db_config.php';
 $pdo = getPDO();
 
 // Pastikan hanya POST request
@@ -32,7 +32,7 @@ if ($user_id && in_array($action, ['verified', 'rejected'])) {
         // Redirect kembali ke index dengan notifikasi
         echo "<script>
                 alert('Berhasil: Status verifikasi user berhasil diubah menjadi " . strtoupper($action) . ".');
-                window.location.href = 'index.php';
+                window.location.href = '../index.php';
               </script>";
         exit;
     } catch (PDOException $e) {

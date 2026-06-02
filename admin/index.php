@@ -115,7 +115,7 @@ $customers = $stmtCustomers->fetchAll(PDO::FETCH_ASSOC);
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SewaMobil — Admin Panel</title>
+  <title>SewaMobil - Admin Panel</title>
   <meta name="description" content="Sistem Admin Dashboard SewaMobil — Customers, Settings, dan manajemen armada."/>
 
   <script src="https://cdn.tailwindcss.com"></script>

@@ -536,7 +536,7 @@ foreach($pendingOrders as $order) {
                             </div>
                             
                             <!-- Form Tolak/Hapus Pesanan -->
-                            <form action="order_action.php" method="POST" class="m-0 pl-3 border-l border-slate-100 dark:border-slate-700" onsubmit="return confirm('Hapus / Tolak pesanan ini secara permanen?')">
+                            <form action="actions/order_action.php" method="POST" class="m-0 pl-3 border-l border-slate-100 dark:border-slate-700" onsubmit="return confirm('Hapus / Tolak pesanan ini secara permanen?')">
                                 <input type="hidden" name="action" value="reject">
                                 <input type="hidden" name="booking_id" :value="a.id">
                                 <button type="submit" title="Tolak Pesanan" class="w-8 h-8 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">

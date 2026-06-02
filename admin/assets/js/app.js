@@ -307,7 +307,7 @@ function appData() {
       if (confirm('Selesaikan sewa kendaraan ini tanpa biaya tambahan atau kerusakan?')) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = 'order_action.php';
+        form.action = 'actions/order_action.php';
         
         const bookingIdInput = document.createElement('input');
         bookingIdInput.type = 'hidden';
