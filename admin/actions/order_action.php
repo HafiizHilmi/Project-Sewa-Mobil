@@ -127,6 +127,15 @@ if ($booking_id && in_array($action, ['accept', 'reject', 'complete'])) {
             $msgWA = "Halo *{$booking['full_name']}*,\n\nMohon maaf, pesanan sewa mobil *$carName* Anda (Order ID: #$booking_id) harus kami *TOLAK/BATALKAN* untuk saat ini karena satu dan lain hal.\n\nSilakan hubungi Admin untuk informasi lebih lanjut atau lakukan pemesanan ulang dengan jadwal/unit yang berbeda.\n\nTerima kasih.";
             sendNotifAlert($booking['phone'], $booking['email'], "Pesanan Dibatalkan - SewaMobil SBY", $msgWA);
 
+            // Kirim notifikasi Telegram untuk pesanan dibatalkan oleh Admin
+            require_once __DIR__ . '/../../include/api_keys.php';
+            $msgTelegram = "❌ *Pesanan Dibatalkan Admin!*\n\n"
+                         . "*Order ID:* `#{$booking_id}`\n"
+                         . "*Pelanggan:* {$booking['full_name']}\n"
+                         . "*Mobil:* {$carName}\n"
+                         . "*Status:* CANCELLED";
+            sendTelegramNotification($msgTelegram);
+
         } elseif ($action === 'complete') {
             if ($currentStatus !== 'confirmed') {
                 throw new Exception("Pemesanan ini tidak dapat diselesaikan.");

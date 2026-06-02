@@ -271,6 +271,17 @@ class BookingController {
         $msgWA = "Halo *$full_name*,\n\nTerima kasih telah memesan mobil *$carName* di SewaMobil SBY (Order ID: #$bookingId).\n\nSilakan selesaikan pembayaran via Midtrans menggunakan link berikut:\n$payment_url\n\nHarap lakukan pembayaran dalam waktu 15 menit sebelum pesanan otomatis dibatalkan.\n\nTerima kasih!";
         $this->sendNotification($phone, $email, "Menunggu Pembayaran - SewaMobil SBY", $msgWA);
 
+        // Kirim notifikasi Telegram untuk pesanan baru masuk
+        require_once __DIR__ . '/../../../include/api_keys.php';
+        $totalFormatted = "Rp " . number_format($total_price, 0, ',', '.');
+        $msgTelegram = "*Pesanan Baru Masuk!*\n\n"
+                     . "*Order ID:* `#{$bookingId}`\n"
+                     . "*Pelanggan:* {$full_name}\n"
+                     . "*Mobil:* {$carName}\n"
+                     . "*Total Sewa:* {$totalFormatted}\n"
+                     . "*Status:* PENDING";
+        sendTelegramNotification($msgTelegram);
+
         header('Location: index.php?module=Booking&action=pending&booking_id=' . $bookingId);
         exit;
     }
@@ -357,6 +368,15 @@ class BookingController {
                             } else if (in_array($txStatus, ['expire', 'cancel', 'deny'], true)) {
                                 $stmtCancel = $pdo->prepare("UPDATE bookings SET status = 'cancelled' WHERE id = ?");
                                 $stmtCancel->execute([$bookingId]);
+
+                                // Kirim notifikasi Telegram untuk pesanan dibatalkan otomatis
+                                require_once __DIR__ . '/../../../include/api_keys.php';
+                                $msgTelegram = "❌ *Pesanan Dibatalkan Otomatis!*\n\n"
+                                             . "*Order ID:* `#{$bookingId}`\n"
+                                             . "*Pelanggan:* {$booking['full_name']}\n"
+                                             . "*Alasan:* Transaksi Midtrans " . strtoupper($txStatus) . "\n"
+                                             . "*Status:* CANCELLED";
+                                sendTelegramNotification($msgTelegram);
                             }
                         }
                     }

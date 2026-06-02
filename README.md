@@ -33,7 +33,7 @@ Berikut adalah teknologi dan layanan pihak ketiga yang digunakan dalam proyek in
     *   Pengunggahan berkas KTP dan SIM secara langsung melalui halaman profil pelanggan.
     *   Status verifikasi *real-time*: `unverified`, `pending`, `verified`, atau `rejected`.
 4.  **Halaman Utama (Homepage) & Filtrasi:**
-    *   Pencarian mobil secara dinamis.
+    *   Pencarian mobil.
     *   Filtering berdasarkan kategori (MPV, SUV, Sedan, EV), jenis bahan bakar (Bensin, Diesel, Listrik), dan kapasitas tempat duduk (seats).
 5.  **Pemesanan & Sewa Mobil (Booking System):**
     *   Formulir input tanggal mulai dan berakhir, lokasi penjemputan/pengembalian, alamat, serta opsi tambahan sopir (*add-on driver*).
@@ -103,7 +103,7 @@ Proyek ini dilengkapi dengan fitur **Auto-Setup Database** pada berkas `include/
 
 Proyek ini dikembangkan oleh tim kolaboratif berbakat berikut:
 
-| Foto Profil | Nama Kontributor | Tautan Profil | Kontribusi Commits |
+| Foto Profil | Nama Kontributor | Link Profil | Kontribusi Commits |
 | :---: | :--- | :--- | :---: |
 | <img src="https://github.com/bayuwirayudha13.png" width="55" height="55" style="border-radius:50%;" /> | **bayuwirayudha13** | [@bayuwirayudha13](https://github.com/bayuwirayudha13) | 70 commits |
 | <img src="https://github.com/hafiizhilmi.png" width="55" height="55" style="border-radius:50%;" /> | **hafiizhilmi** (Hafiiz) | [@hafiizhilmi](https://github.com/hafiizhilmi) | 63 commits |
