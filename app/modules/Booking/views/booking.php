@@ -25,7 +25,7 @@ $carStock = intval($car['stock'] ?? 1);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reservasi Kendaraan - SewaMobil</title>
+    <title>SewaMobil - Reservasi Kendaraan</title>
     <script>
         (function() {
             const savedTheme = localStorage.getItem('theme');

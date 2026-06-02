@@ -10,7 +10,7 @@ if (empty($_SESSION['csrf_token'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masuk - SewaMobil</title>
+    <title>SewaMobil - Masuk</title>
     <script>
         (function() {
             const savedTheme = localStorage.getItem('theme');
