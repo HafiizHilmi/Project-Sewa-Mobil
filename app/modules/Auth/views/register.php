@@ -149,8 +149,14 @@ if (empty($_SESSION['csrf_token'])) {
                                 </div>
                             </div>
                             
-                            <div class="col-md-6 d-none d-md-flex align-items-center justify-content-center image-placeholder">
-                                <h2 class="fw-bold text-dark tracking-wide">INI GAMBAR</h2>
+                             <div class="col-md-6 d-none d-md-block p-0 position-relative" style="overflow: hidden; background-color: #0f172a;">
+                                <div id="sliderTrack" style="display: flex; width: 100%; height: 100%; transition: transform 0.8s ease-in-out;">
+                                    
+                                    <img src="assets/images/gambar-login-page.avif" alt="Slide 1" style="min-width: 100%; height: 100%; object-fit: cover;">
+                                    <img src="assets/images/gambar-login-page2.jpg" alt="Slide 2" style="min-width: 100%; height: 100%; object-fit: cover;">
+                                    <img src="assets/images/gambar-login-page3.jpg" alt="Slide 3" style="min-width: 100%; height: 100%; object-fit: cover;">
+                                    
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -159,4 +165,37 @@ if (empty($_SESSION['csrf_token'])) {
         </div>
     </main>
 </body>
+
+<script>
+                                document.addEventListener("DOMContentLoaded", function() {
+                                    const sliderTrack = document.getElementById('sliderTrack');
+                                    
+                                    // 1. Gandakan gambar pertama dan taruh di paling akhir (otomatis oleh sistem)
+                                    const firstImgClone = sliderTrack.children[0].cloneNode(true);
+                                    sliderTrack.appendChild(firstImgClone);
+                                    
+                                    const totalImages = sliderTrack.children.length;
+                                    let currentIndex = 0;
+                                    
+                                    setInterval(() => {
+                                        currentIndex++;
+                                        
+                                        // Nyalakan kembali animasi geser (transisi)
+                                        sliderTrack.style.transition = 'transform 0.8s ease-in-out';
+                                        sliderTrack.style.transform = `translateX(-${currentIndex * 100}%)`;
+                                        
+                                        // 2. Jika sistem bergeser menyentuh gambar kloningan terakhir...
+                                        if (currentIndex === totalImages - 1) {
+                                            // Tunggu sampai animasi gesernya selesai (800ms)
+                                            setTimeout(() => {
+                                                // Matikan animasi sejenak dan lompat kembali ke gambar asli paling awal
+                                                sliderTrack.style.transition = 'none'; 
+                                                currentIndex = 0;
+                                                sliderTrack.style.transform = `translateX(0%)`;
+                                            }, 800);
+                                        }
+                                        
+                                    }, 3000); // Ganti gambar setiap 3 detik
+                                });
+</script>
 </html>
