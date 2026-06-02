@@ -1613,4 +1613,4 @@ if (isset($pdo)) {
     updateThemeIcon();
 </script>
 </body>
-</html>
+</html> 

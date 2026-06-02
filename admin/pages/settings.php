@@ -151,7 +151,7 @@ $currMidtransClient = $secSettings['midtrans_client_key'] ?? '';
         $stmtSet = $pdo->query("SELECT setting_key, setting_value FROM settings");
         if ($stmtSet) {
             while ($row = $stmtSet->fetch(PDO::FETCH_ASSOC)) {
-                $currentSettings[$row['setting_key']] = $row['setting_value'];
+                $currentSettings[$row['setting_key']] = $row['setting_value']; 
             }
         }
     } catch (Exception $e) {

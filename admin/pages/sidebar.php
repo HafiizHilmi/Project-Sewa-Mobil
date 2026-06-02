@@ -101,4 +101,4 @@ if (isset($pdo)) {
     </p>
     <p class="text-[9px] text-blue-400 mt-0.5 opacity-80">v2.0.0 · 2026</p>
   </div>
-</aside>
+</aside> 
