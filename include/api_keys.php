@@ -24,7 +24,31 @@ if (file_exists($envPath)) {
     }
 }
 
-define('FONNTE_TOKEN', getenv('FONNTE_TOKEN') ?: 'NULL');
-define('MIDTRANS_IS_PRODUCTION', filter_var(getenv('MIDTRANS_IS_PRODUCTION') ?: 'false', FILTER_VALIDATE_BOOLEAN));
-define('MIDTRANS_SERVER_KEY', getenv('MIDTRANS_SERVER_KEY') ?: '');
-define('MIDTRANS_CLIENT_KEY', getenv('MIDTRANS_CLIENT_KEY') ?: '');
+// Ambil pengaturan dari basis data jika terhubung
+$dbSettings = [];
+try {
+    if (function_exists('getPDO')) {
+        $pdo = getPDO();
+        if ($pdo) {
+            $stmt = $pdo->query("SELECT setting_key, setting_value FROM business_settings WHERE setting_key IN ('fonnte_token', 'midtrans_is_production', 'midtrans_server_key', 'midtrans_client_key')");
+            if ($stmt) {
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    $dbSettings[$row['setting_key']] = $row['setting_value'];
+                }
+            }
+        }
+    }
+} catch (Exception $e) {
+    // Abaikan jika tabel belum dibuat atau database bermasalah
+}
+
+$fonnteToken = isset($dbSettings['fonnte_token']) && $dbSettings['fonnte_token'] !== '' ? $dbSettings['fonnte_token'] : getenv('FONNTE_TOKEN');
+$midtransIsProd = isset($dbSettings['midtrans_is_production']) ? filter_var($dbSettings['midtrans_is_production'], FILTER_VALIDATE_BOOLEAN) : filter_var(getenv('MIDTRANS_IS_PRODUCTION') ?: 'false', FILTER_VALIDATE_BOOLEAN);
+$midtransServer = isset($dbSettings['midtrans_server_key']) && $dbSettings['midtrans_server_key'] !== '' ? $dbSettings['midtrans_server_key'] : getenv('MIDTRANS_SERVER_KEY');
+$midtransClient = isset($dbSettings['midtrans_client_key']) && $dbSettings['midtrans_client_key'] !== '' ? $dbSettings['midtrans_client_key'] : getenv('MIDTRANS_CLIENT_KEY');
+
+define('FONNTE_TOKEN', $fonnteToken ?: 'NULL');
+define('MIDTRANS_IS_PRODUCTION', $midtransIsProd);
+define('MIDTRANS_SERVER_KEY', $midtransServer ?: '');
+define('MIDTRANS_CLIENT_KEY', $midtransClient ?: '');
+

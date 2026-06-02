@@ -1,3 +1,20 @@
+<?php
+// Ambil data pengaturan keamanan saat ini dari database
+$secSettings = [];
+try {
+    $stmtSec = $pdo->query("SELECT setting_key, setting_value FROM business_settings WHERE setting_key IN ('fonnte_token', 'midtrans_is_production', 'midtrans_server_key', 'midtrans_client_key')");
+    if ($stmtSec) {
+        while ($row = $stmtSec->fetch(PDO::FETCH_ASSOC)) {
+            $secSettings[$row['setting_key']] = $row['setting_value'];
+        }
+    }
+} catch (Exception $e) {}
+
+$currFonnteToken = $secSettings['fonnte_token'] ?? '';
+$currMidtransIsProd = isset($secSettings['midtrans_is_production']) ? filter_var($secSettings['midtrans_is_production'], FILTER_VALIDATE_BOOLEAN) : false;
+$currMidtransServer = $secSettings['midtrans_server_key'] ?? '';
+$currMidtransClient = $secSettings['midtrans_client_key'] ?? '';
+?>
 <div x-show="activePage === 'settings'"
      x-data="{ showEditAdmin: false, showChangePass: false, editForm: {id:'', nama:'', email:'', role:''} }"
      x-init="
@@ -37,6 +54,10 @@
 
       <button @click="activeTab = 'blacklist'" :class="activeTab === 'blacklist' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-slate-500 dark:text-slate-400 font-medium hover:text-slate-700 dark:hover:text-slate-200 border-b-2 border-transparent'" class="pb-3 px-1 mr-5 text-sm transition-all whitespace-nowrap">
         Blacklist Area
+      </button>
+
+      <button @click="activeTab = 'security'" :class="activeTab === 'security' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-slate-500 dark:text-slate-400 font-medium hover:text-slate-700 dark:hover:text-slate-200 border-b-2 border-transparent'" class="pb-3 px-1 mr-5 text-sm transition-all whitespace-nowrap">
+        Security Settings
       </button>
     <?php endif; ?>
 
@@ -326,6 +347,85 @@
       </div>
     </div>
   </div>
+
+  <?php if (isset($role) && $role === 'superuser'): ?>
+  <div x-show="activeTab === 'security'" class="page-fade">
+    <form action="actions/admin_action.php" method="POST" class="space-y-6">
+      <input type="hidden" name="action" value="save_security_settings">
+      
+      <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+            <i class="fa-solid fa-shield-halved text-blue-500 text-sm"></i>
+          </div>
+          <div>
+            <h2 class="text-sm font-bold text-slate-800 dark:text-white">Security & API Credentials</h2>
+            <p class="text-xs text-slate-400">Konfigurasi token WhatsApp Fonnte dan Payment Gateway Midtrans</p>
+          </div>
+        </div>
+
+        <div class="space-y-5">
+          <!-- Fonnte Section -->
+          <div class="border-b border-slate-100 dark:border-slate-700 pb-5">
+            <div class="flex items-center gap-2 mb-3">
+              <i class="fa-brands fa-whatsapp text-emerald-500 text-base font-bold"></i>
+              <h3 class="text-xs font-bold text-slate-700 dark:text-slate-350 uppercase tracking-wider">Integrasi WhatsApp Fonnte</h3>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Fonnte API Token</label>
+              <div class="relative flex items-center" x-data="{ show: false }">
+                <input :type="show ? 'text' : 'password'" name="fonnte_token" value="<?= htmlspecialchars($currFonnteToken) ?>" placeholder="Masukkan token Fonnte" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl pl-4 pr-10 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:border-blue-400"/>
+                <button type="button" @click="show = !show" class="absolute right-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                  <i class="fa-solid" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
+                </button>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-1">Token ini digunakan untuk mengirimkan notifikasi pemesanan via WhatsApp otomatis ke pelanggan.</p>
+            </div>
+          </div>
+
+          <!-- Midtrans Section -->
+          <div>
+            <div class="flex items-center gap-2 mb-3">
+              <i class="fa-solid fa-credit-card text-blue-500 text-base"></i>
+              <h3 class="text-xs font-bold text-slate-700 dark:text-slate-350 uppercase tracking-wider">Integrasi Payment Gateway Midtrans</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Midtrans Client Key</label>
+                <input type="text" name="midtrans_client_key" value="<?= htmlspecialchars($currMidtransClient) ?>" placeholder="Masukkan Midtrans Client Key" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:border-blue-400"/>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Midtrans Server Key</label>
+                <div class="relative flex items-center" x-data="{ show: false }">
+                  <input :type="show ? 'text' : 'password'" name="midtrans_server_key" value="<?= htmlspecialchars($currMidtransServer) ?>" placeholder="Masukkan Midtrans Server Key" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl pl-4 pr-10 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:border-blue-400"/>
+                  <button type="button" @click="show = !show" class="absolute right-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="fa-solid" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Environment Mode</label>
+              <select name="midtrans_is_production" class="border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:border-blue-400">
+                <option value="0" <?= !$currMidtransIsProd ? 'selected' : '' ?>>Sandbox / Testing Mode</option>
+                <option value="1" <?= $currMidtransIsProd ? 'selected' : '' ?>>Production / Live Mode</option>
+              </select>
+              <p class="text-[10px] text-slate-400 mt-1">Pilih "Sandbox" untuk testing pembayaran dengan uang virtual, atau "Production" untuk menerima pembayaran nyata.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 pt-5 border-t border-slate-100 dark:border-slate-700 flex justify-end">
+          <button type="submit" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-md shadow-blue-500/20 hover:shadow-blue-600/30">
+            <i class="fa-solid fa-floppy-disk text-xs"></i>Simpan Kredensial
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <?php endif; ?>
 
   <div x-show="activeTab === 'preferences'" class="page-fade">
     

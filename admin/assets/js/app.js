@@ -162,6 +162,7 @@ function appData() {
       { key: 'admin', label: 'Admin Management' },
       { key: 'business', label: 'Business Settings' },
       { key: 'preferences', label: 'Preferences' },
+      { key: 'security', label: 'Security Settings' },
     ],
     admins: [
       { id:1, name:'Ahmad Fauzi', email:'ahmad@sewamobilsby.id', role:'Super Admin', addedAt:'1 Jan 2025', color:'#3b82f6' },

@@ -120,5 +120,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         header("Location: ../index.php?page=settings&tab=blacklist");
         exit();
     }
+
+    // Simpan konfigurasi keamanan (Security Settings)
+    if ($_POST['action'] === 'save_security_settings') {
+        if (!isset($_SESSION['admin_role']) || $_SESSION['admin_role'] !== 'superuser') die("Akses Ditolak!");
+        
+        $fonnte_token = trim($_POST['fonnte_token'] ?? '');
+        $midtrans_client_key = trim($_POST['midtrans_client_key'] ?? '');
+        $midtrans_server_key = trim($_POST['midtrans_server_key'] ?? '');
+        $midtrans_is_production = (isset($_POST['midtrans_is_production']) && $_POST['midtrans_is_production'] === '1') ? '1' : '0';
+
+        $settings = [
+            'fonnte_token' => $fonnte_token,
+            'midtrans_client_key' => $midtrans_client_key,
+            'midtrans_server_key' => $midtrans_server_key,
+            'midtrans_is_production' => $midtrans_is_production
+        ];
+
+        try {
+            $stmt = $pdo->prepare("INSERT INTO business_settings (setting_key, setting_value) VALUES (:key, :val) 
+                ON DUPLICATE KEY UPDATE setting_value = :val_update");
+            foreach ($settings as $key => $val) {
+                $stmt->execute(['key' => $key, 'val' => $val, 'val_update' => $val]);
+            }
+            $_SESSION['flash_msg'] = "Berhasil! Pengaturan keamanan berhasil disimpan.";
+        } catch (Exception $e) {
+            $_SESSION['flash_msg'] = "Gagal menyimpan pengaturan: " . $e->getMessage();
+        }
+        
+        header("Location: ../index.php?page=settings&tab=security");
+        exit();
+    }
 }
 ?>
