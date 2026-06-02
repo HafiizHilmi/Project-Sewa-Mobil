@@ -353,9 +353,6 @@
         <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm">
            Simpan & Selesaikan
         </button>
-        <button type="button" @click="skipComplete(completingOrder.id)" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-white py-2.5 rounded-xl font-semibold text-xs transition-colors flex items-center justify-center gap-1.5">
-           Lewati
-        </button>
       </div>
     </form>
   </div>
