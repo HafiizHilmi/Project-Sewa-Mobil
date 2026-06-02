@@ -356,7 +356,6 @@ $currMidtransClient = $secSettings['midtrans_client_key'] ?? '';
       <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6">
         <div class="flex items-center gap-3 mb-6">
           <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
-            <i class="fa-solid fa-shield-halved text-blue-500 text-sm"></i>
           </div>
           <div>
             <h2 class="text-sm font-bold text-slate-800 dark:text-white">Security & API Credentials</h2>
@@ -368,7 +367,6 @@ $currMidtransClient = $secSettings['midtrans_client_key'] ?? '';
           <!-- Fonnte Section -->
           <div class="border-b border-slate-100 dark:border-slate-700 pb-5">
             <div class="flex items-center gap-2 mb-3">
-              <i class="fa-brands fa-whatsapp text-emerald-500 text-base font-bold"></i>
               <h3 class="text-xs font-bold text-slate-700 dark:text-slate-350 uppercase tracking-wider">Integrasi WhatsApp Fonnte</h3>
             </div>
             <div>
@@ -386,7 +384,6 @@ $currMidtransClient = $secSettings['midtrans_client_key'] ?? '';
           <!-- Midtrans Section -->
           <div>
             <div class="flex items-center gap-2 mb-3">
-              <i class="fa-solid fa-credit-card text-blue-500 text-base"></i>
               <h3 class="text-xs font-bold text-slate-700 dark:text-slate-350 uppercase tracking-wider">Integrasi Payment Gateway Midtrans</h3>
             </div>
             
