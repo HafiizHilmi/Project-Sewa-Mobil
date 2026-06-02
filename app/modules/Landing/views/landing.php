@@ -132,7 +132,7 @@
                     <p class="text-muted-custom fs-6 mb-4 col-lg-8">
                         Tersedia berbagai mobil untuk mencukupi kebutuhan mu sehari-hari.
                     </p>
-                    <a href="#" class="btn btn-brand rounded-pill px-4 py-2 fw-semibold">Lihat Katalog</a>
+                    <a href="index.php?module=Homepage&action=index" class="btn btn-brand rounded-pill px-4 py-2 fw-semibold">Lihat Katalog</a>
                 </div>
                 <div class="col-lg-6">
                     <img src="../public/assets/images/5-Essential-Car-Rental-Tips-for-a-Smooth-Business-Travel-Experience-1024x544.jpg" alt="Avanza" class="img-fluid rounded-4 shadow-sm w-100 object-fit-cover" style="height: 350px;">
@@ -148,73 +148,53 @@
                     <h3 class="fw-bold mb-1">Mobil Terlaris</h3>
                     <p class="text-muted-custom mb-0">Mobil dengan penyewaan terbanyak bulan ini.</p>
                 </div>
-                <a href="#" class="text-brand text-decoration-none fw-semibold">Lihat Semua <i class="bi bi-arrow-right"></i></a>
+                <a href="index.php?module=Homepage&action=index" class="text-brand text-decoration-none fw-semibold">Lihat Semua <i class="bi bi-arrow-right"></i></a>
             </div>
 
             <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card card-custom p-3 h-100">
-                        <img src="../public/assets/images/avanza_b1242_dfr.jpeg" class="card-img-top rounded-3 mb-3 object-fit-cover" alt="Avanza" style="height: 180px;">
-                        <div class="card-body p-0">
-                            <div class="d-flex justify-content-between align-items-start mb-1">
-                                <h6 class="fw-bold mb-0">Toyota Avanza</h6>
-                                <div class="text-end">
-                                    <span class="fw-bold mb-0 d-block">Rp350.000 <span class="text-muted fw-normal" style="font-size: 0.75rem;">/hari</span></span>
+                <?php if (!empty($cars)): ?>
+                    <?php foreach ($cars as $car): ?>
+                        <?php 
+                            $carName = htmlspecialchars(trim($car['make'] . ' ' . $car['model'] . ' ' . $car['year'])); 
+                            $carCategory = htmlspecialchars($car['category'] ?: 'Lainnya'); 
+                            $carFuel = htmlspecialchars($car['fuel_type'] ?: '-'); 
+                            $carSeats = htmlspecialchars($car['seats'] ?: '-'); 
+                            $carPrice = number_format($car['price_per_day'], 0, ',', '.'); 
+                            
+                            $rawImg = $car['image'] ?? '';
+                            if (!empty($rawImg)) {
+                                $carImage = filter_var($rawImg, FILTER_VALIDATE_URL) ? $rawImg : 'assets/images/' . $rawImg;
+                            } else {
+                                $carImage = 'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop';
+                            }
+                        ?>
+                        <div class="col-md-4">
+                            <div class="card card-custom p-3 h-100">
+                                <img src="<?= htmlspecialchars($carImage) ?>" class="card-img-top rounded-3 mb-3 object-fit-cover" alt="<?= $carName ?>" style="height: 180px;">
+                                <div class="card-body p-0">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <h6 class="fw-bold mb-0"><?= $carName ?></h6>
+                                        <div class="text-end">
+                                            <span class="fw-bold mb-0 d-block">Rp<?= $carPrice ?> <span class="text-muted fw-normal" style="font-size: 0.75rem;">/hari</span></span>
+                                        </div>
+                                    </div>
+                                    <p class="text-muted-custom" style="font-size: 0.75rem;"><?= $carCategory ?></p>
+                                    
+                                    <div class="mb-4">
+                                        <span class="badge badge-custom rounded-pill me-1"><?= $carFuel ?></span>
+                                        <span class="badge badge-custom rounded-pill"><?= $carSeats ?> Penumpang</span>
+                                    </div>
+                                    
+                                    <a href="index.php?module=Booking&action=checkout&car_id=<?= htmlspecialchars($car['id']) ?>" class="btn btn-brand w-100 rounded-3 fw-semibold">Sewa Sekarang</a>
                                 </div>
                             </div>
-                            <p class="text-muted-custom" style="font-size: 0.75rem;">MPV</p>
-                            
-                            <div class="mb-4">
-                                <span class="badge badge-custom rounded-pill me-1">Bensin</span>
-                                <span class="badge badge-custom rounded-pill">7 Penumpang</span>
-                            </div>
-                            
-                            <a href="#" class="btn btn-brand w-100 rounded-3 fw-semibold">Sewa Sekarang</a>
                         </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="col-12 text-center py-5">
+                        <p class="text-muted mb-0">Tidak ada mobil yang tersedia.</p>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card card-custom p-3 h-100">
-                        <img src="../public/assets/images/mercy.avif" class="card-img-top rounded-3 mb-3 object-fit-cover" alt="Mercedes Benz S600" style="height: 180px;">
-                        <div class="card-body p-0">
-                            <div class="d-flex justify-content-between align-items-start mb-1">
-                                <h6 class="fw-bold mb-0">Mercedes Benz S500</h6>
-                                <div class="text-end">
-                                    <span class="fw-bold mb-0 d-block">Rp2.350.000 <span class="text-muted fw-normal" style="font-size: 0.75rem;">/hari</span></span>
-                                </div>
-                            </div>
-                            <p class="text-muted-custom" style="font-size: 0.75rem;">Sedan</p>
-                            
-                            <div class="mb-4">
-                                <span class="badge badge-custom rounded-pill me-1">Bensin</span>
-                                <span class="badge badge-custom rounded-pill">5 Penumpang</span>
-                            </div>
-                            
-                            <a href="#" class="btn btn-brand w-100 rounded-3 fw-semibold">Sewa Sekarang</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card card-custom p-3 h-100">
-                        <img src="../public/assets/images/zigi-6770e685dc131-hyundai-ioniq-5-bekas_665_374.webp" class="card-img-top rounded-3 mb-3 object-fit-cover" alt="Avanza" style="height: 180px;">
-                        <div class="card-body p-0">
-                            <div class="d-flex justify-content-between align-items-start mb-1">
-                                <h6 class="fw-bold mb-0">Hyundai IONIQ 5</h6>
-                                <div class="text-end">
-                                    <span class="fw-bold mb-0 d-block">Rp550.000 <span class="text-muted fw-normal" style="font-size: 0.75rem;">/hari</span></span>
-                                </div>
-                            </div>
-                            <p class="text-muted-custom" style="font-size: 0.75rem;">Listrik</p>
-                            
-                            <div class="mb-4">
-                                <span class="badge badge-custom rounded-pill me-1">Listrik</span>
-                                <span class="badge badge-custom rounded-pill">5 Penumpang</span>
-                            </div>
-                            
-                            <a href="#" class="btn btn-brand w-100 rounded-3 fw-semibold">Sewa Sekarang</a>
-                        </div>
-                    </div>
-                </div>
+                <?php endif; ?>
             </div>
         </div>
     </section>
