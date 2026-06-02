@@ -1,10 +1,9 @@
 <?php
-// ====================================================================================
-// FITUR BARU: API AJAX UNTUK NOTIFIKASI REAL-TIME
-// Bagian ini akan mencegat request dari Javascript dan membalasnya dengan JSON
-// ====================================================================================
+// ==========================================
+// API AJAX untuk notifikasi real-time
+// ==========================================
 if (isset($_GET['ajax_alerts'])) {
-    if (ob_get_length()) ob_clean(); // Bersihkan HTML (header/nav/sidebar) yang terlanjur di-print index.php
+    if (ob_get_length()) ob_clean(); // Bersihkan output buffer jika ada data HTML yang telanjur dicetak
     header('Content-Type: application/json');
     
     $alertsStmt = $pdo->query("
@@ -28,9 +27,9 @@ if (isset($_GET['ajax_alerts'])) {
         ];
     }
     echo json_encode($dynamicAlerts);
-    exit; // Stop render sisa halaman dashboard
+    exit; // Stop render sisa halaman dashboard setelah respon JSON
 }
-// ====================================================================================
+// ==========================================
 
 
 $stockStmt = $pdo->query("SELECT IFNULL(SUM(CASE WHEN IFNULL(is_type,0)=0 THEN 1 ELSE 0 END), 0) AS total_cars, IFNULL(SUM(CASE WHEN IFNULL(is_type,0)=0 THEN stock ELSE 0 END), 0) AS total_stock, IFNULL(SUM(CASE WHEN available = 1 AND IFNULL(is_type,0)=0 THEN stock ELSE 0 END), 0) AS available_stock FROM cars");
@@ -49,9 +48,9 @@ $totalCust = $stats['total_cust'] ?? 0;
 $totalRevenue = $stats['total_revenue'] ?? 0;
 
 
-// ====================================================================================
-// FITUR: KALKULASI GRAFIK DYNAMIC DENGAN FITUR SLIDE / SCROLL & TOOLTIP
-// ====================================================================================
+// ==========================================
+// Kalkulasi grafik dinamis (slide & tooltip)
+// ==========================================
 
 function getSvgY($val, $max) {
     if ($max == 0) $max = 1; 
@@ -62,7 +61,7 @@ $numPoints = 12;
 $pointSpacing = 100; 
 $svgWidth = 40 + (($numPoints - 1) * $pointSpacing) + 40; 
 
-// 1. Data Bulan
+// 1. Ambil data bulanan
 $chartMonths = [];
 $chartValues = [];
 $maxValue = 10; 
@@ -83,7 +82,7 @@ for ($i = $numPoints - 1; $i >= 0; $i--) {
     $chartValues[] = $count;
 }
 
-// 2. Data Minggu
+// 2. Ambil data mingguan
 $weeklyLabels = [];
 $weeklyValues = [];
 $maxWeekValue = 10;
@@ -105,7 +104,7 @@ for ($i = $numPoints - 1; $i >= 0; $i--) {
     $weeklyValues[] = $countW;
 }
 
-// 3. Data Harian
+// 3. Ambil data harian
 $dailyLabels = [];
 $dailyValues = [];
 $maxDailyValue = 10;
@@ -127,13 +126,13 @@ for ($i = $numPoints - 1; $i >= 0; $i--) {
 }
 
 
-// 4. Algoritma X Coordinate
+// 4. Hitung koordinat X grafik
 $xCoords = [];
 for ($i = 0; $i < $numPoints; $i++) {
     $xCoords[] = 40 + ($i * $pointSpacing); 
 }
 
-// 5. Algoritma Melengkung (Bulan)
+// 5. Buat kurva melengkung bulanan (SVG Path)
 $pathD = "M " . $xCoords[0] . "," . getSvgY($chartValues[0], $maxValue);
 for ($i = 1; $i < $numPoints; $i++) {
     $prevX = $xCoords[$i-1];
@@ -146,7 +145,7 @@ for ($i = 1; $i < $numPoints; $i++) {
 $bgPathD = $pathD . " L " . end($xCoords) . ",150 L " . $xCoords[0] . ",150 Z";
 $step = $maxValue / 4;
 
-// 6. Algoritma Melengkung (Minggu)
+// 6. Buat kurva melengkung mingguan (SVG Path)
 $pathDW = "M " . $xCoords[0] . "," . getSvgY($weeklyValues[0], $maxWeekValue);
 for ($i = 1; $i < $numPoints; $i++) {
     $prevX = $xCoords[$i-1];
@@ -159,7 +158,7 @@ for ($i = 1; $i < $numPoints; $i++) {
 $bgPathDW = $pathDW . " L " . end($xCoords) . ",150 L " . $xCoords[0] . ",150 Z";
 $stepW = $maxWeekValue / 4;
 
-// 7. Algoritma Melengkung (Harian)
+// 7. Buat kurva melengkung harian (SVG Path)
 $pathDD = "M " . $xCoords[0] . "," . getSvgY($dailyValues[0], $maxDailyValue);
 for ($i = 1; $i < $numPoints; $i++) {
     $prevX = $xCoords[$i-1];
@@ -172,9 +171,9 @@ for ($i = 1; $i < $numPoints; $i++) {
 $bgPathDD = $pathDD . " L " . end($xCoords) . ",150 L " . $xCoords[0] . ",150 Z";
 $stepD = $maxDailyValue / 4;
 
-// ====================================================================================
-// PESANAN MASUK (INITIAL LOAD)
-// ====================================================================================
+// ==========================================
+// Load awal data pesanan masuk (pending)
+// ==========================================
 $alertsStmt = $pdo->query("
     SELECT b.id, b.created_at, b.full_name, c.make, c.model 
     FROM bookings b 
@@ -195,7 +194,7 @@ foreach($pendingOrders as $order) {
         'time' => date('d M Y, H:i', strtotime($order['created_at']))
     ];
 }
-// ====================================================================================
+
 
 ?>
 

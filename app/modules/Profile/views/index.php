@@ -202,7 +202,7 @@
     $phone   = htmlspecialchars($user['phone'] ?? '');
     $initial = strtoupper(substr($name, 0, 1));
 
-    // Booking stats
+    // Statistik penyewaan
     $totalBookings    = count($bookings);
     $activeBookings   = count(array_filter($bookings, fn($b) => $b['status'] === 'confirmed'));
     $completedBookings= count(array_filter($bookings, fn($b) => $b['status'] === 'completed'));
@@ -963,9 +963,9 @@
                     </div>
                             </div>
                         </div>
-                <?php endif; // end of if ($status === 'rejected') ?>
-            <?php endif; // end of if (!$docsUnlocked) ?>
-        <?php endif; // end of if ($status === 'unverified') ?>
+                <?php endif; // akhir dari status === 'rejected' ?>
+            <?php endif; // akhir dari docsUnlocked === false ?>
+        <?php endif; // akhir dari status === 'unverified' ?>
         </div>
 
         <div class="tab-panel" id="tab-editprofil">
@@ -1219,13 +1219,15 @@
 </div>
 
 <script>
-    // ==================== REJECTED DOCS STEP WORKFLOW ====================
+    // ==========================================
+    // Alur unggah ulang dokumen ditolak
+    // ==========================================
     function showRejectedUploadForm() {
         const infoCard   = document.getElementById('rejected-info-card');
         const uploadForm = document.getElementById('rejected-upload-form');
         if (!infoCard || !uploadForm) return;
 
-        // Fade out info card
+        // Efek transparan pada kartu info
         infoCard.style.transition = 'opacity .2s ease, transform .2s ease';
         infoCard.style.opacity = '0';
         infoCard.style.transform = 'translateY(-6px)';
@@ -1236,7 +1238,7 @@
             infoCard.style.transform = '';
 
             uploadForm.classList.remove('hidden');
-            // Trigger reflow for animation
+            // Picu reflow DOM untuk jalankan animasi
             void uploadForm.offsetWidth;
             uploadForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 200);
@@ -1262,7 +1264,9 @@
         }, 200);
     }
 
-    // ==================== TAB NAVIGATION ====================
+    // ==========================================
+    // Navigasi Tab Halaman
+    // ==========================================
     const sidebarLinks = document.querySelectorAll('[data-tab]');
     const tabPanels    = document.querySelectorAll('.tab-panel');
 
@@ -1275,11 +1279,11 @@
         if (link)  link.classList.add('active');
         if (panel) panel.classList.add('active');
 
-        // Close mobile sidebar
+        // Tutup menu sidebar saat di HP
         document.getElementById('sidebar').classList.remove('open');
         document.getElementById('sidebar-overlay').classList.remove('show');
 
-        // Persist to URL hash
+        // Simpan tab aktif ke URL hash
         history.replaceState(null, '', `#${tabId}`);
     }
 
@@ -1290,7 +1294,7 @@
         });
     });
 
-    // "Lihat semua" links
+    // Link "Lihat Semua"
     document.querySelectorAll('[data-tab-link]').forEach(el => {
         el.addEventListener('click', e => {
             e.preventDefault();
@@ -1298,13 +1302,15 @@
         });
     });
 
-    // Init from URL hash
+    // Inisialisasi tab berdasarkan URL hash
     const hash = location.hash.replace('#', '');
     if (hash && document.getElementById(`tab-${hash}`)) {
         activateTab(hash);
     }
 
-    // ==================== MOBILE SIDEBAR ====================
+    // ==========================================
+    // Kontrol Menu Sidebar (HP)
+    // ==========================================
     const sidebar        = document.getElementById('sidebar');
     const overlay        = document.getElementById('sidebar-overlay');
     const toggleBtn      = document.getElementById('sidebar-toggle');
@@ -1318,7 +1324,9 @@
         overlay.classList.remove('show');
     });
 
-    // ==================== IMAGE PREVIEW ====================
+    // ==========================================
+    // Preview Foto Upload
+    // ==========================================
     function previewImage(input, previewId, textId, iconId) {
         const preview = document.getElementById(previewId);
         const text    = document.getElementById(textId);
@@ -1340,7 +1348,9 @@
         }
     }
 
-    // ==================== PASSWORD TOGGLE ====================
+    // ==========================================
+    // Tampilkan / Sembunyikan Password
+    // ==========================================
     function togglePwd(fieldId, btn) {
         const field = document.getElementById(fieldId);
         const icon  = btn.querySelector('i');
@@ -1353,7 +1363,9 @@
         }
     }
 
-    // ==================== ALERTS CLOSABLE ====================
+    // ==========================================
+    // Menutup Banner Notifikasi (Alert)
+    // ==========================================
     function closeAlert(btn) {
         const alertBox = btn.closest('.alert-banner');
         if (alertBox) {
@@ -1366,7 +1378,9 @@
         }
     }
 
-    // ==================== TOGGLE BOOKING DETAIL ====================
+    // ==========================================
+    // Tampilkan / Sembunyikan Detail Booking
+    // ==========================================
     function toggleBookingDetail(detailId, btn) {
         const detailBox = document.getElementById(detailId);
         if (!detailBox) return;
@@ -1384,7 +1398,9 @@
         }
     }
 
-    // ==================== TOGGLE DOCUMENT IMAGES ====================
+    // ==========================================
+    // Tampilkan / Sembunyikan Foto Identitas
+    // ==========================================
     function toggleDocImages(docId, btn) {
         const docBox = document.getElementById(docId);
         if (!docBox) return;
@@ -1405,7 +1421,9 @@
         }
     }
 
-    // ==================== THEME CROSS-TAB SYNC ====================
+    // ==========================================
+    // Sinkronisasi Tema Antar Tab
+    // ==========================================
     window.addEventListener('storage', (event) => {
         if (event.key === 'theme') {
             const currentTheme = event.newValue;
@@ -1422,7 +1440,9 @@
         }
     });
 
-    // ==================== THEME TOGGLE ====================
+    // ==========================================
+    // Pengaturan Ganti Tema
+    // ==========================================
     const themeToggleBtn = document.getElementById('theme-toggle');
     const themeToggleIcon = document.getElementById('theme-toggle-icon');
 
@@ -1439,7 +1459,7 @@
             }
         }
         
-        // Update Theme Setting Cards if they exist
+        // Perbarui kartu pilihan tema jika ada
         document.querySelectorAll('.theme-card').forEach(card => {
             card.classList.remove('border-brand-500', 'dark:border-brand-500');
             card.classList.add('border-slate-200', 'dark:border-slate-700');
@@ -1481,7 +1501,7 @@
         });
     }
 
-    // Object to track active countdown timers per button
+    // Objek untuk melacak sisa waktu tombol konfirmasi
     const gateTimers = {};
 
     function toggleGateButton(checkboxId, buttonId) {
@@ -1489,7 +1509,7 @@
         const button   = document.getElementById(buttonId);
         if (!checkbox || !button) return;
 
-        // Clear any existing active timer for this button first
+        // Bersihkan timer aktif yang lama pada tombol ini
         if (gateTimers[buttonId]) {
             clearInterval(gateTimers[buttonId]);
             delete gateTimers[buttonId];
@@ -1498,7 +1518,7 @@
         if (checkbox.checked) {
             let secondsLeft = 5;
             
-            // Keep button styled as disabled
+            // Buat tombol menjadi tidak aktif (disabled)
             button.disabled = true;
             button.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'text-white', 'cursor-pointer');
             button.classList.add('bg-slate-200', 'dark:bg-slate-700', 'text-slate-400', 'dark:text-slate-500', 'cursor-not-allowed');
@@ -1509,7 +1529,7 @@
                 if (secondsLeft > 0) {
                     button.innerHTML = `Tunggu (${secondsLeft}s)...`;
                 } else {
-                    // Countdown complete, enable the button
+                    // Timer selesai, aktifkan kembali tombol
                     clearInterval(gateTimers[buttonId]);
                     delete gateTimers[buttonId];
                     
@@ -1520,7 +1540,7 @@
                 }
             }, 1000);
         } else {
-            // Checkbox unchecked: make sure button is disabled and reset to original state
+            // Jika centang dilepas, nonaktifkan kembali tombol
             button.disabled = true;
             button.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'text-white', 'cursor-pointer');
             button.classList.add('bg-slate-200', 'dark:bg-slate-700', 'text-slate-400', 'dark:text-slate-500', 'cursor-not-allowed');
@@ -1533,7 +1553,7 @@
         const container = document.getElementById(containerId);
         if (!gate || !container) return;
 
-        // Hide gate, show actual form with fade effect
+        // Sembunyikan halaman pengaman, tampilkan form asli
         gate.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
         gate.style.opacity = '0';
         gate.style.transform = 'translateY(-8px)';
@@ -1548,7 +1568,7 @@
             container.style.transform = 'translateY(8px)';
             container.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
             
-            // Trigger reflow for transition
+            // Picu reflow DOM untuk transisi
             void container.offsetHeight;
             
             container.style.opacity = '1';
@@ -1556,7 +1576,7 @@
         }, 200);
     }
 
-    // Initialize UI on load
+    // Inisialisasi tampilan saat halaman selesai dimuat
     document.addEventListener('DOMContentLoaded', updateThemeIcon);
     updateThemeIcon();
 </script>

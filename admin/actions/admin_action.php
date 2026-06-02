@@ -1,12 +1,12 @@
 <?php
-// admin/actions/admin_action.php
+
 session_start();
 require_once __DIR__ . '/../../include/db_config.php';
 $pdo = getPDO();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     
-    // 1. TAMBAH ADMIN
+    // Tambah akun admin baru
     if ($_POST['action'] === 'add_admin') {
         if (!isset($_SESSION['admin_role']) || $_SESSION['admin_role'] !== 'superuser') die("Akses Ditolak!");
         
@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         }
     }
     
-    // 2. HAPUS ADMIN
+    // Hapus akun admin
     if ($_POST['action'] === 'delete_admin') {
         if (!isset($_SESSION['admin_role']) || $_SESSION['admin_role'] !== 'superuser') die("Akses Ditolak!");
         
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         }
     }
 
-    // 3. EDIT ADMIN
+    // Edit data admin
     if ($_POST['action'] === 'edit_admin') {
         if (!isset($_SESSION['admin_role']) || $_SESSION['admin_role'] !== 'superuser') die("Akses Ditolak!");
 
@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
 
-    // 4. GANTI PASSWORD
+    // Ganti password admin
     if ($_POST['action'] === 'change_password') {
         $admin_id = $_SESSION['admin_id'];
         $old_pass = $_POST['old_password'];
@@ -88,9 +88,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
 
-    // -------------------------------------------------------------------
-    // FITUR BLACKLIST AREA
-    // -------------------------------------------------------------------
+    // ==========================================
+    // Fitur Blacklist Area (Geofencing)
+    // ==========================================
     if ($_POST['action'] === 'add_blacklist') {
         if (!isset($_SESSION['admin_role']) || $_SESSION['admin_role'] !== 'superuser') die("Akses Ditolak!");
         

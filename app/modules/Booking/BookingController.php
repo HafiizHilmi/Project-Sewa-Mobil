@@ -87,7 +87,7 @@ class BookingController {
             exit;
         }
 
-        // ----------------- GEOFENCING BLACKLIST CHECK -----------------
+        // Cek apakah lokasi jemput/kembali masuk area blacklist (geofencing)
         $stmtBL = $pdo->query("SELECT * FROM blacklisted_locations");
         $geofences = $stmtBL->fetchAll(PDO::FETCH_ASSOC);
 
@@ -108,7 +108,7 @@ class BookingController {
         $address_lower = strtolower($address);
 
         $haversine = function($lat1, $lon1, $lat2, $lon2) {
-            $earthRadius = 6371000; // in meters
+            $earthRadius = 6371000; // dalam satuan meter
             $latDelta = deg2rad($lat2 - $lat1);
             $lonDelta = deg2rad($lon2 - $lon1);
             $a = sin($latDelta / 2) * sin($latDelta / 2) +
@@ -125,14 +125,14 @@ class BookingController {
             $locationName = $gf['location_name'];
             $locationNameLower = strtolower(trim($locationName));
 
-            // A. Pengecekan berbasis Pencocokan Teks (Manual Input)
+            // A. Cek kecocokan teks untuk input manual
             if ($locationNameLower !== '') {
-                // Bersihkan nama lokasi dari suffix angka dan kata "point"
+                // Bersihkan angka dan kata "point" di bagian akhir nama lokasi
                 $cleanGfName = preg_replace('/\s*\d+$/', '', $locationNameLower);
                 $cleanGfName = preg_replace('/\s*point\s*$/', '', $cleanGfName);
                 $cleanGfName = trim($cleanGfName);
 
-                // Pecah menjadi bagian-bagian kata kunci (misal: "ntt - ntb" -> ["ntt", "ntb"])
+                // Pecah jadi bagian kata kunci (contoh: "ntt - ntb" -> ["ntt", "ntb"])
                 $parts = preg_split('/[\s\-,]+/', $cleanGfName);
                 $parts = array_filter($parts, function($part) {
                     return strlen(trim($part)) >= 3;
@@ -143,7 +143,7 @@ class BookingController {
                     $parts[] = $cleanGfName;
                 }
 
-                // Cek apakah ada bagian dari nama lokasi blacklist yang terkandung dalam input user
+                // Cek apakah input user mengandung kata kunci blacklist
                 $text_blocked = false;
                 foreach ($parts as $part) {
                     if (strpos($pickup_location_lower, $part) !== false ||
@@ -161,8 +161,8 @@ class BookingController {
                 }
             }
 
-            // B. Pengecekan berbasis Geofencing Radius (Koordinat)
-            // Cek Lokasi Pengambilan
+            // B. Cek radius geofencing berdasarkan koordinat
+            // Validasi titik jemput
             if ($pickup_lat && $pickup_lon) {
                 $dist = $haversine($pickup_lat, $pickup_lon, $gfLat, $gfLng);
                 if ($dist <= $gfRad) {
@@ -172,7 +172,7 @@ class BookingController {
                 }
             }
 
-            // Cek Lokasi Pengembalian
+            // Validasi titik kembalikan
             if ($return_lat && $return_lon) {
                 $dist = $haversine($return_lat, $return_lon, $gfLat, $gfLng);
                 if ($dist <= $gfRad) {
@@ -182,7 +182,7 @@ class BookingController {
                 }
             }
 
-            // Cek Alamat Lengkap
+            // Validasi alamat lengkap user
             if ($address_lat && $address_lon) {
                 $dist = $haversine($address_lat, $address_lon, $gfLat, $gfLng);
                 if ($dist <= $gfRad) {
@@ -198,7 +198,7 @@ class BookingController {
             header('Location: index.php?module=Booking&action=checkout&car_id=' . $car_id);
             exit;
         }
-        // -------------------------------------------------------------
+        // Selesai cek geofencing
 
         $stmt = $pdo->prepare('INSERT INTO bookings (user_id, car_id, pickup_location, return_location, full_name, email, phone, address, start_date, end_date, addon_driver, total_price, status, created_at) VALUES (:user_id, :car_id, :pickup_location, :return_location, :full_name, :email, :phone, :address, :start_date, :end_date, :addon_driver, :total_price, :status, NOW())');
 
@@ -220,7 +220,7 @@ class BookingController {
 
         $bookingId = $pdo->lastInsertId();
 
-        // 1. Upgrade database columns if not present
+        // 1. Tambah kolom database baru kalau belum ada
         try {
             $pdo->exec("ALTER TABLE bookings ADD COLUMN payment_token VARCHAR(255) DEFAULT NULL");
         } catch (Exception $e) {}
@@ -234,7 +234,7 @@ class BookingController {
             $pdo->exec("ALTER TABLE bookings ADD COLUMN midtrans_order_id VARCHAR(100) DEFAULT NULL");
         } catch (Exception $e) {}
 
-        // 2. Generate Midtrans Snap Token
+        // 2. Buat Snap Token Midtrans untuk pembayaran
         $payment_url = "";
         $snap = $this->getSnapToken($bookingId, $total_price, $full_name, $email, $phone);
         if ($snap) {
@@ -262,7 +262,7 @@ class BookingController {
             'car_id' => $car_id
         ];
 
-        // --- AMBIL NAMA MOBIL LALU KIRIM NOTIFIKASI PENDING & PEMBAYARAN ---
+        // Ambil nama mobil lalu kirim notifikasi pembayaran tertunda
         $stmtCarDetails = $pdo->prepare("SELECT make, model FROM cars WHERE id = :id");
         $stmtCarDetails->execute(['id' => $car_id]);
         $carDetails = $stmtCarDetails->fetch(PDO::FETCH_ASSOC);
@@ -270,7 +270,6 @@ class BookingController {
 
         $msgWA = "Halo *$full_name*,\n\nTerima kasih telah memesan mobil *$carName* di SewaMobil SBY (Order ID: #$bookingId).\n\nSilakan selesaikan pembayaran via Midtrans menggunakan link berikut:\n$payment_url\n\nHarap lakukan pembayaran dalam waktu 15 menit sebelum pesanan otomatis dibatalkan.\n\nTerima kasih!";
         $this->sendNotification($phone, $email, "Menunggu Pembayaran - SewaMobil SBY", $msgWA);
-        // ------------------------------------------------------
 
         header('Location: index.php?module=Booking&action=pending&booking_id=' . $bookingId);
         exit;
@@ -284,12 +283,12 @@ class BookingController {
         require_once __DIR__ . '/../../../include/db_config.php';
         $pdo = getPDO();
         if ($pdo) {
-            // 1. Database Cleanup: Batalkan pesanan expired secara otomatis
+            // 1. Beres-beres DB: Batalkan pesanan yang expired otomatis
             try {
                 $pdo->exec("UPDATE bookings SET status = 'cancelled' WHERE status = 'pending' AND payment_expiry IS NOT NULL AND payment_expiry < NOW()");
             } catch (Exception $e) {}
 
-            // 2. Poll Midtrans Status if midtrans_order_id is set
+            // 2. Cek status pembayaran ke Midtrans jika ada id transaksi
             $bookingId = isset($_GET['booking_id']) ? intval($_GET['booking_id']) : null;
             if ($bookingId) {
                 $stmt = $pdo->prepare("SELECT status, car_id, payment_token, midtrans_order_id, total_price, full_name, email, phone FROM bookings WHERE id = ? LIMIT 1");
@@ -297,7 +296,7 @@ class BookingController {
                 $booking = $stmt->fetch(PDO::FETCH_ASSOC);
                 
                 if ($booking && $booking['status'] === 'pending') {
-                    // JIKA PAYMENT TOKEN KOSONG, GENERATE SEKARANG SECARA DINAMIS
+                    // Bikin token pembayaran secara dinamis jika masih kosong
                     if (empty($booking['payment_token'])) {
                         $snap = $this->getSnapToken($bookingId, $booking['total_price'], $booking['full_name'], $booking['email'], $booking['phone']);
                         if ($snap) {
@@ -315,13 +314,13 @@ class BookingController {
                         }
                     }
 
-                    // Poll Midtrans Status if midtrans_order_id is set
+                    // Tarik status terbaru dari Midtrans
                     if (!empty($booking['midtrans_order_id'])) {
                         $statusResult = $this->getMidtransStatus($booking['midtrans_order_id']);
                         if (isset($statusResult['transaction_status'])) {
                             $txStatus = $statusResult['transaction_status'];
                             if ($txStatus === 'settlement' || $txStatus === 'capture') {
-                                // 1. Temukan type_key & nama dari mobil induk yang di-booking
+                                // 1. Cari tipe mobil (mobil induk) yang dipesan
                                 $stmtCar = $pdo->prepare("SELECT type_key, make, model FROM cars WHERE id = ?");
                                 $stmtCar->execute([$booking['car_id']]);
                                 $parentCar = $stmtCar->fetch(PDO::FETCH_ASSOC);
@@ -332,7 +331,7 @@ class BookingController {
                                 
                                 if ($parentCar) {
                                     $carName = trim(($parentCar['make'] ?? '') . ' ' . ($parentCar['model'] ?? ''));
-                                    // 2. Cari mobil anak (is_type=0) yang sejenis (type_key sama) yang tersedia
+                                    // 2. Cari unit fisik mobil yang cocok dan tersedia
                                     $stmtChild = $pdo->prepare("SELECT id, number_plate FROM cars WHERE type_key = ? AND is_type = 0 AND available = 1 LIMIT 1");
                                     $stmtChild->execute([$parentCar['type_key']]);
                                     $assigned_car = $stmtChild->fetch(PDO::FETCH_ASSOC);
@@ -342,17 +341,17 @@ class BookingController {
                                     }
                                 }
 
-                                // 3. Update status booking menjadi confirmed & simpan assigned_car_id
+                                // 3. Konfirmasi booking dan pasangkan unit mobil
                                 $stmtConfirm = $pdo->prepare("UPDATE bookings SET status = 'confirmed', assigned_car_id = ? WHERE id = ?");
                                 $stmtConfirm->execute([$assigned_car_id, $bookingId]);
 
-                                // 4. Jika unit didapatkan, tandai unit tersebut tidak tersedia (available = 0)
+                                // 4. Tandai unit mobil tersebut jadi tidak tersedia
                                 if ($assigned_car_id) {
                                     $stmtUpdateChild = $pdo->prepare("UPDATE cars SET available = 0 WHERE id = ?");
                                     $stmtUpdateChild->execute([$assigned_car_id]);
                                 }
 
-                                // --- KIRIM NOTIFIKASI PEMBAYARAN SUKSES & PLAT NOMOR ---
+                                // Kirim notifikasi pembayaran sukses beserta info plat nomor
                                 $msgWA = "Halo *" . $booking['full_name'] . "*,\n\nPembayaran Anda untuk pesanan sewa mobil *$carName* (Order ID: #$bookingId) telah kami *TERIMA*.\n\nUnit kendaraan Anda telah dialokasikan dengan nomor plat: *" . $assigned_plate . "*.\n\nSilakan datang ke lokasi pengambilan sesuai jadwal. Terima kasih telah menyewa di SewaMobil SBY!";
                                 $this->sendNotification($booking['phone'], $booking['email'], "Pembayaran Diterima - SewaMobil SBY", $msgWA);
                             } else if (in_array($txStatus, ['expire', 'cancel', 'deny'], true)) {
@@ -371,9 +370,9 @@ class BookingController {
         require_once __DIR__ . '/views/payment_rejected.php';
     }
 
-    // ==============================================================
-    // FUNGSI PRIVAT PEMBUATAN SNAP TOKEN MIDTRANS
-    // ==============================================================
+    // ==========================================
+    // Generate Snap Token Pembayaran via Midtrans
+    // ==========================================
     private function getSnapToken($bookingId, $totalPrice, $fullName, $email, $phone) {
         require_once __DIR__ . '/../../../include/api_keys.php';
         
@@ -444,9 +443,9 @@ class BookingController {
         return null;
     }
 
-    // ==============================================================
-    // FUNGSI PRIVAT POLLED STATUS TRANSAKSI MIDTRANS
-    // ==============================================================
+    // ==========================================
+    // Tarik Status Transaksi Terbaru dari Midtrans
+    // ==========================================
     private function getMidtransStatus($midtrans_order_id) {
         require_once __DIR__ . '/../../../include/api_keys.php';
         $serverKey = MIDTRANS_SERVER_KEY;
@@ -471,20 +470,20 @@ class BookingController {
         return json_decode($response, true);
     }
 
-    // ==============================================================
-    // FUNGSI PRIVAT PENGIRIM NOTIFIKASI (EMAIL & WHATSAPP)
-    // ==============================================================
+    // ==========================================
+    // Kirim Notifikasi ke User (Email & WhatsApp)
+    // ==========================================
     private function sendNotification($phone, $email, $subject, $message) {
-        // Panggil file rahasia
+        // Ambil konfigurasi API keys
         require_once __DIR__ . '/../../../include/api_keys.php';
 
-        // 1. Kirim Email (Bawaan PHP)
+        // 1. Kirim notifikasi via email
         $headers = "From: no-reply@sewamobil.com\r\n";
         $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
         @mail($email, $subject, $message, $headers);
 
-        // 2. Kirim WhatsApp (Fonnte API)
-        $token = FONNTE_TOKEN; // <-- Ambil token dari file api_keys.php
+        // 2. Kirim notifikasi via WhatsApp Fonnte
+        $token = FONNTE_TOKEN;
         
         $curl = curl_init();
         curl_setopt_array($curl, array(
@@ -492,7 +491,7 @@ class BookingController {
           CURLOPT_RETURNTRANSFER => true,
           CURLOPT_ENCODING => '',
           CURLOPT_MAXREDIRS => 10,
-          CURLOPT_TIMEOUT => 2, // Timeout cepat agar loading web tidak lemot
+          CURLOPT_TIMEOUT => 2, // Set timeout cepat biar loading web tetap kencang
           CURLOPT_FOLLOWLOCATION => true,
           CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
           CURLOPT_CUSTOMREQUEST => 'POST',

@@ -19,7 +19,7 @@ if ($carId > 0) {
     }
 }
 
-// Fallback jika tidak ditemukan di DB
+// Gunakan device ID cadangan jika tidak ada di database
 if (empty($deviceId)) {
     $deviceId = "DEVICE_ID_MD"; 
 }
@@ -33,7 +33,7 @@ if ($actionType === 'alarm') {
 }
 
 if ($webhookIdentifier !== "") {
-    // Gunakan urlencode agar mencegah error malformed input jika ada spasi pada ID
+    // Gunakan urlencode untuk menghindari error jika ada spasi pada ID
     $encodedDevice = urlencode($deviceId);
     $url = "https://trigger.macrodroid.com/{$encodedDevice}/{$webhookIdentifier}";
     

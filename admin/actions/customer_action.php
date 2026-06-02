@@ -82,7 +82,7 @@ if ($user_id && in_array($action, ['edit', 'suspend', 'unsuspend', 'delete'])) {
             exit;
 
         } elseif ($action === 'suspend') {
-            // Set verification_status to rejected for suspend
+            // Set status verifikasi ke rejected untuk menangguhkan akun (suspend)
             $stmt = $pdo->prepare("UPDATE users SET verification_status = 'rejected' WHERE id = :id");
             $stmt->execute([':id' => $user_id]);
 
@@ -93,7 +93,7 @@ if ($user_id && in_array($action, ['edit', 'suspend', 'unsuspend', 'delete'])) {
             exit;
 
         } elseif ($action === 'unsuspend') {
-            // Set verification_status back to verified
+            // Kembalikan status verifikasi ke verified untuk membuka suspend (unsuspend)
             $stmt = $pdo->prepare("UPDATE users SET verification_status = 'verified' WHERE id = :id");
             $stmt->execute([':id' => $user_id]);
 
@@ -104,7 +104,7 @@ if ($user_id && in_array($action, ['edit', 'suspend', 'unsuspend', 'delete'])) {
             exit;
 
         } elseif ($action === 'delete') {
-            // Delete customer from users table
+            // Hapus data pelanggan dari database
             $stmt = $pdo->prepare("DELETE FROM users WHERE id = :id AND role = 'user'");
             $stmt->execute([':id' => $user_id]);
 

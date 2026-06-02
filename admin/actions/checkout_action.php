@@ -1,19 +1,19 @@
 <?php
-// Misal ini adalah data yang diinput oleh penyewa saat memesan mobil:
-$asal_pelanggan = $_POST['kota_asal'];        // Cth: "Surabaya"
-$tujuan_penyewa = $_POST['kota_tujuan'];      // Cth: "Bangkalan"
-$lokasi_ambil   = $_POST['lokasi_pickup'];    // Cth: "Pelabuhan Kamal"
+// Ambil data input dari penyewa (contoh kota asal, tujuan, dan lokasi jemput)
+$asal_pelanggan = $_POST['kota_asal'] ?? '';   
+$tujuan_penyewa = $_POST['kota_tujuan'] ?? ''; 
+$lokasi_ambil   = $_POST['lokasi_pickup'] ?? '';
 
-// 1. Ambil semua data blacklist dari database
+// 1. Ambil seluruh data lokasi blacklist dari database
 $stmtBL = $pdo->query("SELECT location_name FROM blacklisted_locations");
 $blacklists = $stmtBL->fetchAll(PDO::FETCH_COLUMN);
 
 $is_blacklisted = false;
 $blocked_reason = "";
 
-// 2. Loop dan periksa apakah ada kata blacklist di dalam input penyewa
+// 2. Cek apakah ada kata kunci blacklist dalam input penyewa
 foreach ($blacklists as $b_area) {
-    // Ubah ke huruf kecil semua agar pengecekan tidak sensitif huruf besar/kecil
+    // Ubah ke huruf kecil biar pencocokannya tidak sensitif huruf besar/kecil
     $b_area = strtolower(trim($b_area));
     
     if (strpos(strtolower($asal_pelanggan), $b_area) !== false) {
@@ -33,9 +33,9 @@ foreach ($blacklists as $b_area) {
     }
 }
 
-// 3. Jika terkena blacklist, tolak pesanan
+// 3. Jika masuk blacklist, langsung tolak pesanan
 if ($is_blacklisted) {
-    // Kembalikan user ke halaman sebelumnya dengan pesan error
+    // Balikkan user ke halaman sebelumnya dengan pesan error
     echo "<script>
             alert('Maaf, pesanan Anda tidak dapat diproses. {$blocked_reason}');
             window.history.back();
@@ -43,7 +43,5 @@ if ($is_blacklisted) {
     exit();
 }
 
-// JIKA LOLOS BLACKLIST, LANJUTKAN PROSES SIMPAN PESANAN (INSERT INTO bookings ...)
-// ...
-// ...
+// Jika lolos blacklist, lanjutkan ke proses simpan pesanan ke database
 ?>

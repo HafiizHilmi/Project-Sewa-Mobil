@@ -6,18 +6,18 @@ if (!isset($_SESSION['admin_id'])) {
     exit();
 }
 $role = $_SESSION['admin_role'] ?? 'staff';
-// ---------------------------------
+
 
 require_once __DIR__ . '/../include/db_config.php';
 $pdo = getPDO();
 
-// Ensure assigned_car_id column exists in bookings table
+// Pastikan kolom assigned_car_id ada di tabel bookings
 $checkAssigned = $pdo->query("SHOW COLUMNS FROM bookings LIKE 'assigned_car_id'");
 if ($checkAssigned->rowCount() === 0) {
     $pdo->exec("ALTER TABLE bookings ADD COLUMN assigned_car_id INT UNSIGNED NULL");
 }
 
-// Ensure additional columns exist in bookings table
+// Pastikan kolom biaya tambahan dan kerusakan ada di tabel bookings
 $checkAdditional = $pdo->query("SHOW COLUMNS FROM bookings LIKE 'additional_cost'");
 if ($checkAdditional->rowCount() === 0) {
     $pdo->exec("ALTER TABLE bookings ADD COLUMN additional_cost DECIMAL(12, 2) DEFAULT 0.00");
@@ -31,7 +31,7 @@ if ($checkDamageDesc->rowCount() === 0) {
     $pdo->exec("ALTER TABLE bookings ADD COLUMN damage_description TEXT NULL");
 }
 
-// Upgrade Midtrans columns
+// Upgrade kolom pembayaran Midtrans
 try {
     $pdo->exec("ALTER TABLE bookings ADD COLUMN payment_token VARCHAR(255) DEFAULT NULL");
 } catch (Exception $e) {}
@@ -45,17 +45,17 @@ try {
     $pdo->exec("ALTER TABLE bookings ADD COLUMN midtrans_order_id VARCHAR(100) DEFAULT NULL");
 } catch (Exception $e) {}
 
-// Otomatis batalkan pesanan pending yang sudah melewati batas waktu pembayaran
+// Otomatis batalkan transaksi pending yang telat bayar
 try {
     $pdo->exec("UPDATE bookings SET status = 'cancelled' WHERE status = 'pending' AND payment_expiry IS NOT NULL AND payment_expiry < NOW()");
 } catch (Exception $e) {}
 
 
-// Ambil data user yang memiliki status verifikasi selain unverified (pending, verified, rejected)
+// Ambil data pelanggan yang sedang mengajukan verifikasi atau sudah selesai diproses
 $stmt = $pdo->query("SELECT id, name, email, verification_status, ktp_file, sim_file, created_at FROM users WHERE verification_status != 'unverified' ORDER BY FIELD(verification_status, 'pending') DESC, id DESC");
 $verifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Ambil data bookings/orders
+// Tarik data riwayat penyewaan (booking)
 $stmtOrders = $pdo->query("
     SELECT 
         b.id,
@@ -85,7 +85,7 @@ $stmtOrders = $pdo->query("
 ");
 $orders = $stmtOrders->fetchAll(PDO::FETCH_ASSOC);
 
-// Ambil data pelanggan (customers)
+// Tarik daftar semua pelanggan (customer)
 $stmtCustomers = $pdo->query("
     SELECT 
         u.id,
@@ -161,7 +161,7 @@ $customers = $stmtCustomers->fetchAll(PDO::FETCH_ASSOC);
             alert("<?= $_SESSION['flash_msg'] ?>");
         }, 150);
     </script>
-    <?php unset($_SESSION['flash_msg']); // Hapus pesan setelah ditampilkan ?>
+    <?php unset($_SESSION['flash_msg']); // Hapus flash message dari session agar tidak tampil lagi ?>
 <?php endif; ?>
 
 <div class="flex h-screen overflow-hidden">

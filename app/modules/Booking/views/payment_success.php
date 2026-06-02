@@ -172,7 +172,7 @@ $taxAmount = round($totalPrice - $baseSubtotal);
 
             <div class="h-36 w-full mb-5 rounded-2xl overflow-hidden bg-gray-100 dark:bg-slate-800 flex items-center justify-center">
                 <?php 
-                    // Perbaikan Path Gambar
+                    // Logika perbaikan path gambar
                     $rawImg = ($car && $car['image']) ? $car['image'] : '';
                     $carImage = !empty($rawImg) ? (filter_var($rawImg, FILTER_VALIDATE_URL) ? $rawImg : 'assets/images/' . $rawImg) : 'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop';
                 ?>

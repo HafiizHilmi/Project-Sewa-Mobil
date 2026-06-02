@@ -19,7 +19,7 @@ class ProfileController {
         $stmt->execute(['id' => $_SESSION['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Ambil riwayat pemesanan/penyewaan untuk user ini
+        // Ambil riwayat pemesanan (booking) untuk user ini
         $stmtBookings = $pdo->prepare("
             SELECT 
                 b.id,
@@ -77,7 +77,7 @@ class ProfileController {
         }
 
         $allowedExts = ['jpg', 'jpeg', 'png'];
-        $maxSize = 2 * 1024 * 1024; // 2MB
+        $maxSize = 2 * 1024 * 1024; // maksimal 2MB
 
         $ktpName = null;
         $simName = null;
@@ -202,7 +202,7 @@ class ProfileController {
             exit;
         }
 
-        // Check if email is already taken by another user
+        // Cek apakah email sudah terdaftar untuk user lain
         $stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email AND id != :id LIMIT 1");
         $stmt->execute(['email' => $email, 'id' => $_SESSION['user_id']]);
         if ($stmt->fetch()) {
@@ -218,7 +218,7 @@ class ProfileController {
             'phone' => $phone,
             'id' => $_SESSION['user_id']
         ])) {
-            $_SESSION['user_name'] = $name; // Sync session user_name
+            $_SESSION['user_name'] = $name; // Sinkronisasi nama user di session
             $_SESSION['flash_success'] = "Profil berhasil diperbarui.";
         } else {
             $_SESSION['flash_error'] = "Gagal memperbarui profil.";
@@ -268,7 +268,7 @@ class ProfileController {
             exit;
         }
 
-        // Fetch current password
+        // Ambil password saat ini dari database
         $stmt = $pdo->prepare("SELECT password FROM users WHERE id = :id");
         $stmt->execute(['id' => $_SESSION['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);

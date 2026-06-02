@@ -6,7 +6,7 @@ if (!isset($pdo)) {
 $stmtBL = $pdo->query("SELECT * FROM blacklisted_locations");
 $geofences = $stmtBL ? $stmtBL->fetchAll(PDO::FETCH_ASSOC) : [];
 
-// QUERY SUCCESFUL BOOKINGS FOR THIS CAR TO CALCULATE DATES STOCK
+// Ambil data pemesanan sukses untuk hitung stok tanggal
 $bookedRanges = [];
 if (isset($car['id'])) {
     $stmtBooked = $pdo->prepare("
@@ -354,7 +354,7 @@ $carStock = intval($car['stock'] ?? 1);
                 <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden sticky top-24">
                     <div class="h-48 bg-gray-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
                         <?php 
-                            // Perbaikan Logika Path Gambar
+                            // Logika perbaikan path gambar mobil
                             $rawImg = $car['image'] ?? '';
                             $carImage = !empty($rawImg) ? (filter_var($rawImg, FILTER_VALIDATE_URL) ? $rawImg : 'assets/images/' . $rawImg) : 'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop';
                         ?>

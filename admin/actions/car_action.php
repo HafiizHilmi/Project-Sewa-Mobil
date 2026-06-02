@@ -1,16 +1,16 @@
 <?php
-// Pastikan session sudah menyala untuk mengecek role
+// Nyalakan session jika belum aktif untuk cek role
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// PROTEKSI BACKEND: Jika bukan superuser, matikan proses.
+// Pengaman backend: Tolak akses jika bukan superuser
 if (!isset($_SESSION['admin_role']) || $_SESSION['admin_role'] !== 'superuser') {
     http_response_code(403);
     die("Akses Ditolak! Hanya Superuser yang diizinkan untuk menambah, mengedit, atau menghapus kendaraan.");
 }
 
-// Pastikan path ke database benar
+// Load koneksi database
 require_once '../../Config/database.php';
 
 $checkIsType = mysqli_query($conn, "SHOW COLUMNS FROM cars LIKE 'is_type'");
@@ -25,7 +25,7 @@ if (mysqli_num_rows($checkTypeKey) === 0) {
 }
 
 // ==========================================
-// [ PROSES SIMPAN / EDIT KENDARAAN ]
+// Simpan atau edit data mobil
 // ==========================================
 if (isset($_POST['save_car'])) {
     $id           = isset($_POST['id']) ? $_POST['id'] : '';
@@ -50,29 +50,29 @@ if (isset($_POST['save_car'])) {
         $stock = 0;
     }
     
-    // Variabel untuk menampung nama file gambar
+    // Siapkan variabel untuk menampung nama file gambar
     $imageName = "";
 
-    // Logika Upload Foto
+    // Proses upload foto mobil
     if (isset($_FILES['foto_mobil']) && $_FILES['foto_mobil']['error'] == 0) {
-        // Path ke folder penyimpanan gambar kamu
+        // Folder tujuan upload foto
         $target_dir = "../../public/assets/images/";
         
-        // Membuat nama file unik dengan timestamp agar tidak ada nama gambar yang bentrok
+        // Bikin nama file gambar unik dengan timestamp biar tidak bentrok
         $imageName = time() . "_" . basename($_FILES["foto_mobil"]["name"]);
         $target_file = $target_dir . $imageName;
         
-        // Pindahkan file dari memori sementara ke folder tujuan
+        // Pindahkan file foto dari memori sementara ke folder tujuan
         move_uploaded_file($_FILES["foto_mobil"]["tmp_name"], $target_file);
     }
 
     if (empty($id)) {
-        // [ MODE TAMBAH DATA BARU ]
-        // Jika tidak ada gambar yang diupload, imageName akan kosong
+        // Mode tambah mobil baru
+        // Gunakan string kosong jika tidak ada gambar yang diupload
         $sql = "INSERT INTO cars (make, model, year, number_plate, chassis_number, category, price_per_day, fuel_type, engine_capacity, seats, stock, transmission, image, is_type, type_key) 
             VALUES ('".mysqli_real_escape_string($conn,$make)."', '".mysqli_real_escape_string($conn,$model)."', '".mysqli_real_escape_string($conn,$year)."', '".mysqli_real_escape_string($conn,$plate)."', '".mysqli_real_escape_string($conn,$chassis)."', '".mysqli_real_escape_string($conn,$category)."', '".mysqli_real_escape_string($conn,$price)."', '".mysqli_real_escape_string($conn,$fuel)."', '".mysqli_real_escape_string($conn,$engine)."', '".mysqli_real_escape_string($conn,$passengers)."', '".mysqli_real_escape_string($conn,$stock)."', '".mysqli_real_escape_string($conn,$transmission)."', '".mysqli_real_escape_string($conn,$imageName)."', '".mysqli_real_escape_string($conn,$is_type)."', '".mysqli_real_escape_string($conn,$type_key)."')";
     } else {
-        // [ MODE EDIT DATA ]
+        // Mode edit data mobil
         if ($is_type && !empty($id)) {
             $safe_type_key = mysqli_real_escape_string($conn, $type_key);
             $safe_id = mysqli_real_escape_string($conn, $id);
@@ -95,12 +95,12 @@ if (isset($_POST['save_car'])) {
             }
         } else {
             if ($imageName != "") {
-                // Jika user mengupload foto BARU saat edit
+                // Edit data dan perbarui foto dengan yang baru
                 $sql = "UPDATE cars SET make='".mysqli_real_escape_string($conn,$make)."', model='".mysqli_real_escape_string($conn,$model)."', year='".mysqli_real_escape_string($conn,$year)."', number_plate='".mysqli_real_escape_string($conn,$plate)."', chassis_number='".mysqli_real_escape_string($conn,$chassis)."', category='".mysqli_real_escape_string($conn,$category)."', 
                     price_per_day='".mysqli_real_escape_string($conn,$price)."', fuel_type='".mysqli_real_escape_string($conn,$fuel)."', engine_capacity='".mysqli_real_escape_string($conn,$engine)."', seats='".mysqli_real_escape_string($conn,$passengers)."', stock='".mysqli_real_escape_string($conn,$stock)."', 
                     transmission='".mysqli_real_escape_string($conn,$transmission)."', image='".mysqli_real_escape_string($conn,$imageName)."', type_key='".mysqli_real_escape_string($conn,$type_key)."' WHERE id='".mysqli_real_escape_string($conn,$id)."'";
             } else {
-                // Jika user TIDAK mengganti foto (hanya edit teks)
+                // Edit data tanpa mengganti foto yang lama
                 $sql = "UPDATE cars SET make='".mysqli_real_escape_string($conn,$make)."', model='".mysqli_real_escape_string($conn,$model)."', year='".mysqli_real_escape_string($conn,$year)."', number_plate='".mysqli_real_escape_string($conn,$plate)."', chassis_number='".mysqli_real_escape_string($conn,$chassis)."', category='".mysqli_real_escape_string($conn,$category)."', 
                     price_per_day='".mysqli_real_escape_string($conn,$price)."', fuel_type='".mysqli_real_escape_string($conn,$fuel)."', engine_capacity='".mysqli_real_escape_string($conn,$engine)."', seats='".mysqli_real_escape_string($conn,$passengers)."', stock='".mysqli_real_escape_string($conn,$stock)."', 
                     transmission='".mysqli_real_escape_string($conn,$transmission)."', type_key='".mysqli_real_escape_string($conn,$type_key)."' WHERE id='".mysqli_real_escape_string($conn,$id)."'";
@@ -108,12 +108,12 @@ if (isset($_POST['save_car'])) {
         }
     }
 
-    // Eksekusi query
+    // Eksekusi perubahan ke database
     mysqli_query($conn, $sql);
     
     $_SESSION['flash_msg'] = "Data kendaraan berhasil disimpan!";
 
-    // KUNCI PERBAIKAN EDIT: Tambahkan page=cars SEBELUM open_type_key
+    // Kembalikan ke halaman daftar mobil
     if (!empty($type_key)) {
         header("Location: ../index.php?page=cars");
     }
@@ -121,17 +121,17 @@ if (isset($_POST['save_car'])) {
 }
 
 // ==========================================
-// [ PROSES HAPUS KENDARAAN ]
+// Hapus data mobil
 // ==========================================
 if (isset($_GET['delete_id'])) {
     $id = mysqli_real_escape_string($conn, $_GET['delete_id']);
     $delete_is_type = isset($_GET['delete_is_type']) ? intval($_GET['delete_is_type']) : 0;
     $delete_type_key = isset($_GET['delete_type_key']) ? mysqli_real_escape_string($conn, $_GET['delete_type_key']) : '';
 
-    // JIKA YANG DIHAPUS ADALAH PARENT (Beserta semua anaknya)
+    // Jika tipe induk yang dihapus (hapus tipe beserta semua unit fisiknya)
     if ($delete_is_type === 1 && !empty($delete_type_key)) {
         
-        // 1. Hapus semua file gambar fisik (milik parent maupun child)
+        // 1. Hapus semua file gambar fisik tipe induk & unit anaknya
         $queryImg = mysqli_query($conn, "SELECT image FROM cars WHERE type_key='$delete_type_key'");
         while($row = mysqli_fetch_assoc($queryImg)) {
             if(!empty($row['image'])) {
@@ -140,7 +140,7 @@ if (isset($_GET['delete_id'])) {
             }
         }
         
-        // 2. Hapus SEMUA mobil yang memiliki type_key tersebut dari database
+        // 2. Hapus semua data mobil dengan tipe tersebut dari database
         $hapus_berhasil = mysqli_query($conn, "DELETE FROM cars WHERE type_key='$delete_type_key'");
         
         if ($hapus_berhasil) {
@@ -150,10 +150,10 @@ if (isset($_GET['delete_id'])) {
         }
 
     } 
-    // JIKA YANG DIHAPUS HANYA SATU UNIT SAJA (Child)
+    // Jika hanya satu unit fisik saja yang dihapus
     else {
         
-        // Hapus file gambar fisiknya saja
+        // Hapus file gambar fisik dari unit tersebut
         $queryImg = mysqli_query($conn, "SELECT image FROM cars WHERE id='$id'");
         if($row = mysqli_fetch_assoc($queryImg)) {
             if(!empty($row['image'])) {
@@ -162,7 +162,7 @@ if (isset($_GET['delete_id'])) {
             }
         }
 
-        // Hapus spesifik 1 data dari database
+        // Hapus unit fisik dari database
         $hapus_berhasil = mysqli_query($conn, "DELETE FROM cars WHERE id='$id'");
         
         if ($hapus_berhasil) {

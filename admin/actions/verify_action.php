@@ -3,7 +3,7 @@ session_start();
 require_once __DIR__ . '/../../include/db_config.php';
 $pdo = getPDO();
 
-// Pastikan hanya POST request
+// Pastikan hanya menerima request POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die("Akses ditolak.");
 }
@@ -29,7 +29,7 @@ if ($user_id && in_array($action, ['verified', 'rejected'])) {
             ]);
         }
         
-        // Redirect kembali ke index dengan notifikasi
+        // Arahkan kembali ke halaman index dan beri notifikasi
         echo "<script>
                 alert('Berhasil: Status verifikasi user berhasil diubah menjadi " . strtoupper($action) . ".');
                 window.location.href = '../index.php';

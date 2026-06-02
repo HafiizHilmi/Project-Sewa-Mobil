@@ -9,14 +9,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-// ==============================================================
-// FUNGSI PENGIRIM NOTIFIKASI (EMAIL & WHATSAPP)
-// ==============================================================
+// ==========================================
+// Kirim Notifikasi ke User (Email & WhatsApp)
+// ==========================================
 function sendNotifAlert($phone, $email, $subject, $message) {
-    // Panggil file rahasia
+    // Ambil API keys
     require_once __DIR__ . '/../../include/api_keys.php';
 
-    // 1. Kirim Email
+    // 1. Kirim email
     $headers = "From: no-reply@sewamobil.com\r\n";
     $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
     @mail($email, $subject, $message, $headers);
@@ -56,7 +56,7 @@ if ($booking_id && in_array($action, ['accept', 'reject', 'complete'])) {
     try {
         $pdo->beginTransaction();
 
-        // Mengambil data pelanggan (email, no HP, dan nama) agar bisa dikirimi pesan
+        // Ambil data pelanggan untuk dikirimi pesan
         $stmtGet = $pdo->prepare("SELECT status, car_id, full_name, email, phone FROM bookings WHERE id = :id");
         $stmtGet->execute([':id' => $booking_id]);
         $booking = $stmtGet->fetch(PDO::FETCH_ASSOC);
@@ -68,7 +68,7 @@ if ($booking_id && in_array($action, ['accept', 'reject', 'complete'])) {
         $currentStatus = $booking['status'];
         $car_id = $booking['car_id'];
 
-        // Mengambil nama mobil untuk dicantumkan di pesan WA
+        // Ambil nama mobil untuk dicantumkan di WhatsApp
         $stmtCar = $pdo->prepare("SELECT type_key, make, model FROM cars WHERE id = :id");
         $stmtCar->execute([':id' => $car_id]);
         $car = $stmtCar->fetch(PDO::FETCH_ASSOC);
@@ -79,7 +79,7 @@ if ($booking_id && in_array($action, ['accept', 'reject', 'complete'])) {
                 throw new Exception("Pemesanan ini tidak dapat diterima karena statusnya bukan pending.");
             }
 
-            // 1. Cari mobil anak (is_type=0) yang sejenis (type_key sama) yang tersedia
+            // 1. Cari unit fisik (is_type=0) yang sejenis dan tersedia
             $stmtChild = $pdo->prepare("SELECT id FROM cars WHERE type_key = :type_key AND is_type = 0 AND available = 1 LIMIT 1");
             $stmtChild->execute([':type_key' => $car['type_key']]);
             $assigned_car = $stmtChild->fetch(PDO::FETCH_ASSOC);
@@ -90,25 +90,24 @@ if ($booking_id && in_array($action, ['accept', 'reject', 'complete'])) {
 
             $assigned_car_id = $assigned_car['id'];
 
-            // 2. Update status booking menjadi confirmed & simpan assigned_car_id
+            // 2. Konfirmasi booking dan pasangkan unit mobil
             $stmtUpdate = $pdo->prepare("UPDATE bookings SET status = 'confirmed', assigned_car_id = :assigned_id WHERE id = :id");
             $stmtUpdate->execute([':assigned_id' => $assigned_car_id, ':id' => $booking_id]);
 
-            // 3. Ubah status available mobil tersebut menjadi 0 (tersewa)
+            // 3. Ubah status ketersediaan unit menjadi tidak tersedia
             $stmtUpdateChild = $pdo->prepare("UPDATE cars SET available = 0 WHERE id = :child_id");
             $stmtUpdateChild->execute([':child_id' => $assigned_car_id]);
 
-            // --- EKSEKUSI NOTIFIKASI APPROVED (DISETUJUI) ---
+            // Kirim notifikasi pesanan disetujui
             $msgWA = "Halo *{$booking['full_name']}*,\n\nKabar baik! Pesanan sewa mobil *$carName* Anda (Order ID: #$booking_id) telah *DISETUJUI* oleh Admin.\n\nSilakan cek status di Profil Anda dan segera siapkan pembayaran agar unit dapat segera kami serahkan.\n\nTerima kasih!";
             sendNotifAlert($booking['phone'], $booking['email'], "Pesanan Disetujui - SewaMobil SBY", $msgWA);
-            // ------------------------------------------------
 
         } elseif ($action === 'reject') {
             if ($currentStatus === 'completed') {
                 throw new Exception("Pemesanan sudah selesai dan tidak dapat dibatalkan.");
             }
 
-            // Jika status sebelumnya confirmed, kembalikan mobil ke available
+            // Kembalikan unit mobil menjadi tersedia jika pesanan sebelumnya sudah confirmed
             if ($currentStatus === 'confirmed') {
                 $stmtGetAssigned = $pdo->prepare("SELECT assigned_car_id FROM bookings WHERE id = :id");
                 $stmtGetAssigned->execute([':id' => $booking_id]);
@@ -120,14 +119,13 @@ if ($booking_id && in_array($action, ['accept', 'reject', 'complete'])) {
                 }
             }
 
-            // Update status booking menjadi cancelled/rejected
+            // Batalkan booking di database
             $stmtUpdate = $pdo->prepare("UPDATE bookings SET status = 'cancelled' WHERE id = :id");
             $stmtUpdate->execute([':id' => $booking_id]);
 
-            // --- EKSEKUSI NOTIFIKASI REJECTED (DITOLAK) ---
+            // Kirim notifikasi pembatalan/penolakan pesanan
             $msgWA = "Halo *{$booking['full_name']}*,\n\nMohon maaf, pesanan sewa mobil *$carName* Anda (Order ID: #$booking_id) harus kami *TOLAK/BATALKAN* untuk saat ini karena satu dan lain hal.\n\nSilakan hubungi Admin untuk informasi lebih lanjut atau lakukan pemesanan ulang dengan jadwal/unit yang berbeda.\n\nTerima kasih.";
             sendNotifAlert($booking['phone'], $booking['email'], "Pesanan Dibatalkan - SewaMobil SBY", $msgWA);
-            // ----------------------------------------------
 
         } elseif ($action === 'complete') {
             if ($currentStatus !== 'confirmed') {

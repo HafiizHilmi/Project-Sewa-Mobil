@@ -148,7 +148,7 @@
   </div>
 
   <?php
-  // Buat/Sesuaikan tabel blacklist untuk mendukung geofencing
+  // Sesuaikan tabel blacklist biar mendukung geofencing otomatis
   $pdo->exec("CREATE TABLE IF NOT EXISTS blacklisted_locations (
       id INT AUTO_INCREMENT PRIMARY KEY,
       location_name VARCHAR(150) NOT NULL,
@@ -158,7 +158,7 @@
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )");
 
-  // Pastikan kolom geofence ada jika tabel sudah pernah dibuat sebelumnya
+  // Pastikan kolom geofence (lat/lng/radius) ada di tabel blacklist
   try {
       $pdo->exec("ALTER TABLE blacklisted_locations ADD COLUMN latitude DECIMAL(10,8) DEFAULT NULL");
   } catch (Exception $e) {}

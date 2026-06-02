@@ -12,7 +12,7 @@ function getBusinessSettings() {
             return $cachedBS;
         }
 
-        // Ensure table exists
+        // Pastikan tabel pengaturan bisnis sudah ada
         $pdo->exec("CREATE TABLE IF NOT EXISTS business_settings (
             id INT AUTO_INCREMENT PRIMARY KEY,
             setting_key VARCHAR(100) NOT NULL UNIQUE,
@@ -20,7 +20,7 @@ function getBusinessSettings() {
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )");
 
-        // Seed defaults
+        // Masukkan data pengaturan default (seeding)
         $checkSeed = $pdo->query("SELECT COUNT(*) FROM business_settings WHERE setting_key = 'company_name'");
         if ($checkSeed->fetchColumn() == 0) {
             $pdo->exec("INSERT IGNORE INTO business_settings (setting_key, setting_value) VALUES 

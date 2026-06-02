@@ -9,7 +9,7 @@ if (empty($_SESSION['csrf_token'])) {
     <div class="alert alert-danger" style="font-size: 0.85rem; padding: 0.5rem 1rem; border-radius: 0.5rem;">
         <?= htmlspecialchars($_SESSION['flash']) ?>
     </div>
-    <?php unset($_SESSION['flash']); // Hapus pesan setelah ditampilkan ?>
+    <?php unset($_SESSION['flash']); // Hapus flash message setelah ditampilkan biar tidak muncul lagi ?>
 <?php endif; ?>
 
 <?php if (!empty($_SESSION['flash_success'])): ?>

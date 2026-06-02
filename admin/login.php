@@ -1,14 +1,14 @@
 <?php
 session_start();
 
-// 1. Hubungkan ke database beralaskan file config/database.php milikmu
-// Cek otomatis posisi folder config agar tidak terjadi error path
+// Hubungkan ke database menggunakan config database
+// Cek otomatis folder config biar tidak error path
 if (file_exists('config/database.php')) {
     require_once 'config/database.php';
 } else if (file_exists('../config/database.php')) {
     require_once '../config/database.php';
 } else {
-    // Jika tidak ketemu, gunakan konfigurasi yang kamu siapkan sebagai fallback
+    // Kalau tidak ketemu, gunakan config default sebagai cadangan
     $host = "localhost";
     $user = "root";
     $password = "";
@@ -20,7 +20,7 @@ if (!$conn) {
     die("Koneksi ke database gagal! Periksa kembali file config/database.php kamu.");
 }
 
-// 2. FITUR OTOMATIS: Membuat tabel 'admins' jika belum ada di database kamu
+// Buat tabel 'admins' secara otomatis jika belum ada
 mysqli_query($conn, "CREATE TABLE IF NOT EXISTS `admins` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nama` varchar(100) NOT NULL,
@@ -31,13 +31,13 @@ mysqli_query($conn, "CREATE TABLE IF NOT EXISTS `admins` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
-// Memasukkan akun default Superuser secara otomatis jika baris data belum ada
+// Masukkan akun default superuser secara otomatis jika datanya kosong
 $checkAdmin = mysqli_query($conn, "SELECT * FROM admins WHERE email = 'ahmad@sewamobilsby.id'");
 if (mysqli_num_rows($checkAdmin) == 0) {
     mysqli_query($conn, "INSERT INTO admins (nama, email, password, role) VALUES ('Ahmad Fauzi', 'ahmad@sewamobilsby.id', 'admin123', 'superuser')");
 }
 
-// 3. Eksekusi Form Login saat tombol diklik
+// Jalankan proses login saat form dikirim
 $error = null;
 if (isset($_POST['login'])) {
     $email = mysqli_real_escape_string($conn, $_POST['email']);
@@ -48,13 +48,12 @@ if (isset($_POST['login'])) {
     if (mysqli_num_rows($query) > 0) {
         $data = mysqli_fetch_assoc($query);
         
-        // Cek kecocokan password dengan teks biasa (plain text)
+        // Cocokkan password teks biasa
         if ($password === $data['password']) {
             $_SESSION['admin_id'] = $data['id'];
             $_SESSION['admin_nama'] = $data['nama'];
-            $_SESSION['admin_role'] = $data['role']; // 'superuser' atau 'staff'
-            
-            // Berhasil login! Langsung lempar ke index.php
+            $_SESSION['admin_role'] = $data['role'];
+            // Sukses login, arahkan ke dashboard utama
             header("Location: index.php");
             exit();
         } else {
