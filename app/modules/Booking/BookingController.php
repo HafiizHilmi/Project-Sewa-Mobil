@@ -200,6 +200,43 @@ class BookingController {
         }
         // Selesai cek geofencing
 
+        // Cek ketersediaan stok mobil berdasarkan tipe model (type_key) di tanggal terpilih
+        $stmtCarType = $pdo->prepare("SELECT type_key FROM cars WHERE id = ?");
+        $stmtCarType->execute([$car_id]);
+        $type_key = $stmtCarType->fetchColumn();
+
+        if (!empty($type_key)) {
+            // 1. Hitung total unit fisik yang terdaftar untuk tipe mobil ini
+            $stmtStock = $pdo->prepare("SELECT COUNT(*) FROM cars WHERE type_key = ? AND is_type = 0");
+            $stmtStock->execute([$type_key]);
+            $totalStock = intval($stmtStock->fetchColumn());
+            if ($totalStock < 1) {
+                $totalStock = 1;
+            }
+
+            // 2. Cari pemesanan terkonfirmasi yang tumpang tindih dengan rentang tanggal ini
+            $stmtConflict = $pdo->prepare("
+                SELECT COUNT(*) 
+                FROM bookings b
+                JOIN cars c ON b.car_id = c.id
+                WHERE c.type_key = :type_key
+                  AND b.status = 'confirmed'
+                  AND NOT (b.end_date < :start_date OR b.start_date > :end_date)
+            ");
+            $stmtConflict->execute([
+                'type_key' => $type_key,
+                'start_date' => $start_date,
+                'end_date' => $end_date
+            ]);
+            $conflictCount = intval($stmtConflict->fetchColumn());
+
+            if ($conflictCount >= $totalStock) {
+                $_SESSION['flash'] = "Maaf, seluruh unit mobil jenis ini sudah penuh dipesan pada tanggal yang Anda pilih.";
+                header('Location: index.php?module=Booking&action=checkout&car_id=' . $car_id);
+                exit;
+            }
+        }
+
         $stmt = $pdo->prepare('INSERT INTO bookings (user_id, car_id, pickup_location, return_location, full_name, email, phone, address, start_date, end_date, addon_driver, total_price, status, created_at) VALUES (:user_id, :car_id, :pickup_location, :return_location, :full_name, :email, :phone, :address, :start_date, :end_date, :addon_driver, :total_price, :status, NOW())');
 
         $stmt->execute([

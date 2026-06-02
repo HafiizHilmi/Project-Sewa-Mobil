@@ -6,9 +6,35 @@ if (!isset($pdo)) {
 $stmtBL = $pdo->query("SELECT * FROM blacklisted_locations");
 $geofences = $stmtBL ? $stmtBL->fetchAll(PDO::FETCH_ASSOC) : [];
 
-// Ambil data pemesanan sukses untuk hitung stok tanggal
+// Ambil data pemesanan sukses untuk hitung stok tanggal berdasarkan type_key dari tipe mobil ini
 $bookedRanges = [];
-if (isset($car['id'])) {
+$totalStock = 1;
+if (!empty($car['type_key'])) {
+    // 1. Hitung total unit fisik yang terdaftar untuk tipe mobil ini
+    $stmtStock = $pdo->prepare("
+        SELECT COUNT(*) 
+        FROM cars 
+        WHERE type_key = :type_key 
+          AND is_type = 0
+    ");
+    $stmtStock->execute(['type_key' => $car['type_key']]);
+    $totalStock = intval($stmtStock->fetchColumn());
+    if ($totalStock < 1) {
+        $totalStock = 1; // Fallback minimal 1
+    }
+
+    // 2. Ambil semua rentang tanggal pemesanan terkonfirmasi untuk semua mobil dengan type_key yang sama
+    $stmtBooked = $pdo->prepare("
+        SELECT b.start_date, b.end_date 
+        FROM bookings b
+        JOIN cars c ON b.car_id = c.id
+        WHERE c.type_key = :type_key 
+          AND b.status = 'confirmed'
+    ");
+    $stmtBooked->execute(['type_key' => $car['type_key']]);
+    $bookedRanges = $stmtBooked->fetchAll(PDO::FETCH_ASSOC);
+} else if (isset($car['id'])) {
+    // Fallback lama jika type_key kosong
     $stmtBooked = $pdo->prepare("
         SELECT start_date, end_date 
         FROM bookings 
@@ -17,8 +43,9 @@ if (isset($car['id'])) {
     ");
     $stmtBooked->execute(['car_id' => $car['id']]);
     $bookedRanges = $stmtBooked->fetchAll(PDO::FETCH_ASSOC);
+    $totalStock = intval($car['stock'] ?? 1);
 }
-$carStock = intval($car['stock'] ?? 1);
+$carStock = $totalStock;
 ?>
 <!DOCTYPE html>
 <html lang="id">
