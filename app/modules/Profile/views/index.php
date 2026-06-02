@@ -502,6 +502,11 @@ if (isset($pdo)) {
                                         <?= $statusLabel ?>
                                     </span>
                                     <p class="text-sm font-extrabold text-blue-600 mt-1">Rp<?= $total ?></p>
+                                    <?php if ($statusVal === 'pending'): ?>
+                                        <a href="index.php?module=Booking&action=pending&booking_id=<?= $booking['id'] ?>" class="inline-flex items-center gap-1 text-[10.5px] font-bold px-2 py-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition no-underline mt-1.5">
+                                            <i class="bi bi-credit-card-2-front"></i> Bayar
+                                        </a>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -672,6 +677,12 @@ if (isset($pdo)) {
                                                 <span class="text-[10px] text-red-500 font-medium block">
                                                     +Rp<?= number_format($booking['additional_cost'], 0, ',', '.') ?> denda
                                                 </span>
+                                            <?php endif; ?>
+                                            
+                                            <?php if ($statusVal === 'pending'): ?>
+                                                <a href="index.php?module=Booking&action=pending&booking_id=<?= $booking['id'] ?>" class="w-full sm:w-auto text-center inline-flex items-center justify-center gap-1.5 text-xs font-bold px-4 py-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition shadow-md shadow-blue-500/10 hover:shadow-blue-600/20 no-underline mt-3">
+                                                    <i class="bi bi-wallet2 text-xs"></i> Bayar Sekarang
+                                                </a>
                                             <?php endif; ?>
                                         </div>
                                     </div>
