@@ -208,7 +208,7 @@
     $completedBookings= count(array_filter($bookings, fn($b) => $b['status'] === 'completed'));
 ?>
 
-<nav class="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 sticky top-0 z-30 shadow-sm transition-colors w-full">
+<nav class="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 fixed top-0 left-0 right-0 z-50 shadow-sm transition-colors w-full">
     <div class="w-full px-4 sm:px-6 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
             <button id="sidebar-toggle" class="lg:hidden p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 transition">
@@ -231,7 +231,7 @@
 
 <div id="sidebar-overlay"></div>
 
-<div class="w-full flex min-h-[calc(100vh-57px)]">
+<div class="w-full flex min-h-screen pt-[57px]">
 
     <aside id="sidebar" class="w-72 lg:w-64 xl:w-72 bg-white dark:bg-slate-800 border-r border-slate-100 dark:border-slate-700 flex flex-col lg:fixed lg:left-0 lg:top-[57px] lg:bottom-0 lg:z-20 overflow-y-auto custom-scroll transition-colors">
         
@@ -457,8 +457,8 @@
                                 }
                             ?>
                             <div class="px-6 py-4 flex items-center gap-4 hover:bg-gray-50/60 transition">
-                                <div class="w-16 h-11 rounded-lg bg-slate-100 dark:bg-slate-700 flex-shrink-0 overflow-hidden">
-                                    <img src="<?= $image ?>" alt="<?= $carName ?>" class="w-full h-full object-cover">
+                                <div class="w-16 h-11 rounded-lg bg-slate-100 dark:bg-slate-700 flex-shrink-0 overflow-hidden p-1 flex items-center justify-center">
+                                    <img src="<?= $image ?>" alt="<?= $carName ?>" class="w-full h-full object-contain drop-shadow-sm">
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="font-bold text-slate-800 dark:text-white text-sm truncate"><?= $carName ?></p>
@@ -534,8 +534,8 @@
                         ?>
                         <div class="booking-card bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
                             <div class="flex flex-col sm:flex-row gap-0">
-                                <div class="sm:w-36 h-32 sm:h-auto bg-slate-100 dark:bg-slate-700 flex-shrink-0 overflow-hidden">
-                                    <img src="<?= $image ?>" alt="<?= $carName ?>" class="w-full h-full object-cover">
+                                <div class="sm:w-36 h-32 sm:h-auto bg-slate-100 dark:bg-slate-700 flex-shrink-0 overflow-hidden p-3 sm:p-4 flex items-center justify-center">
+                                    <img src="<?= $image ?>" alt="<?= $carName ?>" class="w-full h-full object-contain drop-shadow-sm">
                                 </div>
 
                                 <div class="flex-1 p-4 sm:p-5 flex flex-col sm:flex-row gap-4">
