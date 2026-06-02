@@ -136,35 +136,61 @@ $currMidtransClient = $secSettings['midtrans_client_key'] ?? '';
     </div>
   </div>
 
-  <div x-show="activeTab === 'business'" class="page-fade">
+  <div x-show="activeTab === 'business'" class="page-fade" x-cloak>
+    <?php
+    // 1. Buat tabel otomatis jika belum ada untuk menghindari error nge-blank!
+    $pdo->exec("CREATE TABLE IF NOT EXISTS settings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        setting_key VARCHAR(100) UNIQUE NOT NULL,
+        setting_value TEXT
+    )");
+
+    // 2. Ambil data settings dengan pengaman (try-catch)
+    $currentSettings = [];
+    try {
+        $stmtSet = $pdo->query("SELECT setting_key, setting_value FROM settings");
+        if ($stmtSet) {
+            while ($row = $stmtSet->fetch(PDO::FETCH_ASSOC)) {
+                $currentSettings[$row['setting_key']] = $row['setting_value'];
+            }
+        }
+    } catch (Exception $e) {
+        // Jika ada error database lain, abaikan agar halaman tetap tampil
+    }
+    ?>
     <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6">
       <div class="flex items-center gap-3 mb-6">
         <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center"><i class="fa-solid fa-building text-blue-500 text-sm"></i></div>
         <div><h2 class="text-sm font-bold text-slate-800 dark:text-white">Informasi Bisnis</h2><p class="text-xs text-slate-400">Konfigurasi data utama perusahaan</p></div>
       </div>
       
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Nama Perusahaan / Toko</label>
-          <input type="text" value="SewaMobil" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:border-blue-400"/>
+      <form action="actions/admin_action.php" method="POST">
+        <input type="hidden" name="action" value="update_business">
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Nama Perusahaan / Toko</label>
+            <input type="text" name="app_name" value="<?= htmlspecialchars($currentSettings['app_name'] ?? 'SewaMobil') ?>" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:border-blue-400"/>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">No Telp / WhatsApp</label>
+            <input type="text" name="company_phone" value="<?= htmlspecialchars($currentSettings['company_phone'] ?? '08123456789') ?>" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:border-blue-400"/>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Sosial Media (Instagram/Facebook)</label>
+            <input type="text" name="company_social" value="<?= htmlspecialchars($currentSettings['company_social'] ?? '@sewamobilsby') ?>" placeholder="Contoh: @sewamobilsby" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:border-blue-400"/>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Alamat Perusahaan</label>
+            <textarea name="company_address" rows="3" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:border-blue-400 resize-none"><?= htmlspecialchars($currentSettings['company_address'] ?? 'Jl. Ketintang Baru, Surabaya, Jawa Timur') ?></textarea>
+          </div>
         </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">No Telp / WhatsApp</label>
-          <input type="text" value="08123456789" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:border-blue-400"/>
-        </div>
-        <div class="sm:col-span-2">
-          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Sosial Media (Instagram/Facebook)</label>
-          <input type="text" value="@sewamobilsby" placeholder="Contoh: @sewamobilsby" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:border-blue-400"/>
-        </div>
-        <div class="sm:col-span-2">
-          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Alamat Perusahaan</label>
-          <textarea rows="3" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:border-blue-400 resize-none">Jl. Ketintang Baru, Surabaya, Jawa Timur</textarea>
-        </div>
-      </div>
-      
-      <button class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
-        <i class="fa-solid fa-floppy-disk text-xs"></i>Save Changes
-      </button>
+        
+        <button type="submit" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
+          <i class="fa-solid fa-floppy-disk text-xs"></i>Save Changes
+        </button>
+      </form>
+
     </div>
   </div>
 

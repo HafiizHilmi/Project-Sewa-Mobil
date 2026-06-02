@@ -151,5 +151,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         header("Location: ../index.php?page=settings&tab=security");
         exit();
     }
+    // business management
+    if (isset($_POST['action']) && $_POST['action'] === 'update_business') {
+    $settings = [
+        'app_name' => $_POST['app_name'] ?? '',
+        'company_phone' => $_POST['company_phone'] ?? '',
+        'company_social' => $_POST['company_social'] ?? '',
+        'company_address' => $_POST['company_address'] ?? ''
+    ];
+
+    // Simpan data ke tabel settings
+    foreach ($settings as $key => $value) {
+        $stmt = $pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES (:key, :val) ON DUPLICATE KEY UPDATE setting_value = :val2");
+        $stmt->execute([
+            'key' => $key, 
+            'val' => $value, 
+            'val2' => $value
+        ]);
+    }
+
+    // Refresh kembali ke tab Business
+    echo "<script>alert('Informasi Bisnis berhasil diperbarui!'); window.location.href='../index.php?page=settings&tab=business';</script>";
+    exit;
+}
 }
 ?>
