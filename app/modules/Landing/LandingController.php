@@ -25,7 +25,7 @@ class LandingController {
                     COUNT(b.id) AS rental_count 
                 FROM cars c 
                 LEFT JOIN bookings b ON b.car_id = c.id AND b.status IN ('confirmed', 'completed') 
-                WHERE c.available = 1 AND c.is_type = 0 AND c.stock > 0 
+                WHERE c.is_type = 0 AND c.stock > 0 
                 GROUP BY c.type_key 
                 ORDER BY rental_count DESC, MIN(c.price_per_day) ASC 
                 LIMIT 3
