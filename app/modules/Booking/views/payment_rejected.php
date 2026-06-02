@@ -169,8 +169,8 @@ $carImage = htmlspecialchars($carImage);
                 </div>
             </div>
 
-            <div class="h-36 w-full mb-5 rounded-2xl overflow-hidden bg-gray-100 dark:bg-slate-800 flex items-center justify-center">
-                <img src="<?= $carImage ?>" alt="<?= $carName ?>" class="w-full h-full object-cover">
+            <div class="h-32 w-56 sm:w-64 mb-5 rounded-2xl overflow-hidden bg-gray-50 dark:bg-slate-800/50 flex items-center justify-center p-3 border border-gray-100 dark:border-slate-700 shadow-sm">
+                <img src="<?= $carImage ?>" alt="<?= $carName ?>" class="w-full h-full object-contain drop-shadow-sm">
             </div>
 
             <div class="mb-4">

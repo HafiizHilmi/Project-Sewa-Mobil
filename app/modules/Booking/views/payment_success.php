@@ -145,8 +145,6 @@ $taxAmount = round($totalPrice - $baseSubtotal);
 </head>
 <body class="flex flex-col items-center justify-center py-10 px-4 relative transition-colors duration-200">
 
-    <!-- Floating theme toggle removed: theme is managed from Profile page -->
-
     <div class="z-10 flex flex-col items-center text-center mb-6">
         <div class="w-16 h-16 bg-blue-700 text-white rounded-full flex items-center justify-center text-3xl shadow-lg shadow-blue-700/40 mb-4">
             <i class="bi bi-check-lg"></i>
@@ -170,13 +168,13 @@ $taxAmount = round($totalPrice - $baseSubtotal);
                 </div>
             </div>
 
-            <div class="h-36 w-full mb-5 rounded-2xl overflow-hidden bg-gray-100 dark:bg-slate-800 flex items-center justify-center">
+            <div class="h-32 w-56 sm:w-64 mb-5 rounded-2xl overflow-hidden bg-gray-50 dark:bg-slate-800/50 flex items-center justify-center p-3 border border-gray-100 dark:border-slate-700 shadow-sm">
                 <?php 
                     // Logika perbaikan path gambar
                     $rawImg = ($car && $car['image']) ? $car['image'] : '';
                     $carImage = !empty($rawImg) ? (filter_var($rawImg, FILTER_VALIDATE_URL) ? $rawImg : 'assets/images/' . $rawImg) : 'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop';
                 ?>
-                <img src="<?= htmlspecialchars($carImage) ?>" alt="<?= htmlspecialchars($car ? ($car['make'] . ' ' . $car['model']) : 'Toyota Avanza') ?>" class="w-full h-full object-cover">
+                <img src="<?= htmlspecialchars($carImage) ?>" alt="<?= htmlspecialchars($car ? ($car['make'] . ' ' . $car['model']) : 'Toyota Avanza') ?>" class="w-full h-full object-contain drop-shadow-sm">
             </div>
 
             <div class="mb-4">

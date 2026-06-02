@@ -144,7 +144,6 @@ $snapScriptUrl = $isProduction ? 'https://app.midtrans.com/snap/snap.js' : 'http
             ) !important;
         }
     </style>
-    <!-- Midtrans Snap JS -->
     <script type="text/javascript" src="<?= $snapScriptUrl ?>" data-client-key="<?= MIDTRANS_CLIENT_KEY ?>"></script>
 </head>
 <body class="flex flex-col items-center justify-center py-10 px-4 relative transition-colors duration-200">
@@ -157,7 +156,6 @@ $snapScriptUrl = $isProduction ? 'https://app.midtrans.com/snap/snap.js' : 'http
         <p class="text-gray-600 dark:text-slate-400 text-sm max-w-md leading-relaxed">Pesanan Anda berhasil dikirim. Silakan selesaikan pembayaran Anda via <?= $methodLabel ?> sebelum batas waktu pembayaran berakhir.</p>
     </div>
  
-    <!-- TAMPILKAN ERROR MIDTRANS JIKA ADA -->
     <?php if (isset($_SESSION['midtrans_error'])): ?>
         <div class="z-10 w-full max-w-4xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 rounded-2xl p-4 mb-5 flex gap-3 items-start text-left shadow-sm">
             <i class="bi bi-exclamation-triangle-fill text-rose-600 dark:text-rose-500 mt-0.5 flex-shrink-0 text-lg"></i>
@@ -191,8 +189,8 @@ $snapScriptUrl = $isProduction ? 'https://app.midtrans.com/snap/snap.js' : 'http
                 </div>
             </div>
  
-            <div class="h-36 w-full mb-5 rounded-2xl overflow-hidden bg-gray-100 dark:bg-slate-800 flex items-center justify-center">
-                <img src="<?= $carImage ?>" alt="<?= $carName ?>" class="w-full h-full object-cover">
+            <div class="h-32 w-56 sm:w-64 mb-5 rounded-2xl overflow-hidden bg-gray-50 dark:bg-slate-800/50 flex items-center justify-center p-3 border border-gray-100 dark:border-slate-700 shadow-sm">
+                <img src="<?= $carImage ?>" alt="<?= $carName ?>" class="w-full h-full object-contain drop-shadow-sm">
             </div>
  
             <div class="mb-4">
