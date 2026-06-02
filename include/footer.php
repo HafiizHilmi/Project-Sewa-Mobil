@@ -52,14 +52,22 @@
                 </div>
 
                 <!-- Col 4: Contact -->
-                <div class="flex flex-col items-center md:items-start text-gray-300 text-sm">
-                    <h6 class="uppercase font-bold mb-4">Kontak</h6>
-                    <hr class="mb-4 mt-0 w-[60px] bg-[#1d4ed8] h-[2px] border-none" />
-                    <p class="flex items-center gap-3 mb-2"><i class="bi bi-house-door-fill text-blue-400 text-lg"></i> Surabaya, Jawa Timur, ID</p>
-                    <p class="flex items-center gap-3 mb-2"><i class="bi bi-envelope-fill text-blue-400 text-lg"></i> info@sewamobil.com</p>
-                    <p class="flex items-center gap-3 mb-2"><i class="bi bi-telephone-fill text-blue-400 text-lg"></i> +62 812-3456-7890</p>
+                <div class="flex flex-col items-center md:items-start">
+                    <h6 class="uppercase font-bold mb-4">Kontak Kami</h6>
+                    <hr class="mb-4 mt-0 w-[60px] bg-[#004aad] h-0.5 border-0">
+                    <p class="mb-3 flex items-center gap-3">
+                        <i class="bi bi-house-door-fill text-[#004aad]"></i> 
+                        <span><?= htmlspecialchars($appAddress) ?></span>
+                    </p>
+                    <p class="mb-3 flex items-center gap-3">
+                        <i class="bi bi-envelope-fill text-[#004aad]"></i>
+                        <span><?= htmlspecialchars($appEmail) ?></span>
+                    </p>
+                    <p class="mb-3 flex items-center gap-3">
+                        <i class="bi bi-telephone-fill text-[#004aad]"></i>
+                        <span><?= htmlspecialchars($appPhone) ?></span>
+                    </p>
                 </div>
-
             </div>
         </div>
     </section>

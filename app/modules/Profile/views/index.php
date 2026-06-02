@@ -1,3 +1,26 @@
+<?php
+// Set nilai bawaan (default) untuk berjaga-jaga jika database kosong
+$appName = "SewaMobil SBY";
+$appAddress = "Surabaya, Jawa Timur, Indonesia";
+$appEmail = "admin@sewamobil.com";
+$appPhone = "+62 812 3456 7890";
+
+// Tarik data dari database (sesuaikan nama kolom/tabel jika berbeda)
+if (isset($pdo)) {
+    try {
+        $stmtSettings = $pdo->query("SELECT setting_key, setting_value FROM settings");
+        while ($row = $stmtSettings->fetch(PDO::FETCH_ASSOC)) {
+            if ($row['setting_key'] === 'app_name') $appName = $row['setting_value'];
+            if ($row['setting_key'] === 'company_address') $appAddress = $row['setting_value'];
+            if ($row['setting_key'] === 'company_email') $appEmail = $row['setting_value'];
+            if ($row['setting_key'] === 'company_phone') $appPhone = $row['setting_value'];
+        }
+    } catch (Exception $e) {
+        // Abaikan jika tabel tidak ditemukan
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -214,8 +237,17 @@
             <button id="sidebar-toggle" class="lg:hidden p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 transition">
                 <i class="bi bi-list text-xl"></i>
             </button>
-            <a href="index.php?module=Homepage&action=index" class="font-extrabold text-xl tracking-tight no-underline">
-                <span class="text-blue-600">Sewa</span><span class="text-slate-900 dark:text-white">Mobil</span>
+           <a href="index.php?module=Homepage&action=index" class="no-underline flex items-center">
+                    <?php
+                    // Jika nama di database diawali dengan kata "Sewa" (tidak sensitif huruf besar/kecil)
+                    if (stripos($appName, 'sewa') === 0) {
+                        $restOfName = substr($appName, 4); // Ambil sisa nama setelah kata "Sewa"
+                        echo '<span class="text-blue-700 dark:text-blue-500 font-extrabold text-2xl tracking-tight">Sewa<span class="text-gray-900 dark:text-white">' . htmlspecialchars($restOfName) . '</span></span>';
+                    } else {
+                        // Jika namanya tidak diawali kata "Sewa", tampilkan warna default biru
+                        echo '<span class="text-blue-700 dark:text-blue-500 font-extrabold text-2xl tracking-tight">' . htmlspecialchars($appName) . '</span>';
+                    }
+                    ?>
             </a>
         </div>
         <div class="flex items-center gap-2">
@@ -1581,4 +1613,4 @@
     updateThemeIcon();
 </script>
 </body>
-</html>
+</html> 

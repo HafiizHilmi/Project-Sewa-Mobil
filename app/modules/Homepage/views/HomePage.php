@@ -1,3 +1,26 @@
+<?php
+// Set nilai bawaan (default) untuk berjaga-jaga jika database kosong
+$appName = "SewaMobil SBY";
+$appAddress = "Surabaya, Jawa Timur, Indonesia";
+$appEmail = "admin@sewamobil.com";
+$appPhone = "+62 812 3456 7890";
+
+// Tarik data dari database (sesuaikan nama kolom/tabel jika berbeda)
+if (isset($pdo)) {
+    try {
+        $stmtSettings = $pdo->query("SELECT setting_key, setting_value FROM settings");
+        while ($row = $stmtSettings->fetch(PDO::FETCH_ASSOC)) {
+            if ($row['setting_key'] === 'app_name') $appName = $row['setting_value'];
+            if ($row['setting_key'] === 'company_address') $appAddress = $row['setting_value'];
+            if ($row['setting_key'] === 'company_email') $appEmail = $row['setting_value'];
+            if ($row['setting_key'] === 'company_phone') $appPhone = $row['setting_value'];
+        }
+    } catch (Exception $e) {
+        // Abaikan jika tabel tidak ditemukan
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -52,7 +75,18 @@
     <nav class="bg-white dark:bg-slate-900 border-b dark:border-slate-800 sticky top-0 z-50 transition-colors duration-200">
         <div class="max-w-6xl mx-auto px-4 md:px-6 py-4 relative flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center justify-between w-full md:w-auto">
-                <span class="text-blue-700 font-extrabold text-2xl tracking-tight">Sewa<span class="text-gray-900 dark:text-white">Mobil</span></span>
+                <a href="index.php?module=Homepage&action=index" class="no-underline flex items-center">
+                    <?php
+                    // Jika nama di database diawali dengan kata "Sewa" (tidak sensitif huruf besar/kecil)
+                    if (stripos($appName, 'sewa') === 0) {
+                        $restOfName = substr($appName, 4); // Ambil sisa nama setelah kata "Sewa"
+                        echo '<span class="text-blue-700 dark:text-blue-500 font-extrabold text-2xl tracking-tight">Sewa<span class="text-gray-900 dark:text-white">' . htmlspecialchars($restOfName) . '</span></span>';
+                    } else {
+                        // Jika namanya tidak diawali kata "Sewa", tampilkan warna default biru
+                        echo '<span class="text-blue-700 dark:text-blue-500 font-extrabold text-2xl tracking-tight">' . htmlspecialchars($appName) . '</span>';
+                    }
+                    ?>
+                </a>
             </div>
             
             <div class="w-full md:w-[450px] lg:w-[550px] md:absolute md:left-1/2 md:-translate-x-1/2 order-last md:order-none z-10">
@@ -238,7 +272,7 @@
         </section>
     </main>
 
-    <?php include __DIR__ . '/../../../../include/footer.html'; ?>
+    <?php include __DIR__ . '/../../../../include/footer.php'; ?>
 
     <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -399,4 +433,4 @@
     });
     </script>
 </body>
-</html>
+</html> 
