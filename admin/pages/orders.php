@@ -1,5 +1,5 @@
 <div x-show="activePage === 'orders'"
-     x-data="{ orderSearch: '' }"
+     x-data="{ orderSearch: '', filterStartDate: '', filterEndDate: '' }"
      x-transition:enter="transition ease-out duration-200"
      x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
      class="absolute inset-0 overflow-y-auto px-5 lg:px-6 py-5">
@@ -26,12 +26,14 @@
     </div>
     
     <div class="flex items-center gap-2">
-      <button class="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
-        <i class="fa-regular fa-calendar text-slate-400 text-xs"></i>
-        Apr 26 – May 2 2026
-      </button>
-      <button class="w-8 h-8 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg flex items-center justify-center text-slate-500 transition-colors">
-        <i class="fa-solid fa-sliders text-xs"></i>
+      <div class="flex items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg overflow-hidden transition-colors shadow-sm">
+        <div class="px-2.5 text-slate-400"><i class="fa-regular fa-calendar text-xs"></i></div>
+        <input type="date" x-model="filterStartDate" title="Tanggal Awal" class="bg-transparent text-slate-600 dark:text-slate-300 text-xs font-semibold py-1.5 outline-none cursor-pointer">
+        <span class="text-slate-300 mx-1">-</span>
+        <input type="date" x-model="filterEndDate" title="Tanggal Akhir" class="bg-transparent text-slate-600 dark:text-slate-300 text-xs font-semibold py-1.5 outline-none cursor-pointer pr-2.5">
+      </div>
+      <button @click="filterStartDate = ''; filterEndDate = ''; orderSearch = ''" title="Reset Filter" class="w-8 h-8 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-500 hover:border-red-200 dark:hover:border-red-900 transition-colors shadow-sm">
+        <i class="fa-solid fa-rotate-right text-xs"></i>
       </button>
     </div>
   </div>
@@ -54,7 +56,8 @@
 
         <div>
           <template x-for="(order, idx) in filteredOrders" :key="order.idLine2">
-            <div x-show="orderSearch === '' || String(order.idLine1 + ' ' + order.idLine2 + ' ' + order.customer.name + ' ' + order.car.name + ' ' + (order.assignedPlate||'')).toLowerCase().includes(orderSearch.toLowerCase())">
+            
+            <div x-show="(orderSearch === '' || String(order.idLine1 + ' ' + order.idLine2 + ' ' + order.customer.name + ' ' + order.car.name + ' ' + (order.assignedPlate||'')).toLowerCase().includes(orderSearch.toLowerCase())) && (filterStartDate === '' || (window.SERVER_ORDERS.find(o => o.id == order.id)?.created_at.substring(0,10) >= filterStartDate)) && (filterEndDate === '' || (window.SERVER_ORDERS.find(o => o.id == order.id)?.created_at.substring(0,10) <= filterEndDate))">
               
               <div x-show="idx > 0" class="border-t border-slate-100 dark:border-slate-700 mx-6"></div>
 
@@ -63,8 +66,11 @@
                 <div class="hidden md:grid items-center" style="grid-template-columns: 100px 1.5fr 1.5fr 150px 110px 110px 90px; gap: 16px;">
                   
                   <div>
-                    <p class="text-xs font-bold text-slate-800 dark:text-slate-100 leading-snug" x-text="order.idLine1"></p>
-                    <p class="text-xs font-bold text-slate-800 dark:text-slate-100" x-text="order.idLine2"></p>
+                    <p class="text-[11px] font-bold text-slate-800 dark:text-slate-100 leading-snug" x-text="order.idLine1 + ' ' + order.idLine2"></p>
+                    <div class="flex items-center gap-1 mt-1 text-[9px] text-slate-400 font-medium" title="Waktu Pemesanan (WIB)">
+                      <i class="fa-regular fa-clock"></i>
+                      <span x-text="(window.SERVER_ORDERS.find(o => o.id == order.id)?.created_at || '').substring(0, 16)"></span>
+                    </div>
                   </div>
                   
                   <div class="flex items-center gap-3">
@@ -173,7 +179,10 @@
                   </div>
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between mb-0.5">
-                      <p class="text-xs font-bold text-slate-500" x-text="order.idLine1 + ' ' + order.idLine2"></p>
+                      <div class="flex items-center gap-1.5">
+                        <p class="text-xs font-bold text-slate-500" x-text="order.idLine1 + ' ' + order.idLine2"></p>
+                        <span class="text-[9px] text-slate-400 font-medium" x-text="'- ' + (window.SERVER_ORDERS.find(o => o.id == order.id)?.created_at || '').substring(0, 16)"></span>
+                      </div>
                       <span class="inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full"
                             :class="{
                               'bg-blue-600 text-white' : order.status === 'Confirmed',
@@ -259,7 +268,12 @@
   <div class="modal-box relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md flex flex-col p-5">
     <template x-if="selectedOrder">
       <div>
-        <h2 class="text-lg font-bold text-slate-800 dark:text-white mb-4">Detail Pesanan <span x-text="selectedOrder.idLine2"></span></h2>
+        <div class="mb-4">
+          <h2 class="text-lg font-bold text-slate-800 dark:text-white">Detail Pesanan <span x-text="selectedOrder.idLine2"></span></h2>
+          <p class="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
+            <i class="fa-regular fa-clock"></i> Pemesanan dibuat: <span x-text="(window.SERVER_ORDERS.find(o => o.id == selectedOrder.id)?.created_at || '')"></span>
+          </p>
+        </div>
         <div class="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 mb-4">
           <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Pelanggan</p>
           <p class="text-sm font-bold text-slate-800 dark:text-white" x-text="selectedOrder.customer.name"></p>
