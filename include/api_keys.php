@@ -23,7 +23,6 @@ if (file_exists($envPath)) {
         }
     }
 }
-
 // Ambil pengaturan dari basis data jika terhubung
 $dbSettings = [];
 try {
@@ -51,4 +50,9 @@ define('FONNTE_TOKEN', $fonnteToken ?: 'NULL');
 define('MIDTRANS_IS_PRODUCTION', $midtransIsProd);
 define('MIDTRANS_SERVER_KEY', $midtransServer ?: '');
 define('MIDTRANS_CLIENT_KEY', $midtransClient ?: '');
+
+define('FONNTE_TOKEN', getenv('UNr7QQkbrDeoRAgEe7bw') ?: 'NULL');
+define('MIDTRANS_IS_PRODUCTION', filter_var(getenv('MIDTRANS_IS_PRODUCTION') ?: 'false', FILTER_VALIDATE_BOOLEAN));
+define('MIDTRANS_SERVER_KEY', getenv('MIDTRANS_SERVER_KEY') ?: '');
+define('MIDTRANS_CLIENT_KEY', getenv('MIDTRANS_CLIENT_KEY') ?: '');
 
