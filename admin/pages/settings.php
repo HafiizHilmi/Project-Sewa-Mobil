@@ -2,7 +2,7 @@
 // Ambil data pengaturan keamanan saat ini dari database
 $secSettings = [];
 try {
-    $stmtSec = $pdo->query("SELECT setting_key, setting_value FROM business_settings WHERE setting_key IN ('fonnte_token', 'midtrans_is_production', 'midtrans_server_key', 'midtrans_client_key', 'telegram_bot_token', 'telegram_chat_id')");
+    $stmtSec = $pdo->query("SELECT setting_key, setting_value FROM business_settings WHERE setting_key IN ('fonnte_token', 'midtrans_is_production', 'midtrans_server_key', 'midtrans_client_key')");
     if ($stmtSec) {
         while ($row = $stmtSec->fetch(PDO::FETCH_ASSOC)) {
             $secSettings[$row['setting_key']] = $row['setting_value'];
@@ -14,8 +14,6 @@ $currFonnteToken = $secSettings['fonnte_token'] ?? '';
 $currMidtransIsProd = isset($secSettings['midtrans_is_production']) ? filter_var($secSettings['midtrans_is_production'], FILTER_VALIDATE_BOOLEAN) : false;
 $currMidtransServer = $secSettings['midtrans_server_key'] ?? '';
 $currMidtransClient = $secSettings['midtrans_client_key'] ?? '';
-$currTelegramBotToken = $secSettings['telegram_bot_token'] ?? '';
-$currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
 ?>
 <div x-show="activePage === 'settings'"
      x-data="{ showEditAdmin: false, showChangePass: false, editForm: {id:'', nama:'', email:'', role:''} }"
@@ -53,11 +51,13 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
       <button @click="activeTab = 'business'" :class="activeTab === 'business' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-slate-500 dark:text-slate-400 font-medium hover:text-slate-700 dark:hover:text-slate-200 border-b-2 border-transparent'" class="pb-3 px-1 mr-5 text-sm transition-all whitespace-nowrap">
         Business Settings
       </button>
+    <?php endif; ?>
 
-      <button @click="activeTab = 'blacklist'" :class="activeTab === 'blacklist' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-slate-500 dark:text-slate-400 font-medium hover:text-slate-700 dark:hover:text-slate-200 border-b-2 border-transparent'" class="pb-3 px-1 mr-5 text-sm transition-all whitespace-nowrap">
-        Blacklist Area
-      </button>
+    <button @click="activeTab = 'blacklist'" :class="activeTab === 'blacklist' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-slate-500 dark:text-slate-400 font-medium hover:text-slate-700 dark:hover:text-slate-200 border-b-2 border-transparent'" class="pb-3 px-1 mr-5 text-sm transition-all whitespace-nowrap">
+      Blacklist Area
+    </button>
 
+    <?php if (isset($role) && $role === 'superuser'): ?>
       <button @click="activeTab = 'security'" :class="activeTab === 'security' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-slate-500 dark:text-slate-400 font-medium hover:text-slate-700 dark:hover:text-slate-200 border-b-2 border-transparent'" class="pb-3 px-1 mr-5 text-sm transition-all whitespace-nowrap">
         Security Settings
       </button>
@@ -68,6 +68,7 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
     </button>
   </div>
 
+  <?php if (isset($role) && $role === 'superuser'): ?>
   <div x-show="activeTab === 'admin'" class="page-fade">
     <div class="flex items-center justify-between mb-4">
       <div>
@@ -140,14 +141,12 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
 
   <div x-show="activeTab === 'business'" class="page-fade" x-cloak>
     <?php
-    // 1. Buat tabel otomatis jika belum ada untuk menghindari error nge-blank!
     $pdo->exec("CREATE TABLE IF NOT EXISTS settings (
         id INT AUTO_INCREMENT PRIMARY KEY,
         setting_key VARCHAR(100) UNIQUE NOT NULL,
         setting_value TEXT
     )");
 
-    // 2. Ambil data settings dengan pengaman (try-catch)
     $currentSettings = [];
     try {
         $stmtSet = $pdo->query("SELECT setting_key, setting_value FROM settings");
@@ -156,9 +155,7 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
                 $currentSettings[$row['setting_key']] = $row['setting_value']; 
             }
         }
-    } catch (Exception $e) {
-        // Jika ada error database lain, abaikan agar halaman tetap tampil
-    }
+    } catch (Exception $e) {}
     ?>
     <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6">
       <div class="flex items-center gap-3 mb-6">
@@ -195,9 +192,9 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
 
     </div>
   </div>
+  <?php endif; ?>
 
   <?php
-  // Sesuaikan tabel blacklist biar mendukung geofencing otomatis
   $pdo->exec("CREATE TABLE IF NOT EXISTS blacklisted_locations (
       id INT AUTO_INCREMENT PRIMARY KEY,
       location_name VARCHAR(150) NOT NULL,
@@ -207,7 +204,6 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )");
 
-  // Pastikan kolom geofence (lat/lng/radius) ada di tabel blacklist
   try {
       $pdo->exec("ALTER TABLE blacklisted_locations ADD COLUMN latitude DECIMAL(10,8) DEFAULT NULL");
   } catch (Exception $e) {}
@@ -242,29 +238,31 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
         <p class="text-xs text-slate-400 mt-0.5">Blokir otomatis transaksi sewa dari/ke wilayah rawan terlarang</p>
       </div>
       <div class="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-xl border dark:border-slate-700 flex items-center gap-1.5 font-medium shrink-0">
-        <i class="fa-solid fa-circle-info text-blue-500"></i> Klik lokasi di peta atau klik 'Tambah Kata Kunci'
+        <i class="fa-solid fa-circle-info text-blue-500"></i>
+        <?php if (isset($role) && $role === 'superuser'): ?>
+            Klik lokasi di peta atau klik 'Tambah Kata Kunci'
+        <?php else: ?>
+            Mode Pantau (Hanya Lihat)
+        <?php endif; ?>
       </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-      <!-- MAP CONTAINER WITH LOCATION SEARCH BAR -->
       <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-3.5 relative overflow-visible flex flex-col gap-3">
-        <!-- Search bar input -->
+        <?php if (isset($role) && $role === 'superuser'): ?>
         <div class="relative z-30">
           <div class="relative flex items-center">
             <input type="text" id="map-search-input" placeholder="Cari wilayah/kota untuk di-blacklist (Cth: Pati, Surabaya, Jakarta)..." autocomplete="off" class="w-full border dark:border-slate-600 rounded-xl pl-10 pr-10 py-2.5 text-xs bg-slate-50 dark:bg-slate-700 dark:text-white outline-none focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-inner"/>
             <div class="absolute left-3.5 text-slate-400"><i class="fa-solid fa-magnifying-glass text-xs"></i></div>
             <button type="button" id="map-search-clear" class="absolute right-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hidden"><i class="fa-solid fa-circle-xmark text-xs"></i></button>
           </div>
-          <!-- Search Dropdown Suggestions -->
           <div id="map-search-results" class="absolute left-0 right-0 top-[calc(100%+4px)] z-40 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl max-h-60 overflow-y-auto hidden"></div>
         </div>
+        <?php endif; ?>
         <div id="geofence-map" class="w-full rounded-xl z-10" style="height: 440px; min-height: 380px;"></div>
       </div>
       
-      <!-- CONTROL PANEL -->
       <div class="lg:col-span-1 flex flex-col gap-4">
-        <!-- FORM TAMBAH GEOFENCE / KATA KUNCI -->
         <div x-show="showAddForm" x-transition.opacity class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5">
           <div class="flex items-center gap-2 mb-4">
             <div class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400"><i class="fa-solid fa-plus text-xs"></i></div>
@@ -311,16 +309,17 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
           </form>
         </div>
         
-        <!-- LIST GEOFENCE TERDAFTAR -->
         <div x-show="!showAddForm" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 flex-1 flex flex-col min-h-[300px]">
           <div class="flex items-center justify-between mb-4 shrink-0">
             <div class="flex items-center gap-2">
               <div class="w-7 h-7 rounded-lg bg-red-50 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400"><i class="fa-solid fa-ban text-xs"></i></div>
               <h3 class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">Blacklist Aktif</h3>
             </div>
+            <?php if (isset($role) && $role === 'superuser'): ?>
             <button @click="blacklistType = 'keyword'; selectedName = ''; selectedLat = ''; selectedLng = ''; selectedRadius = ''; showAddForm = true;" class="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 text-[10px] font-bold px-2.5 py-1.5 rounded-lg border border-red-200/50 dark:border-red-900/50 transition-colors">
               <i class="fa-solid fa-plus"></i> Kata Kunci
             </button>
+            <?php endif; ?>
           </div>
           
           <div class="space-y-3 overflow-y-auto max-h-[320px] pr-1 flex-1 custom-scrollbar">
@@ -353,6 +352,7 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
                         </button>
                       <?php endif; ?>
                       
+                      <?php if (isset($role) && $role === 'superuser'): ?>
                       <form action="actions/admin_action.php" method="POST" class="m-0 p-0" onsubmit="return confirm('Hapus <?= $isGeofence ? 'geofence' : 'kata kunci' ?> blacklist ini?');">
                         <input type="hidden" name="action" value="delete_blacklist">
                         <input type="hidden" name="id" value="<?= $bl['id'] ?>">
@@ -360,6 +360,7 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
                           <i class="fa-solid fa-trash-can text-[10px]"></i>
                         </button>
                       </form>
+                      <?php endif; ?>
                     </div>
                   </div>
                 </div>
@@ -392,7 +393,6 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
         </div>
 
         <div class="space-y-5">
-          <!-- Fonnte Section -->
           <div class="border-b border-slate-100 dark:border-slate-700 pb-5">
             <div class="flex items-center gap-2 mb-3">
               <h3 class="text-xs font-bold text-slate-700 dark:text-slate-350 uppercase tracking-wider">Integrasi WhatsApp Fonnte</h3>
@@ -409,7 +409,6 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
             </div>
           </div>
 
-          <!-- Midtrans Section -->
           <div>
             <div class="flex items-center gap-2 mb-3">
               <h3 class="text-xs font-bold text-slate-700 dark:text-slate-350 uppercase tracking-wider">Integrasi Payment Gateway Midtrans</h3>
@@ -439,29 +438,6 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
               </select>
               <p class="text-[10px] text-slate-400 mt-1">Pilih "Sandbox" untuk testing pembayaran dengan uang virtual, atau "Production" untuk menerima pembayaran nyata.</p>
             </div>
-          </div>
-
-          <!-- Telegram Bot Section -->
-          <div class="border-t border-slate-150 dark:border-slate-700/80 pt-5">
-            <div class="flex items-center gap-2 mb-3">
-              <h3 class="text-xs font-bold text-slate-700 dark:text-slate-350 uppercase tracking-wider">Integrasi Telegram Bot (BotFather)</h3>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Telegram Bot Token</label>
-                <div class="relative flex items-center" x-data="{ show: false }">
-                  <input :type="show ? 'text' : 'password'" name="telegram_bot_token" value="<?= htmlspecialchars($currTelegramBotToken) ?>" placeholder="Masukkan Bot Token dari BotFather" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl pl-4 pr-10 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:border-blue-400"/>
-                  <button type="button" @click="show = !show" class="absolute right-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                    <i class="fa-solid" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Telegram Chat ID</label>
-                <input type="text" name="telegram_chat_id" value="<?= htmlspecialchars($currTelegramChatId) ?>" placeholder="Masukkan Chat ID penerima (Personal/Grup)" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:border-blue-400"/>
-              </div>
-            </div>
-            <p class="text-[10px] text-slate-400 mt-2">Token ini digunakan untuk mengirimkan notifikasi instan untuk pesanan baru (Pending) dan pesanan dibatalkan (Cancel) ke chat Telegram Anda.</p>
           </div>
         </div>
 
@@ -613,9 +589,7 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
     </div>
   </div>
 
-  <!-- Dynamic Leaflet Loader and Geofencing JS Script -->
   <script>
-      // Load Leaflet dynamically if not loaded
       if (typeof L === 'undefined') {
           const link = document.createElement('link');
           link.rel = 'stylesheet';
@@ -637,7 +611,6 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
 
       function initGeofenceMap() {
           if (typeof L === 'undefined') {
-              // Wait until Leaflet is fully loaded in head
               setTimeout(initGeofenceMap, 100);
               return;
           }
@@ -652,10 +625,8 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
           const mapContainer = document.getElementById('geofence-map');
           if (!mapContainer) return;
 
-          // Inisialisasi Map, Default Center Surabaya (-7.2575, 112.7521)
           map = L.map('geofence-map').setView([-7.2575, 112.7521], 11);
 
-          // Pilih Tile Layer berdasarkan tema Dark/Light
           const isDark = document.documentElement.classList.contains('dark');
           const tileUrl = isDark 
               ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
@@ -665,7 +636,6 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
               attribution: '&copy; OpenStreetMap &copy; CARTO'
           }).addTo(map);
 
-          // Render Geofence terdaftar dari Database
           const geofencesData = <?= json_encode($blacklists) ?>;
           
           geofencesData.forEach(bl => {
@@ -674,7 +644,6 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
                   const lng = parseFloat(bl.longitude);
                   const rad = parseInt(bl.radius);
                   
-                  // Buat Circle Merah
                   const circle = L.circle([lat, lng], {
                       color: '#ef4444',
                       fillColor: '#f87171',
@@ -683,16 +652,17 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
                       radius: rad
                   }).addTo(map);
 
-                  // Detail content untuk popup
                   const popupContent = `
                       <div class="p-2 text-slate-800 dark:text-slate-100 font-sans" style="min-width: 160px; color: #1e293b;">
                           <h4 class="font-bold text-xs mb-1" style="margin:0; color: #0f172a;">${bl.location_name}</h4>
                           <p class="text-[10px] text-slate-500" style="margin:0 0 8px 0;">Radius: ${rad >= 1000000 ? '1000 km' : (rad >= 1000 ? (rad/1000) + ' km' : rad + ' m')}</p>
+                          <?php if (isset($role) && $role === 'superuser'): ?>
                           <form action="actions/admin_action.php" method="POST" onsubmit="return confirm('Hapus geofence ini?');" style="margin:0;">
                               <input type="hidden" name="action" value="delete_blacklist">
                               <input type="hidden" name="id" value="${bl.id}">
                               <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold py-1.5 px-2 rounded-lg transition-colors border-0 cursor-pointer">Hapus Geofence</button>
                           </form>
+                          <?php endif; ?>
                       </div>
                   `;
 
@@ -701,8 +671,11 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
               }
           });
 
-          // Event listener saat peta diklik
           map.on('click', function(e) {
+              <?php if (isset($role) && $role !== 'superuser'): ?>
+              return;
+              <?php endif; ?>
+
               const lat = e.latlng.lat;
               const lng = e.latlng.lng;
               
@@ -715,11 +688,9 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
                   alpineData.blacklistType = 'geofence';
                   alpineData.showAddForm = true;
                   
-                  // Gambar Marker & Circle sementara
                   if (tempMarker) map.removeLayer(tempMarker);
                   if (tempCircle) map.removeLayer(tempCircle);
 
-                  // Buat marker yang bisa digeser (draggable)
                   tempMarker = L.marker([lat, lng], { draggable: true }).addTo(map);
                   tempCircle = L.circle([lat, lng], {
                       color: '#3b82f6',
@@ -729,7 +700,6 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
                       radius: alpineData.selectedRadius
                   }).addTo(map);
 
-                  // Sinkronisasi posisi marker saat digeser
                   tempMarker.on('drag', function(evt) {
                       const newLatLng = evt.latlng;
                       if (tempCircle) {
@@ -743,7 +713,6 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
               }
           });
 
-          // --- KODE AUTOCOMPLETE / SEARCH MAP DENGAN NOMINATIM ---
           const searchInput = document.getElementById('map-search-input');
           const searchClear = document.getElementById('map-search-clear');
           const searchResults = document.getElementById('map-search-results');
@@ -765,7 +734,6 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
                   
                   clearTimeout(debounceTimeout);
                   debounceTimeout = setTimeout(() => {
-                      // Tampilkan spinner loading di dropdown
                       searchResults.innerHTML = `
                           <div class="p-3 text-center text-xs text-slate-400">
                               <i class="fa-solid fa-spinner fa-spin mr-1.5 text-blue-500"></i>Mencari lokasi...
@@ -794,7 +762,6 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
                           
                           let html = '';
                           data.forEach((place, idx) => {
-                              // Potong display_name agar rapi
                               const mainText = place.name || place.display_name.split(',')[0];
                               const secondaryText = place.display_name.replace(mainText + ', ', '');
                               
@@ -827,7 +794,6 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
                   });
               }
               
-              // Tutup dropdown jika klik di luar
               document.addEventListener('click', function(e) {
                   if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
                       searchResults.classList.add('hidden');
@@ -867,7 +833,6 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
               alpineData.blacklistType = 'geofence';
               alpineData.showAddForm = true;
               
-              // Gambar Marker & Circle sementara
               if (tempMarker) map.removeLayer(tempMarker);
               if (tempCircle) map.removeLayer(tempCircle);
 
@@ -880,7 +845,6 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
                   radius: alpineData.selectedRadius
               }).addTo(map);
 
-              // Sinkronisasi posisi marker saat digeser
               tempMarker.on('drag', function(evt) {
                   const newLatLng = evt.latlng;
                   if (tempCircle) {
@@ -890,10 +854,8 @@ $currTelegramChatId = $secSettings['telegram_chat_id'] ?? '';
                   alpineData.selectedLng = newLatLng.lng;
               });
 
-              // Centering Map dengan zoom yang pas
               map.setView([lat, lon], 12);
               
-              // Sembunyikan dropdown saran
               const searchResults = document.getElementById('map-search-results');
               if (searchResults) searchResults.classList.add('hidden');
           }
