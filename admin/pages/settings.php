@@ -2,7 +2,7 @@
 // Ambil data pengaturan keamanan saat ini dari database
 $secSettings = [];
 try {
-    $stmtSec = $pdo->query("SELECT setting_key, setting_value FROM business_settings WHERE setting_key IN ('fonnte_token', 'midtrans_is_production', 'midtrans_server_key', 'midtrans_client_key')");
+    $stmtSec = $pdo->query("SELECT setting_key, setting_value FROM business_settings WHERE setting_key IN ('fonnte_token', 'midtrans_is_production', 'midtrans_server_key', 'midtrans_client_key', 'telegram_bot_token', 'telegram_chat_id')");
     if ($stmtSec) {
         while ($row = $stmtSec->fetch(PDO::FETCH_ASSOC)) {
             $secSettings[$row['setting_key']] = $row['setting_value'];
@@ -14,6 +14,8 @@ $currFonnteToken = $secSettings['fonnte_token'] ?? '';
 $currMidtransIsProd = isset($secSettings['midtrans_is_production']) ? filter_var($secSettings['midtrans_is_production'], FILTER_VALIDATE_BOOLEAN) : false;
 $currMidtransServer = $secSettings['midtrans_server_key'] ?? '';
 $currMidtransClient = $secSettings['midtrans_client_key'] ?? '';
+$currTelegramBotToken = isset($secSettings['telegram_bot_token']) && $secSettings['telegram_bot_token'] !== '' ? $secSettings['telegram_bot_token'] : (getenv('TELEGRAM_BOT_TOKEN') ?: '');
+$currTelegramChatId = isset($secSettings['telegram_chat_id']) && $secSettings['telegram_chat_id'] !== '' ? $secSettings['telegram_chat_id'] : (getenv('TELEGRAM_CHAT_ID') ?: '');
 ?>
 <div x-show="activePage === 'settings'"
      x-data="{ showEditAdmin: false, showChangePass: false, editForm: {id:'', nama:'', email:'', role:''} }"
@@ -388,7 +390,7 @@ $currMidtransClient = $secSettings['midtrans_client_key'] ?? '';
           </div>
           <div>
             <h2 class="text-sm font-bold text-slate-800 dark:text-white">Security & API Credentials</h2>
-            <p class="text-xs text-slate-400">Konfigurasi token WhatsApp Fonnte dan Payment Gateway Midtrans</p>
+            <p class="text-xs text-slate-400">Konfigurasi token WhatsApp Fonnte, Payment Gateway Midtrans, dan Telegram Bot</p>
           </div>
         </div>
 
@@ -438,6 +440,29 @@ $currMidtransClient = $secSettings['midtrans_client_key'] ?? '';
               </select>
               <p class="text-[10px] text-slate-400 mt-1">Pilih "Sandbox" untuk testing pembayaran dengan uang virtual, atau "Production" untuk menerima pembayaran nyata.</p>
             </div>
+          </div>
+
+          <div class="border-t border-slate-100 dark:border-slate-700 pt-5">
+            <div class="flex items-center gap-2 mb-3">
+              <h3 class="text-xs font-bold text-slate-700 dark:text-slate-350 uppercase tracking-wider">Integrasi Notifikasi Telegram</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Telegram Bot Token</label>
+                <div class="relative flex items-center" x-data="{ show: false }">
+                  <input :type="show ? 'text' : 'password'" name="telegram_bot_token" value="<?= htmlspecialchars($currTelegramBotToken) ?>" placeholder="Masukkan Telegram Bot Token" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl pl-4 pr-10 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:border-blue-400"/>
+                  <button type="button" @click="show = !show" class="absolute right-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="fa-solid" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Telegram Chat ID</label>
+                <input type="text" name="telegram_chat_id" value="<?= htmlspecialchars($currTelegramChatId) ?>" placeholder="Masukkan Telegram Chat ID" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:border-blue-400"/>
+              </div>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1">Token dan Chat ID ini digunakan untuk mengirimkan notifikasi pemesanan baru atau pembatalan secara real-time ke grup/kontak Telegram admin.</p>
           </div>
         </div>
 
