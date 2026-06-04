@@ -128,17 +128,16 @@ if (isset($pdo)) {
 
     <nav class="navbar navbar-expand-lg bg-white py-3">
         <div class="container">
-            <a href="index.php?module=Homepage&action=index" class="no-underline flex items-center">
+            <a class="navbar-brand fw-bold fs-4 text-decoration-none" href="index.php?module=Homepage&action=index">
                 <?php
-                            // Jika nama di database diawali dengan kata "Sewa" (tidak sensitif huruf besar/kecil)
-                            if (stripos($appName, 'sewa') === 0) {
-                                $restOfName = substr($appName, 4); // Ambil sisa nama setelah kata "Sewa"
-                                echo '<span class="text-blue-700 dark:text-blue-500 font-extrabold text-2xl tracking-tight">Sewa<span class="text-gray-900 dark:text-white">' . htmlspecialchars($restOfName) . '</span></span>';
-                            } else {
-                                // Jika namanya tidak diawali kata "Sewa", tampilkan warna default biru
-                                echo '<span class="text-blue-700 dark:text-blue-500 font-extrabold text-2xl tracking-tight">' . htmlspecialchars($appName) . '</span>';
-                            }
-                            ?>
+                // Memisahkan warna kata "Sewa" dan sisa namanya menggunakan class Bootstrap
+                if (stripos($appName, 'sewa') === 0) {
+                    $restOfName = substr($appName, 4);
+                    echo '<span class="text-brand">Sewa</span><span class="text-dark">' . htmlspecialchars($restOfName) . '</span>';
+                } else {
+                    echo '<span class="text-brand">' . htmlspecialchars($appName) . '</span>';
+                }
+                ?>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -169,7 +168,23 @@ if (isset($pdo)) {
                     <a href="index.php?module=Homepage&action=index" class="btn btn-brand rounded-pill px-4 py-2 fw-semibold">Lihat Katalog</a>
                 </div>
                 <div class="col-lg-6">
-                    <img src="../public/assets/images/5-Essential-Car-Rental-Tips-for-a-Smooth-Business-Travel-Experience-1024x544.jpg" alt="Avanza" class="img-fluid rounded-4 shadow-sm w-100 object-fit-cover" style="height: 350px;">
+                    <div id="heroCarousel" class="carousel slide carousel-fade rounded-4 shadow-sm overflow-hidden" data-bs-ride="carousel" style="height: 350px;">
+                        
+                        <div class="carousel-inner h-100">
+                            <div class="carousel-item active h-100" data-bs-interval="3000">
+                                <img src="../public/assets/images/5-Essential-Car-Rental-Tips-for-a-Smooth-Business-Travel-Experience-1024x544.jpg" class="d-block w-100 h-100 object-fit-cover" alt="Promo 1">
+                            </div>
+                            
+                            <div class="carousel-item h-100" data-bs-interval="3000">
+                                <img src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=1000&auto=format&fit=crop" class="d-block w-100 h-100 object-fit-cover" alt="Promo 2">
+                            </div>
+                            
+                            <div class="carousel-item h-100" data-bs-interval="3000">
+                                <img src="https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?q=80&w=1000&auto=format&fit=crop" class="d-block w-100 h-100 object-fit-cover" alt="Promo 3">
+                            </div>
+                        </div>
+                        
+                    </div>
                 </div>
             </div>
         </div>
@@ -338,8 +353,21 @@ if (isset($pdo)) {
     <footer class="bg-white py-4 border-top">
         <div class="container">
             <div class="row align-items-center flex-column flex-md-row">
+                <div class="container">
+            <div class="row align-items-center flex-column flex-md-row">
+                
                 <div class="col-md-3 text-center text-md-start mb-3 mb-md-0">
-                    <a class="fw-bold text-brand fs-5 text-decoration-none" href="#">SewaMobil</a>
+                    <a class="fw-bold fs-5 text-decoration-none" href="index.php?module=Homepage&action=index">
+                        <?php
+                        // Memisahkan warna kata "Sewa" dan sisa namanya
+                        if (stripos($appName, 'sewa') === 0) {
+                            $restOfName = substr($appName, 4);
+                            echo '<span class="text-brand">Sewa</span><span class="text-dark">' . htmlspecialchars($restOfName) . '</span>';
+                        } else {
+                            echo '<span class="text-brand">' . htmlspecialchars($appName) . '</span>';
+                        }
+                        ?>
+                    </a>
                 </div>
                 <div class="col-md-6 text-center mb-3 mb-md-0">
                     <ul class="list-inline mb-0">

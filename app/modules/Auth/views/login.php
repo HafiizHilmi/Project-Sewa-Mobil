@@ -1,10 +1,37 @@
 <?php 
-// Buka session dan buat token keamanan CSRF (wajib ditaruh paling atas)
+// Buka session dan buat token keamanan CSRF (Khusus untuk halaman yang butuh keamanan form)
 if (session_status() !== PHP_SESSION_ACTIVE) session_start(); 
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
+
+// ==========================================
+// Panggil Setting Database untuk Nama Navbar
+// ==========================================
+global $pdo; // Ambil koneksi database dari sistem utama
+
+// Jika koneksi tidak ditemukan di sistem utama, panggil file database secara manual
+if (!isset($pdo) || $pdo === null) {
+    // Sesuaikan letak path db_config.php jika terjadi error
+    require_once __DIR__ . '/../../../../include/db_config.php';
+    $pdo = getPDO();
+}
+
+$appName = "SewaMobil SBY"; // Nama default jika database benar-benar kosong
+
+if (isset($pdo)) {
+    try {
+        $stmtSettings = $pdo->query("SELECT setting_key, setting_value FROM settings");
+        while ($row = $stmtSettings->fetch(PDO::FETCH_ASSOC)) {
+            if ($row['setting_key'] === 'app_name') $appName = $row['setting_value'];
+        }
+    } catch (Exception $e) {
+        // Abaikan jika tabel setting belum ada
+    }
+}
+// ==========================================
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -106,9 +133,19 @@ if (empty($_SESSION['csrf_token'])) {
             });
         </script>
     <?php endif; ?>
-    <nav class="navbar navbar-light bg-white py-3 shadow-sm">
+     <nav class="navbar navbar-light bg-white py-3 shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold text-brand fs-4" href="index.php">SewaMobil</a>
+            <a class="navbar-brand fw-bold fs-4 text-decoration-none" href="index.php?module=Homepage&action=index">
+                <?php
+                // Memisahkan warna kata "Sewa" dan sisa namanya menggunakan class Bootstrap
+                if (stripos($appName, 'sewa') === 0) {
+                    $restOfName = substr($appName, 4);
+                    echo '<span class="text-brand">Sewa</span><span class="text-dark">' . htmlspecialchars($restOfName) . '</span>';
+                } else {
+                    echo '<span class="text-brand">' . htmlspecialchars($appName) . '</span>';
+                }
+                ?>
+            </a>
         </div>
     </nav>
 
@@ -195,7 +232,7 @@ if (empty($_SESSION['csrf_token'])) {
                                             }, 800);
                                         }
                                         
-                                    }, 3000); // Ganti gambar setiap 3 detik
+                                    }, 3000); // Ganti gambar setiap 4 detik
                                 });
 </script>
 </html>
