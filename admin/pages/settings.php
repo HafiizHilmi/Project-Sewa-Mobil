@@ -43,7 +43,11 @@ $currTelegramChatId = isset($secSettings['telegram_chat_id']) && $secSettings['t
      x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
      class="absolute inset-0 overflow-y-auto px-5 lg:px-6 py-5">
 
-  <div class="flex items-center border-b border-slate-200 dark:border-slate-700 mb-6 gap-1">
+  <div class="flex items-center border-b border-slate-200 dark:border-slate-700 mb-6 gap-1 overflow-x-auto flex-nowrap hide-scroll" style="scrollbar-width: none; -ms-overflow-style: none;">
+    <style>
+      /* Menyembunyikan garis scrollbar agar terlihat bersih seperti aplikasi native */
+      .hide-scroll::-webkit-scrollbar { display: none; }
+    </style>
     
     <?php if (isset($role) && $role === 'superuser'): ?>
       <button @click="activeTab = 'admin'" :class="activeTab === 'admin' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-slate-500 dark:text-slate-400 font-medium hover:text-slate-700 dark:hover:text-slate-200 border-b-2 border-transparent'" class="pb-3 px-1 mr-5 text-sm transition-all whitespace-nowrap">
@@ -82,62 +86,66 @@ $currTelegramChatId = isset($secSettings['telegram_chat_id']) && $secSettings['t
       </button>
     </div>
     
-    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
-      <div class="hidden sm:grid px-5 py-3.5 bg-gradient-to-r from-slate-700 to-slate-800 text-slate-200 text-[11px] font-bold uppercase tracking-wider" style="grid-template-columns: 1fr 180px 110px 140px 80px; gap: 12px;">
-        <div>Admin</div><div>Email</div><div>Role</div><div>Ditambahkan</div><div class="text-right">Aksi</div>
-      </div>
+    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-x-auto w-full">
       
-      <?php
-      $stmtAdmins = $pdo->query("SELECT * FROM admins ORDER BY id DESC");
-      $adminList = $stmtAdmins->fetchAll(PDO::FETCH_ASSOC);
-      
-      $index = 0;
-      foreach ($adminList as $admin):
-          $index++;
-          $colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
-          $color = $colors[$admin['id'] % count($colors)];
-          
-          $inisial = strtoupper(substr($admin['nama'], 0, 1));
-          $isSuper = ($admin['role'] === 'superuser');
-          $roleText = $isSuper ? 'Super Admin' : 'Staff';
-          $roleClass = $isSuper ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300';
-      ?>
-        <div>
-          <?php if($index > 1): ?>
-          <div class="border-t border-slate-100 dark:border-slate-700 mx-5"></div>
-          <?php endif; ?>
-          
-          <div class="tbl-row hidden sm:grid px-5 py-4 items-center dark:hover:bg-slate-700/30" style="grid-template-columns: 1fr 180px 110px 140px 80px; gap: 12px;">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background: <?= $color ?>">
-                <span><?= $inisial ?></span>
+      <div style="min-width: 800px;">
+        
+        <div class="grid px-5 py-3.5 bg-gradient-to-r from-slate-700 to-slate-800 text-slate-200 text-[11px] font-bold uppercase tracking-wider" style="grid-template-columns: 1fr 180px 110px 140px 80px; gap: 12px;">
+          <div>Admin</div><div>Email</div><div>Role</div><div>Ditambahkan</div><div class="text-right">Aksi</div>
+        </div>
+        
+        <?php
+        $stmtAdmins = $pdo->query("SELECT * FROM admins ORDER BY id DESC");
+        $adminList = $stmtAdmins->fetchAll(PDO::FETCH_ASSOC);
+        
+        $index = 0;
+        foreach ($adminList as $admin):
+            $index++;
+            $colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+            $color = $colors[$admin['id'] % count($colors)];
+            
+            $inisial = strtoupper(substr($admin['nama'], 0, 1));
+            $isSuper = ($admin['role'] === 'superuser');
+            $roleText = $isSuper ? 'Super Admin' : 'Staff';
+            $roleClass = $isSuper ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300';
+        ?>
+          <div>
+            <?php if($index > 1): ?>
+            <div class="border-t border-slate-100 dark:border-slate-700 mx-5"></div>
+            <?php endif; ?>
+            
+            <div class="tbl-row grid px-5 py-4 items-center dark:hover:bg-slate-700/30" style="grid-template-columns: 1fr 180px 110px 140px 80px; gap: 12px;">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background: <?= $color ?>">
+                  <span><?= $inisial ?></span>
+                </div>
+                <div><p class="text-sm font-bold text-slate-800 dark:text-slate-100"><?= htmlspecialchars($admin['nama']) ?></p></div>
               </div>
-              <div><p class="text-sm font-bold text-slate-800 dark:text-slate-100"><?= htmlspecialchars($admin['nama']) ?></p></div>
-            </div>
-            
-            <div class="text-xs text-slate-500 dark:text-slate-400 truncate"><?= htmlspecialchars($admin['email']) ?></div>
-            <div><span class="text-[11px] font-bold px-2.5 py-1 rounded-md <?= $roleClass ?>"><?= $roleText ?></span></div>
-            <div class="text-xs text-slate-400 font-medium"><?= date('d M Y', strtotime($admin['created_at'])) ?></div>
-            
-            <div class="flex justify-end gap-1.5">
-              <button @click="editForm.id = '<?= $admin['id'] ?>'; editForm.nama = '<?= addslashes($admin['nama']) ?>'; editForm.email = '<?= addslashes($admin['email']) ?>'; editForm.role = '<?= $admin['role'] ?>'; showEditAdmin = true;" 
-                      title="Edit Admin/Staff" class="w-7 h-7 rounded-lg flex items-center justify-center text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
-                <i class="fa-solid fa-pen text-[11px]"></i>
-              </button>
               
-              <?php if(!$isSuper): ?>
-              <form action="actions/admin_action.php" method="POST" class="m-0 p-0" onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun staff ini?');">
-                  <input type="hidden" name="action" value="delete_admin">
-                  <input type="hidden" name="id" value="<?= $admin['id'] ?>">
-                  <button type="submit" title="Hapus Staff" class="w-7 h-7 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                    <i class="fa-solid fa-trash-can text-[11px]"></i>
-                  </button>
-              </form>
-              <?php endif; ?>
+              <div class="text-xs text-slate-500 dark:text-slate-400 truncate"><?= htmlspecialchars($admin['email']) ?></div>
+              <div><span class="text-[11px] font-bold px-2.5 py-1 rounded-md <?= $roleClass ?>"><?= $roleText ?></span></div>
+              <div class="text-xs text-slate-400 font-medium"><?= date('d M Y', strtotime($admin['created_at'])) ?></div>
+              
+              <div class="flex justify-end gap-1.5">
+                <button @click="editForm.id = '<?= $admin['id'] ?>'; editForm.nama = '<?= addslashes($admin['nama']) ?>'; editForm.email = '<?= addslashes($admin['email']) ?>'; editForm.role = '<?= $admin['role'] ?>'; showEditAdmin = true;" 
+                        title="Edit Admin/Staff" class="w-7 h-7 rounded-lg flex items-center justify-center text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                  <i class="fa-solid fa-pen text-[11px]"></i>
+                </button>
+                
+                <?php if(!$isSuper): ?>
+                <form action="actions/admin_action.php" method="POST" class="m-0 p-0" onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun staff ini?');">
+                    <input type="hidden" name="action" value="delete_admin">
+                    <input type="hidden" name="id" value="<?= $admin['id'] ?>">
+                    <button type="submit" title="Hapus Staff" class="w-7 h-7 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                      <i class="fa-solid fa-trash-can text-[11px]"></i>
+                    </button>
+                </form>
+                <?php endif; ?>
+              </div>
             </div>
           </div>
-        </div>
-      <?php endforeach; ?>
+        <?php endforeach; ?>
+      </div>
     </div>
   </div>
 
