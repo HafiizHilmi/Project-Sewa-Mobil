@@ -122,6 +122,9 @@ if (isset($pdo)) {
         html.dark .card-custom { background-color: #111827 !important; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); }
         html.dark .badge-custom { background-color: #1f2937 !important; color: #cbd5e1 !important; }
         html.dark .image-placeholder { background-color: #1f2937 !important; }
+        html.dark .bg-white { background-color: #020617 !important; }
+        html.dark .text-dark { color: #f8fafc !important; }
+        html.dark .border-top { border-color: #1e293b !important; }
     </style>
 </head>
 <body>

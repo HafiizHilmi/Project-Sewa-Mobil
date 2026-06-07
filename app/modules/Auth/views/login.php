@@ -105,6 +105,8 @@ if (isset($pdo)) {
         html.dark .btn-brand:hover { background-color: #1d4ed8 !important; }
         html.dark .text-muted { color: #94a3b8 !important; }
         html.dark .image-placeholder { background-color: #111827 !important; }
+        html.dark .text-dark { color: #f8fafc !important; }
+        html.dark .border-top { border-color: #1e293b !important; }
     </style>
 </head>
 <body>
