@@ -21,12 +21,12 @@ function appData() {
 
     /* ── Navigation ── */
     navItems: [
-      { key: 'dashboard', label: 'Dashboard',      icon: 'fa-solid fa-gauge-high' },
+      { key: 'dashboard', label: 'Dashboard', icon: 'fa-solid fa-gauge-high' },
       { key: 'verifications', label: 'Verifications', icon: 'fa-solid fa-id-card' },
-      { key: 'cars',      label: 'Car Management', icon: 'fa-solid fa-car'        },
-      { key: 'orders',    label: 'Orders',         icon: 'fa-solid fa-clipboard-list'},
-      { key: 'customers', label: 'Customers',      icon: 'fa-solid fa-users'      },
-      { key: 'settings',  label: 'Settings',       icon: 'fa-solid fa-gear'       },
+      { key: 'cars', label: 'Car Management', icon: 'fa-solid fa-car' },
+      { key: 'orders', label: 'Orders', icon: 'fa-solid fa-clipboard-list' },
+      { key: 'customers', label: 'Customers', icon: 'fa-solid fa-users' },
+      { key: 'settings', label: 'Settings', icon: 'fa-solid fa-gear' },
     ],
 
     setPage(p) {
@@ -36,7 +36,7 @@ function appData() {
     },
 
     get pageTitle() {
-      return { dashboard:'Dashboard', verifications:'Verifications', cars:'Car Management', orders:'Orders', customers:'Customers', settings:'Settings' }[this.activePage];
+      return { dashboard: 'Dashboard', verifications: 'Verifications', cars: 'Car Management', orders: 'Orders', customers: 'Customers', settings: 'Settings' }[this.activePage];
     },
     get pageSubtitle() {
       return {
@@ -51,8 +51,8 @@ function appData() {
 
     /* ── Dashboard ── */
     dashAlerts: [
-      { icon:'fa-car', bg:'bg-orange-50 dark:bg-orange-900/20', color:'text-orange-400', title:'Vehicle Maintenance Due', desc:'Toyota Avanza 2024 requires scheduled service.', time:'2 hours ago' },
-      { icon:'fa-user-plus', bg:'bg-blue-50 dark:bg-blue-900/20', color:'text-blue-500', title:'New Corporate Account', desc:'PT Sukses completed onboarding process.', time:'5 hours ago' },
+      { icon: 'fa-car', bg: 'bg-orange-50 dark:bg-orange-900/20', color: 'text-orange-400', title: 'Vehicle Maintenance Due', desc: 'Toyota Avanza 2024 requires scheduled service.', time: '2 hours ago' },
+      { icon: 'fa-user-plus', bg: 'bg-blue-50 dark:bg-blue-900/20', color: 'text-blue-500', title: 'New Corporate Account', desc: 'PT Sukses completed onboarding process.', time: '5 hours ago' },
     ],
 
     /* ── Customers ── */
@@ -165,8 +165,8 @@ function appData() {
       { key: 'security', label: 'Security Settings' },
     ],
     admins: [
-      { id:1, name:'Ahmad Fauzi', email:'ahmad@sewamobilsby.id', role:'Super Admin', addedAt:'1 Jan 2025', color:'#3b82f6' },
-      { id:2, name:'Dewi Rahma', email:'dewi@sewamobilsby.id', role:'Staff', addedAt:'10 Feb 2025', color:'#8b5cf6' },
+      { id: 1, name: 'Ahmad Fauzi', email: 'ahmad@sewamobilsby.id', role: 'Super Admin', addedAt: '1 Jan 2025', color: '#3b82f6' },
+      { id: 2, name: 'Dewi Rahma', email: 'dewi@sewamobilsby.id', role: 'Staff', addedAt: '10 Feb 2025', color: '#8b5cf6' },
     ],
 
     /* ── Cars ── */
@@ -178,10 +178,10 @@ function appData() {
     editModalTitle: '',
     editForm: {},
     cars: [
-      { id:1, name:'Toyota Avanza', year:'2024', plate:'B 1242 DFR', category:'MPV', status:'Tersedia', price:'Rp 350.000', fuel:'Bensin - Pertalite', transmission:'Manual', passengers:'7', chassis:'MHFAB8GM4N4001234', renter:'Windah Basudara', rentalStart:'18 Mei 2025', rentalEnd:'22 Mei 2025', rentalPct:60, rentalLeft:'2 Hari Lagi', iconCls:'text-blue-400', bgCls:'bg-blue-50 dark:bg-blue-900/30' },
-      { id:2, name:'Toyota Kijang Innova', year:'2023', plate:'B 1562 DYF', category:'MPV', status:'Tersewa', price:'Rp 550.000', fuel:'Bensin - Pertamax', transmission:'Matic', passengers:'8', chassis:'MHFAG8GM4N4005678', renter:'Budi Santoso', rentalStart:'15 Mei 2025', rentalEnd:'25 Mei 2025', rentalPct:50, rentalLeft:'5 Hari Lagi', iconCls:'text-indigo-400', bgCls:'bg-indigo-50 dark:bg-indigo-900/30' },
-      { id:3, name:'Mercedes Benz E300', year:'2023', plate:'B 84 IK', category:'Sedan', status:'Perbaikan', price:'Rp 2.000.000', fuel:'Bensin Turbo', transmission:'Matic', passengers:'5', chassis:'WDD2130561A012345', renter:'-', rentalStart:'-', rentalEnd:'-', rentalPct:0, rentalLeft:'-', iconCls:'text-slate-400', bgCls:'bg-slate-100 dark:bg-slate-700/50' },
-      { id:4, name:'BYD M6', year:'2024', plate:'B 1238', category:'EV', status:'Tersedia', price:'Rp 550.000', fuel:'Listrik (EV)', transmission:'Matic', passengers:'7', chassis:'LGXCE4CB8N6023456', renter:'-', rentalStart:'-', rentalEnd:'-', rentalPct:0, rentalLeft:'-', iconCls:'text-teal-400', bgCls:'bg-teal-50 dark:bg-teal-900/30' },
+      { id: 1, name: 'Toyota Avanza', year: '2024', plate: 'B 1242 DFR', category: 'MPV', status: 'Tersedia', price: 'Rp 350.000', fuel: 'Bensin - Pertalite', transmission: 'Manual', passengers: '7', chassis: 'MHFAB8GM4N4001234', renter: 'Windah Basudara', rentalStart: '18 Mei 2025', rentalEnd: '22 Mei 2025', rentalPct: 60, rentalLeft: '2 Hari Lagi', iconCls: 'text-blue-400', bgCls: 'bg-blue-50 dark:bg-blue-900/30' },
+      { id: 2, name: 'Toyota Kijang Innova', year: '2023', plate: 'B 1562 DYF', category: 'MPV', status: 'Tersewa', price: 'Rp 550.000', fuel: 'Bensin - Pertamax', transmission: 'Matic', passengers: '8', chassis: 'MHFAG8GM4N4005678', renter: 'Budi Santoso', rentalStart: '15 Mei 2025', rentalEnd: '25 Mei 2025', rentalPct: 50, rentalLeft: '5 Hari Lagi', iconCls: 'text-indigo-400', bgCls: 'bg-indigo-50 dark:bg-indigo-900/30' },
+      { id: 3, name: 'Mercedes Benz E300', year: '2023', plate: 'B 84 IK', category: 'Sedan', status: 'Perbaikan', price: 'Rp 2.000.000', fuel: 'Bensin Turbo', transmission: 'Matic', passengers: '5', chassis: 'WDD2130561A012345', renter: '-', rentalStart: '-', rentalEnd: '-', rentalPct: 0, rentalLeft: '-', iconCls: 'text-slate-400', bgCls: 'bg-slate-100 dark:bg-slate-700/50' },
+      { id: 4, name: 'BYD M6', year: '2024', plate: 'B 1238', category: 'EV', status: 'Tersedia', price: 'Rp 550.000', fuel: 'Listrik (EV)', transmission: 'Matic', passengers: '7', chassis: 'LGXCE4CB8N6023456', renter: '-', rentalStart: '-', rentalEnd: '-', rentalPct: 0, rentalLeft: '-', iconCls: 'text-teal-400', bgCls: 'bg-teal-50 dark:bg-teal-900/30' },
     ],
     get filteredCars() {
       if (this.carFilter === 'All') return this.cars;
@@ -202,7 +202,7 @@ function appData() {
         plate: car.plate,
         chassis: car.chassis,
         category: car.category,
-        price: car.price.replace(/[^\d]/g,''),
+        price: car.price.replace(/[^\d]/g, ''),
         fuel: car.fuel,
         engine: car.engine,
         passengers: parseInt(car.passengers),
@@ -213,7 +213,7 @@ function appData() {
     openAddCarModal() {
       this.editingCarId = null;
       this.editModalTitle = 'Tambah Kendaraan Baru';
-      this.editForm = { name:'', plate:'', chassis:'', category:'', price:'', fuel:'', engine:'', passengers:'', transmission:'' };
+      this.editForm = { name: '', plate: '', chassis: '', category: '', price: '', fuel: '', engine: '', passengers: '', transmission: '' };
       this.showEditModal = true;
     },
     saveCar() {
@@ -309,12 +309,12 @@ function appData() {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = 'actions/order_action.php';
-        
+
         const bookingIdInput = document.createElement('input');
         bookingIdInput.type = 'hidden';
         bookingIdInput.name = 'booking_id';
         bookingIdInput.value = id;
-        
+
         const actionInput = document.createElement('input');
         actionInput.type = 'hidden';
         actionInput.name = 'action';
@@ -324,7 +324,7 @@ function appData() {
         skipInput.type = 'hidden';
         skipInput.name = 'skip_damage';
         skipInput.value = '1';
-        
+
         form.appendChild(bookingIdInput);
         form.appendChild(actionInput);
         form.appendChild(skipInput);

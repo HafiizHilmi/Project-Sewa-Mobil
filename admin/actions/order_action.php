@@ -42,6 +42,8 @@ function sendNotifAlert($phone, $email, $subject, $message) {
       CURLOPT_HTTPHEADER => array(
         "Authorization: $token"
       ),
+      CURLOPT_SSL_VERIFYPEER => false,
+      CURLOPT_SSL_VERIFYHOST => false,
     ));
     @curl_exec($curl);
     @curl_close($curl);
@@ -129,11 +131,11 @@ if ($booking_id && in_array($action, ['accept', 'reject', 'complete'])) {
 
             // Kirim notifikasi Telegram untuk pesanan dibatalkan oleh Admin
             require_once __DIR__ . '/../../include/api_keys.php';
-            $msgTelegram = "❌ *Pesanan Dibatalkan Admin!*\n\n"
-                         . "*Order ID:* `#{$booking_id}`\n"
-                         . "*Pelanggan:* {$booking['full_name']}\n"
-                         . "*Mobil:* {$carName}\n"
-                         . "*Status:* CANCELLED";
+            $msgTelegram = "❌ <b>Pesanan Dibatalkan Admin!</b>\n\n"
+                         . "<b>Order ID:</b> <code>#{$booking_id}</code>\n"
+                         . "<b>Pelanggan:</b> " . htmlspecialchars($booking['full_name'], ENT_QUOTES, 'UTF-8') . "\n"
+                         . "<b>Mobil:</b> " . htmlspecialchars($carName, ENT_QUOTES, 'UTF-8') . "\n"
+                         . "<b>Status:</b> CANCELLED";
             sendTelegramNotification($msgTelegram);
 
         } elseif ($action === 'complete') {

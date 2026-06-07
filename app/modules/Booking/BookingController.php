@@ -311,12 +311,12 @@ class BookingController {
         // Kirim notifikasi Telegram untuk pesanan baru masuk
         require_once __DIR__ . '/../../../include/api_keys.php';
         $totalFormatted = "Rp " . number_format($total_price, 0, ',', '.');
-        $msgTelegram = "*Pesanan Baru Masuk!*\n\n"
-                     . "*Order ID:* `#{$bookingId}`\n"
-                     . "*Pelanggan:* {$full_name}\n"
-                     . "*Mobil:* {$carName}\n"
-                     . "*Total Sewa:* {$totalFormatted}\n"
-                     . "*Status:* PENDING";
+        $msgTelegram = "<b>Pesanan Baru Masuk!</b>\n\n"
+                     . "<b>Order ID:</b> <code>#{$bookingId}</code>\n"
+                     . "<b>Pelanggan:</b> " . htmlspecialchars($full_name, ENT_QUOTES, 'UTF-8') . "\n"
+                     . "<b>Mobil:</b> " . htmlspecialchars($carName, ENT_QUOTES, 'UTF-8') . "\n"
+                     . "<b>Total Sewa:</b> {$totalFormatted}\n"
+                     . "<b>Status:</b> PENDING";
         sendTelegramNotification($msgTelegram);
 
         header('Location: index.php?module=Booking&action=pending&booking_id=' . $bookingId);
@@ -408,11 +408,11 @@ class BookingController {
 
                                 // Kirim notifikasi Telegram untuk pesanan dibatalkan otomatis
                                 require_once __DIR__ . '/../../../include/api_keys.php';
-                                $msgTelegram = "❌ *Pesanan Dibatalkan Otomatis!*\n\n"
-                                             . "*Order ID:* `#{$bookingId}`\n"
-                                             . "*Pelanggan:* {$booking['full_name']}\n"
-                                             . "*Alasan:* Transaksi Midtrans " . strtoupper($txStatus) . "\n"
-                                             . "*Status:* CANCELLED";
+                                $msgTelegram = "❌ <b>Pesanan Dibatalkan Otomatis!</b>\n\n"
+                                             . "<b>Order ID:</b> <code>#{$bookingId}</code>\n"
+                                             . "<b>Pelanggan:</b> " . htmlspecialchars($booking['full_name'], ENT_QUOTES, 'UTF-8') . "\n"
+                                             . "<b>Alasan:</b> Transaksi Midtrans " . strtoupper($txStatus) . "\n"
+                                             . "<b>Status:</b> CANCELLED";
                                 sendTelegramNotification($msgTelegram);
                             }
                         }
@@ -470,6 +470,8 @@ class BookingController {
             'Accept: application/json',
             'Authorization: Basic ' . $payload
         ]);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         
         $response = curl_exec($ch);
         $curl_error = curl_error($ch);
@@ -520,6 +522,8 @@ class BookingController {
             'Accept: application/json',
             'Authorization: Basic ' . $payload
         ]);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         
         $response = curl_exec($ch);
         curl_close($ch);
@@ -560,6 +564,8 @@ class BookingController {
           CURLOPT_HTTPHEADER => array(
             "Authorization: $token"
           ),
+          CURLOPT_SSL_VERIFYPEER => false,
+          CURLOPT_SSL_VERIFYHOST => false,
         ));
         @curl_exec($curl);
         @curl_close($curl);

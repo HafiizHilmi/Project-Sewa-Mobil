@@ -69,7 +69,7 @@ if (!function_exists('sendTelegramNotification')) {
         $postData = [
             'chat_id' => $chatId,
             'text' => $message,
-            'parse_mode' => 'Markdown'
+            'parse_mode' => 'HTML'
         ];
         
         $ch = curl_init();
@@ -78,6 +78,8 @@ if (!function_exists('sendTelegramNotification')) {
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
         curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         $response = curl_exec($ch);
         curl_close($ch);
         
