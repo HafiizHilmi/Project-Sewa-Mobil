@@ -2,7 +2,7 @@
 // Ambil data pengaturan keamanan saat ini dari database
 $secSettings = [];
 try {
-    $stmtSec = $pdo->query("SELECT setting_key, setting_value FROM business_settings WHERE setting_key IN ('fonnte_token', 'midtrans_is_production', 'midtrans_server_key', 'midtrans_client_key', 'telegram_bot_token', 'telegram_chat_id')");
+    $stmtSec = $pdo->query("SELECT setting_key, setting_value FROM business_settings WHERE setting_key IN ('fonnte_token', 'midtrans_is_production', 'midtrans_server_key', 'midtrans_client_key', 'telegram_bot_token', 'telegram_chat_id', 'carto_api_key')");
     if ($stmtSec) {
         while ($row = $stmtSec->fetch(PDO::FETCH_ASSOC)) {
             $secSettings[$row['setting_key']] = $row['setting_value'];
@@ -16,6 +16,7 @@ $currMidtransServer = $secSettings['midtrans_server_key'] ?? '';
 $currMidtransClient = $secSettings['midtrans_client_key'] ?? '';
 $currTelegramBotToken = isset($secSettings['telegram_bot_token']) && $secSettings['telegram_bot_token'] !== '' ? $secSettings['telegram_bot_token'] : (getenv('TELEGRAM_BOT_TOKEN') ?: '');
 $currTelegramChatId = isset($secSettings['telegram_chat_id']) && $secSettings['telegram_chat_id'] !== '' ? $secSettings['telegram_chat_id'] : (getenv('TELEGRAM_CHAT_ID') ?: '');
+$currCartoApiKey = isset($secSettings['carto_api_key']) && $secSettings['carto_api_key'] !== '' ? $secSettings['carto_api_key'] : (getenv('CARTO_API_KEY') ?: '');
 ?>
 <div x-show="activePage === 'settings'"
      x-data="{ showEditAdmin: false, showChangePass: false, editForm: {id:'', nama:'', email:'', role:''} }"
@@ -472,6 +473,22 @@ $currTelegramChatId = isset($secSettings['telegram_chat_id']) && $secSettings['t
             </div>
             <p class="text-[10px] text-slate-400 mt-1">Token dan Chat ID ini digunakan untuk mengirimkan notifikasi pemesanan baru atau pembatalan secara real-time ke grup/kontak Telegram admin.</p>
           </div>
+
+          <div class="border-t border-slate-100 dark:border-slate-700 pt-5">
+            <div class="flex items-center gap-2 mb-3">
+              <h3 class="text-xs font-bold text-slate-700 dark:text-slate-350 uppercase tracking-wider">Integrasi CARTO Basemaps (Peta Geofence)</h3>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">CARTO API Key</label>
+              <div class="relative flex items-center" x-data="{ show: false }">
+                <input :type="show ? 'text' : 'password'" name="carto_api_key" value="<?= htmlspecialchars($currCartoApiKey) ?>" placeholder="Masukkan CARTO API Key" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl pl-4 pr-10 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:border-blue-400 font-mono text-xs"/>
+                <button type="button" @click="show = !show" class="absolute right-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                  <i class="fa-solid" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
+                </button>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-1">API Key diperlukan oleh CARTO agar peta tidak menampilkan watermark <em>"API KEY REQUIRED"</em>. Dapatkan gratis di <a href="https://carto.com/basemaps/apikey/" target="_blank" class="text-blue-500 hover:underline">carto.com/basemaps/apikey</a>. Jika dikosongkan, sistem otomatis menggunakan OpenStreetMap gratis.</p>
+            </div>
+          </div>
         </div>
 
         <div class="mt-6 pt-5 border-t border-slate-100 dark:border-slate-700 flex justify-end">
@@ -660,13 +677,27 @@ $currTelegramChatId = isset($secSettings['telegram_chat_id']) && $secSettings['t
 
           map = L.map('geofence-map').setView([-7.2575, 112.7521], 11);
 
+          const cartoKey = <?= json_encode($currCartoApiKey) ?>;
           const isDark = document.documentElement.classList.contains('dark');
-          const tileUrl = isDark 
-              ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-              : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-              
+          let tileUrl = '';
+          let tileAttribution = '';
+
+          if (cartoKey && cartoKey.trim() !== '') {
+              const keyParam = '?key=' + encodeURIComponent(cartoKey.trim());
+              tileUrl = isDark 
+                  ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' + keyParam
+                  : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png' + keyParam;
+              tileAttribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+          } else {
+              // Fallback aman ke OpenStreetMap tanpa watermark "API KEY REQUIRED"
+              tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+              tileAttribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+          }
+
           L.tileLayer(tileUrl, {
-              attribution: '&copy; OpenStreetMap &copy; CARTO'
+              attribution: tileAttribution,
+              subdomains: 'abcd',
+              maxZoom: 20
           }).addTo(map);
 
           const geofencesData = <?= json_encode($blacklists) ?>;

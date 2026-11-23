@@ -131,6 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $midtrans_is_production = (isset($_POST['midtrans_is_production']) && $_POST['midtrans_is_production'] === '1') ? '1' : '0';
         $telegram_bot_token = trim($_POST['telegram_bot_token'] ?? '');
         $telegram_chat_id = trim($_POST['telegram_chat_id'] ?? '');
+        $carto_api_key = trim($_POST['carto_api_key'] ?? '');
 
         $settings = [
             'fonnte_token' => $fonnte_token,
@@ -138,7 +139,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             'midtrans_server_key' => $midtrans_server_key,
             'midtrans_is_production' => $midtrans_is_production,
             'telegram_bot_token' => $telegram_bot_token,
-            'telegram_chat_id' => $telegram_chat_id
+            'telegram_chat_id' => $telegram_chat_id,
+            'carto_api_key' => $carto_api_key
         ];
 
         try {

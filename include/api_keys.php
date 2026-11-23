@@ -29,7 +29,7 @@ try {
     if (function_exists('getPDO')) {
         $pdo = getPDO();
         if ($pdo) {
-            $stmt = $pdo->query("SELECT setting_key, setting_value FROM business_settings WHERE setting_key IN ('fonnte_token', 'midtrans_is_production', 'midtrans_server_key', 'midtrans_client_key', 'telegram_bot_token', 'telegram_chat_id')");
+            $stmt = $pdo->query("SELECT setting_key, setting_value FROM business_settings WHERE setting_key IN ('fonnte_token', 'midtrans_is_production', 'midtrans_server_key', 'midtrans_client_key', 'telegram_bot_token', 'telegram_chat_id', 'carto_api_key')");
             if ($stmt) {
                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                     $dbSettings[$row['setting_key']] = $row['setting_value'];
@@ -47,6 +47,7 @@ $midtransServer = isset($dbSettings['midtrans_server_key']) && $dbSettings['midt
 $midtransClient = isset($dbSettings['midtrans_client_key']) && $dbSettings['midtrans_client_key'] !== '' ? $dbSettings['midtrans_client_key'] : getenv('MIDTRANS_CLIENT_KEY');
 $telegramBotToken = isset($dbSettings['telegram_bot_token']) && $dbSettings['telegram_bot_token'] !== '' ? $dbSettings['telegram_bot_token'] : getenv('TELEGRAM_BOT_TOKEN');
 $telegramChatId = isset($dbSettings['telegram_chat_id']) && $dbSettings['telegram_chat_id'] !== '' ? $dbSettings['telegram_chat_id'] : getenv('TELEGRAM_CHAT_ID');
+$cartoApiKey = isset($dbSettings['carto_api_key']) && $dbSettings['carto_api_key'] !== '' ? $dbSettings['carto_api_key'] : getenv('CARTO_API_KEY');
 
 define('FONNTE_TOKEN', $fonnteToken ?: 'NULL');
 define('MIDTRANS_IS_PRODUCTION', $midtransIsProd);
@@ -54,6 +55,7 @@ define('MIDTRANS_SERVER_KEY', $midtransServer ?: '');
 define('MIDTRANS_CLIENT_KEY', $midtransClient ?: '');
 define('TELEGRAM_BOT_TOKEN', $telegramBotToken ?: '');
 define('TELEGRAM_CHAT_ID', $telegramChatId ?: '');
+define('CARTO_API_KEY', $cartoApiKey ?: '');
 
 if (!function_exists('sendTelegramNotification')) {
     function sendTelegramNotification($message) {

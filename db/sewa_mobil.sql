@@ -108,4 +108,5 @@ INSERT IGNORE INTO `business_settings` (`setting_key`, `setting_value`) VALUES
   ('company_name', 'SewaMobil'),
   ('phone', '08123456789'),
   ('social_media', '@sewamobilsby'),
-  ('address', 'Jl. Ketintang Baru, Surabaya, Jawa Timur');
+  ('address', 'Jl. Ketintang Baru, Surabaya, Jawa Timur'),
+  ('carto_api_key', '');
