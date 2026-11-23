@@ -10,11 +10,27 @@ if ($carId > 0) {
     require_once __DIR__ . '/../include/db_config.php';
     $pdo = getPDO();
     if ($pdo) {
-        $stmt = $pdo->prepare("SELECT chassis_number FROM cars WHERE id = :id LIMIT 1");
+        $stmt = $pdo->prepare("SELECT chassis_number, webhook_alarm, webhook_mesin FROM cars WHERE id = :id LIMIT 1");
         $stmt->execute([':id' => $carId]);
         $car = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($car && !empty($car['chassis_number'])) {
-            $rawTarget = trim($car['chassis_number']);
+        if ($car) {
+            if ($actionType === 'alarm') {
+                if (!empty($car['webhook_alarm'])) {
+                    $rawTarget = trim($car['webhook_alarm']);
+                } elseif (!empty($car['webhook_mesin'])) {
+                    $rawTarget = trim($car['webhook_mesin']);
+                } elseif (!empty($car['chassis_number'])) {
+                    $rawTarget = trim($car['chassis_number']);
+                }
+            } elseif ($actionType === 'mesin_mati') {
+                if (!empty($car['webhook_mesin'])) {
+                    $rawTarget = trim($car['webhook_mesin']);
+                } elseif (!empty($car['webhook_alarm'])) {
+                    $rawTarget = trim($car['webhook_alarm']);
+                } elseif (!empty($car['chassis_number'])) {
+                    $rawTarget = trim($car['chassis_number']);
+                }
+            }
         }
     }
 }

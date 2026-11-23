@@ -89,10 +89,12 @@ while ($row = mysqli_fetch_assoc($query)) {
 
   if (intval($row['is_type']) === 0) {
     $child = [
-      'id'      => (int)$row['id'],
-      'plate'   => $row['number_plate'],
-      'chassis' => $row['chassis_number'],
-      'status'  => ($row['available'] == 1) ? 'Tersedia' : 'Tersewa',
+      'id'            => (int)$row['id'],
+      'plate'         => $row['number_plate'],
+      'chassis'       => $row['chassis_number'],
+      'webhook_alarm' => $row['webhook_alarm'] ?? '',
+      'webhook_mesin' => $row['webhook_mesin'] ?? '',
+      'status'        => ($row['available'] == 1) ? 'Tersedia' : 'Tersewa',
       'image'   => $imagePath,
       'latitude'=> $row['latitude'] ?? null,
       'longitude'=> $row['longitude'] ?? null,
@@ -293,8 +295,14 @@ foreach ($types_data as $t) {
                       </div>
                   </template>
                 </div>
-                <div class="bg-slate-50 dark:bg-slate-700/50 border-t border-slate-100 dark:border-slate-700 px-5 py-2.5">
-                  <p class="text-xs text-slate-500">Nomor Rangka / Webhook:&nbsp;<span class="font-semibold text-slate-700 dark:text-slate-200 break-all" x-text="selectedCar.chassis || '-'"></span></p>
+                <div class="bg-slate-50 dark:bg-slate-700/50 border-t border-slate-100 dark:border-slate-700 px-5 py-2.5 space-y-1">
+                  <p class="text-xs text-slate-500">Nomor Rangka:&nbsp;<span class="font-semibold text-slate-700 dark:text-slate-200" x-text="selectedCar.chassis || '-'"></span></p>
+                  <template x-if="selectedCar.webhook_alarm || selectedCar.webhook_mesin">
+                    <div class="pt-1.5 border-t border-slate-200/60 dark:border-slate-600/60 text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
+                      <p x-show="selectedCar.webhook_alarm" class="truncate"><i class="fa-solid fa-bell text-amber-500 text-[10px] mr-1"></i>Link Alarm: <span class="font-mono text-slate-700 dark:text-slate-200" x-text="selectedCar.webhook_alarm"></span></p>
+                      <p x-show="selectedCar.webhook_mesin" class="truncate"><i class="fa-solid fa-power-off text-red-500 text-[10px] mr-1"></i>Link Matikan Mesin: <span class="font-mono text-slate-700 dark:text-slate-200" x-text="selectedCar.webhook_mesin"></span></p>
+                    </div>
+                  </template>
                 </div>
               </div>
             </template>
@@ -485,11 +493,25 @@ foreach ($types_data as $t) {
             <div x-show="!editForm.onlyUnit"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Merk</label><input type="text" name="make" x-model="editForm.make" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-blue-100"/></div>
             <div x-show="!editForm.onlyUnit"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Model</label><input type="text" name="model" x-model="editForm.model" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
             <div x-show="!editForm.onlyUnit"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Tahun</label><input type="text" name="year" x-model="editForm.year" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
-            <div x-show="editForm.is_type === 0"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Plat Nomor</label><input type="text" name="plate" x-model="editForm.plate" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
-            <div x-show="editForm.is_type === 0" class="col-span-2">
-              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">No Rangka / Device ID / Webhook URL</label>
-              <input type="text" name="chassis" x-model="editForm.chassis" placeholder="Contoh: MHFAB8GM4N4001234 atau ID MacroDroid atau http://192.168.11.12:8080/nyalakan_alarm" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/>
-              <p class="text-[10.5px] text-slate-400 mt-1">Dapat diisi No. Rangka fisik, Device ID MacroDroid, atau link URL langsung (misal: <code class="text-blue-500 font-mono">http://192.168.11.12:8080/nyalakan_alarm</code>).</p>
+            <div x-show="editForm.is_type === 0"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Plat Nomor</label><input type="text" name="plate" x-model="editForm.plate" placeholder="Contoh: B 1234 ABC" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
+            <div x-show="editForm.is_type === 0"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">No Rangka</label><input type="text" name="chassis" x-model="editForm.chassis" placeholder="Contoh: MHFAB8GM4N4001234" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
+            
+            <div x-show="editForm.is_type === 0" class="col-span-2 bg-slate-50 dark:bg-slate-700/40 p-3 rounded-xl border border-slate-100 dark:border-slate-700 space-y-2.5">
+              <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200">
+                <i class="fa-solid fa-satellite-dish text-blue-500 text-[11px]"></i>
+                <span>Remote Kontrol / Webhook URL</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">Link / Webhook Alarm</label>
+                  <input type="text" name="webhook_alarm" x-model="editForm.webhook_alarm" placeholder="http://192.168.11.12:8080/nyalakan_alarm" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white font-mono text-[11px]"/>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">Link / Webhook Matikan Mesin</label>
+                  <input type="text" name="webhook_mesin" x-model="editForm.webhook_mesin" placeholder="http://192.168.11.12:8080/matikan_mesin" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white font-mono text-[11px]"/>
+                </div>
+              </div>
+              <p class="text-[10px] text-slate-400">Bisa diisi link webhook langsung (HTTP server / ESP32) atau kode Device ID MacroDroid.</p>
             </div>
             <div x-show="!editForm.onlyUnit"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Kategori</label><select name="category" x-model="editForm.category" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"><option value="MPV">MPV</option><option value="SUV">SUV</option><option value="Sedan">Sedan</option><option value="EV">EV</option></select></div>
             <div x-show="!editForm.onlyUnit"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Harga Sewa / Hari</label><input type="number" name="price" x-model="editForm.price" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
@@ -536,7 +558,7 @@ document.addEventListener('alpine:init', () => {
         
         cars: <?php echo json_encode($cars_data); ?>,
         
-        editForm: { id: '', is_type: 0, type_key: '', make: '', model: '', year: '', plate: '', chassis: '', category: 'MPV', price: '', fuel: '', engine: '', passengers: '', stock: 1, transmission: 'Manual', onlyUnit: false },
+        editForm: { id: '', is_type: 0, type_key: '', make: '', model: '', year: '', plate: '', chassis: '', webhook_alarm: '', webhook_mesin: '', category: 'MPV', price: '', fuel: '', engine: '', passengers: '', stock: 1, transmission: 'Manual', onlyUnit: false },
 
         init() {
             if (sessionStorage.getItem('carActionSuccess')) {
@@ -583,6 +605,8 @@ document.addEventListener('alpine:init', () => {
               year: car.year || '',
               plate: '',
               chassis: '',
+              webhook_alarm: '',
+              webhook_mesin: '',
               category: car.category || 'MPV',
               price: car.price_raw || '',
               fuel: car.fuel || '',
@@ -595,11 +619,11 @@ document.addEventListener('alpine:init', () => {
             this.imagePreview = car.image || null;
             this.editForm.onlyUnit = false;
           } else if (car) {
-            this.editForm = { id: car.id, is_type: 0, type_key: car.type_key || '', make: car.make || '', model: car.model || '', year: car.year || '', plate: car.plate || '', chassis: car.chassis || '', category: car.category || 'MPV', price: car.price_raw || '', fuel: car.fuel || '', engine: car.engine || '', passengers: car.passengers || '', stock: car.stock || 1, transmission: car.transmission || 'Manual', onlyUnit: true };
+            this.editForm = { id: car.id, is_type: 0, type_key: car.type_key || '', make: car.make || '', model: car.model || '', year: car.year || '', plate: car.plate || '', chassis: car.chassis || '', webhook_alarm: car.webhook_alarm || '', webhook_mesin: car.webhook_mesin || '', category: car.category || 'MPV', price: car.price_raw || '', fuel: car.fuel || '', engine: car.engine || '', passengers: car.passengers || '', stock: car.stock || 1, transmission: car.transmission || 'Manual', onlyUnit: true };
             this.editModalTitle = 'Edit Unit Kendaraan';
             this.imagePreview = car.image || null;
           } else {
-            this.editForm = { id: '', is_type: 1, type_key: '', make: '', model: '', year: '', plate: '', chassis: '', category: 'MPV', price: '', fuel: '', engine: '', passengers: '', stock: 0, transmission: 'Manual', onlyUnit: false };
+            this.editForm = { id: '', is_type: 1, type_key: '', make: '', model: '', year: '', plate: '', chassis: '', webhook_alarm: '', webhook_mesin: '', category: 'MPV', price: '', fuel: '', engine: '', passengers: '', stock: 0, transmission: 'Manual', onlyUnit: false };
             this.editModalTitle = 'Tambah Tipe Mobil Baru';
             this.imagePreview = null; 
           }
@@ -607,7 +631,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         openAddUnit(type) {
-          this.editForm = { id: '', is_type: 0, type_key: type.type_key || '', make: type.make || '', model: type.model || '', year: type.year || '', plate: '', chassis: '', category: type.category || 'MPV', price: type.price_raw || '', fuel: type.fuel || '', engine: type.engine || '', passengers: type.passengers || '', stock: 1, transmission: type.transmission || 'Manual', onlyUnit: true };
+          this.editForm = { id: '', is_type: 0, type_key: type.type_key || '', make: type.make || '', model: type.model || '', year: type.year || '', plate: '', chassis: '', webhook_alarm: '', webhook_mesin: '', category: type.category || 'MPV', price: type.price_raw || '', fuel: type.fuel || '', engine: type.engine || '', passengers: type.passengers || '', stock: 1, transmission: type.transmission || 'Manual', onlyUnit: true };
           this.editModalTitle = 'Tambah Unit untuk ' + (type.name || 'Tipe Mobil');
           this.imagePreview = null;
           this.showEditModal = true;
@@ -616,6 +640,8 @@ document.addEventListener('alpine:init', () => {
         viewChild(child, parent) {
           this.selectedCar = {
             ...child,
+            webhook_alarm: child.webhook_alarm || '',
+            webhook_mesin: child.webhook_mesin || '',
             is_type: 0,
             name: `${parent?.make || child.make || ''} ${parent?.model || child.model || ''}`.trim(),
             make: parent?.make || child.make || '',

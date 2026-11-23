@@ -39,6 +39,8 @@ CREATE TABLE
     `type_key` VARCHAR(255) NULL,
     `number_plate` VARCHAR(50) NULL,
     `chassis_number` VARCHAR(255) NULL,
+    `webhook_alarm` VARCHAR(255) NULL,
+    `webhook_mesin` VARCHAR(255) NULL,
     `engine_capacity` VARCHAR(50) NULL,
     `transmission` VARCHAR(50) DEFAULT 'Manual',
     PRIMARY KEY (`id`)

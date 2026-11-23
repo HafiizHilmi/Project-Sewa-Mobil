@@ -51,6 +51,8 @@ try {
             'type_key'        => "ALTER TABLE cars ADD COLUMN type_key VARCHAR(255) NULL",
             'number_plate'    => "ALTER TABLE cars ADD COLUMN number_plate VARCHAR(50) NULL",
             'chassis_number'  => "ALTER TABLE cars ADD COLUMN chassis_number VARCHAR(255) NULL",
+            'webhook_alarm'   => "ALTER TABLE cars ADD COLUMN webhook_alarm VARCHAR(255) NULL",
+            'webhook_mesin'   => "ALTER TABLE cars ADD COLUMN webhook_mesin VARCHAR(255) NULL",
             'engine_capacity' => "ALTER TABLE cars ADD COLUMN engine_capacity VARCHAR(50) NULL",
             'transmission'    => "ALTER TABLE cars ADD COLUMN transmission VARCHAR(50) DEFAULT 'Manual'",
         ];

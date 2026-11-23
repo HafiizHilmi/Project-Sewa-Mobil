@@ -32,6 +32,16 @@ if ($checkChassis && mysqli_num_rows($checkChassis) > 0) {
     }
 }
 
+$checkWebhookAlarm = mysqli_query($conn, "SHOW COLUMNS FROM cars LIKE 'webhook_alarm'");
+if (mysqli_num_rows($checkWebhookAlarm) === 0) {
+    mysqli_query($conn, "ALTER TABLE cars ADD COLUMN webhook_alarm VARCHAR(255) NULL");
+}
+
+$checkWebhookMesin = mysqli_query($conn, "SHOW COLUMNS FROM cars LIKE 'webhook_mesin'");
+if (mysqli_num_rows($checkWebhookMesin) === 0) {
+    mysqli_query($conn, "ALTER TABLE cars ADD COLUMN webhook_mesin VARCHAR(255) NULL");
+}
+
 // ==========================================
 // Simpan atau edit data mobil
 // ==========================================
@@ -40,9 +50,11 @@ if (isset($_POST['save_car'])) {
     $make         = isset($_POST['make']) ? $_POST['make'] : '';
     $model        = isset($_POST['model']) ? $_POST['model'] : '';
     $year         = isset($_POST['year']) ? $_POST['year'] : '';
-    $plate        = isset($_POST['plate']) ? $_POST['plate'] : '';
-    $chassis      = isset($_POST['chassis']) ? $_POST['chassis'] : '';
-    $category     = isset($_POST['category']) ? $_POST['category'] : '';
+    $plate         = isset($_POST['plate']) ? $_POST['plate'] : '';
+    $chassis       = isset($_POST['chassis']) ? $_POST['chassis'] : '';
+    $webhook_alarm = isset($_POST['webhook_alarm']) ? trim($_POST['webhook_alarm']) : '';
+    $webhook_mesin = isset($_POST['webhook_mesin']) ? trim($_POST['webhook_mesin']) : '';
+    $category      = isset($_POST['category']) ? $_POST['category'] : '';
     $price        = isset($_POST['price']) ? $_POST['price'] : '';
     $fuel         = isset($_POST['fuel']) ? $_POST['fuel'] : '';
     $engine       = isset($_POST['engine']) ? $_POST['engine'] : '';
@@ -77,8 +89,8 @@ if (isset($_POST['save_car'])) {
     if (empty($id)) {
         // Mode tambah mobil baru
         // Gunakan string kosong jika tidak ada gambar yang diupload
-        $sql = "INSERT INTO cars (make, model, year, number_plate, chassis_number, category, price_per_day, fuel_type, engine_capacity, seats, stock, transmission, image, is_type, type_key) 
-            VALUES ('".mysqli_real_escape_string($conn,$make)."', '".mysqli_real_escape_string($conn,$model)."', '".mysqli_real_escape_string($conn,$year)."', '".mysqli_real_escape_string($conn,$plate)."', '".mysqli_real_escape_string($conn,$chassis)."', '".mysqli_real_escape_string($conn,$category)."', '".mysqli_real_escape_string($conn,$price)."', '".mysqli_real_escape_string($conn,$fuel)."', '".mysqli_real_escape_string($conn,$engine)."', '".mysqli_real_escape_string($conn,$passengers)."', '".mysqli_real_escape_string($conn,$stock)."', '".mysqli_real_escape_string($conn,$transmission)."', '".mysqli_real_escape_string($conn,$imageName)."', '".mysqli_real_escape_string($conn,$is_type)."', '".mysqli_real_escape_string($conn,$type_key)."')";
+        $sql = "INSERT INTO cars (make, model, year, number_plate, chassis_number, webhook_alarm, webhook_mesin, category, price_per_day, fuel_type, engine_capacity, seats, stock, transmission, image, is_type, type_key) 
+            VALUES ('".mysqli_real_escape_string($conn,$make)."', '".mysqli_real_escape_string($conn,$model)."', '".mysqli_real_escape_string($conn,$year)."', '".mysqli_real_escape_string($conn,$plate)."', '".mysqli_real_escape_string($conn,$chassis)."', '".mysqli_real_escape_string($conn,$webhook_alarm)."', '".mysqli_real_escape_string($conn,$webhook_mesin)."', '".mysqli_real_escape_string($conn,$category)."', '".mysqli_real_escape_string($conn,$price)."', '".mysqli_real_escape_string($conn,$fuel)."', '".mysqli_real_escape_string($conn,$engine)."', '".mysqli_real_escape_string($conn,$passengers)."', '".mysqli_real_escape_string($conn,$stock)."', '".mysqli_real_escape_string($conn,$transmission)."', '".mysqli_real_escape_string($conn,$imageName)."', '".mysqli_real_escape_string($conn,$is_type)."', '".mysqli_real_escape_string($conn,$type_key)."')";
     } else {
         // Mode edit data mobil
         if ($is_type && !empty($id)) {
@@ -104,12 +116,12 @@ if (isset($_POST['save_car'])) {
         } else {
             if ($imageName != "") {
                 // Edit data dan perbarui foto dengan yang baru
-                $sql = "UPDATE cars SET make='".mysqli_real_escape_string($conn,$make)."', model='".mysqli_real_escape_string($conn,$model)."', year='".mysqli_real_escape_string($conn,$year)."', number_plate='".mysqli_real_escape_string($conn,$plate)."', chassis_number='".mysqli_real_escape_string($conn,$chassis)."', category='".mysqli_real_escape_string($conn,$category)."', 
+                $sql = "UPDATE cars SET make='".mysqli_real_escape_string($conn,$make)."', model='".mysqli_real_escape_string($conn,$model)."', year='".mysqli_real_escape_string($conn,$year)."', number_plate='".mysqli_real_escape_string($conn,$plate)."', chassis_number='".mysqli_real_escape_string($conn,$chassis)."', webhook_alarm='".mysqli_real_escape_string($conn,$webhook_alarm)."', webhook_mesin='".mysqli_real_escape_string($conn,$webhook_mesin)."', category='".mysqli_real_escape_string($conn,$category)."', 
                     price_per_day='".mysqli_real_escape_string($conn,$price)."', fuel_type='".mysqli_real_escape_string($conn,$fuel)."', engine_capacity='".mysqli_real_escape_string($conn,$engine)."', seats='".mysqli_real_escape_string($conn,$passengers)."', stock='".mysqli_real_escape_string($conn,$stock)."', 
                     transmission='".mysqli_real_escape_string($conn,$transmission)."', image='".mysqli_real_escape_string($conn,$imageName)."', type_key='".mysqli_real_escape_string($conn,$type_key)."' WHERE id='".mysqli_real_escape_string($conn,$id)."'";
             } else {
                 // Edit data tanpa mengganti foto yang lama
-                $sql = "UPDATE cars SET make='".mysqli_real_escape_string($conn,$make)."', model='".mysqli_real_escape_string($conn,$model)."', year='".mysqli_real_escape_string($conn,$year)."', number_plate='".mysqli_real_escape_string($conn,$plate)."', chassis_number='".mysqli_real_escape_string($conn,$chassis)."', category='".mysqli_real_escape_string($conn,$category)."', 
+                $sql = "UPDATE cars SET make='".mysqli_real_escape_string($conn,$make)."', model='".mysqli_real_escape_string($conn,$model)."', year='".mysqli_real_escape_string($conn,$year)."', number_plate='".mysqli_real_escape_string($conn,$plate)."', chassis_number='".mysqli_real_escape_string($conn,$chassis)."', webhook_alarm='".mysqli_real_escape_string($conn,$webhook_alarm)."', webhook_mesin='".mysqli_real_escape_string($conn,$webhook_mesin)."', category='".mysqli_real_escape_string($conn,$category)."', 
                     price_per_day='".mysqli_real_escape_string($conn,$price)."', fuel_type='".mysqli_real_escape_string($conn,$fuel)."', engine_capacity='".mysqli_real_escape_string($conn,$engine)."', seats='".mysqli_real_escape_string($conn,$passengers)."', stock='".mysqli_real_escape_string($conn,$stock)."', 
                     transmission='".mysqli_real_escape_string($conn,$transmission)."', type_key='".mysqli_real_escape_string($conn,$type_key)."' WHERE id='".mysqli_real_escape_string($conn,$id)."'";
             }
