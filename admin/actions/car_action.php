@@ -24,6 +24,14 @@ if (mysqli_num_rows($checkTypeKey) === 0) {
     mysqli_query($conn, "UPDATE cars SET type_key = CONCAT(make,'|',model,'|',year,'|',fuel_type,'|',engine_capacity,'|',seats,'|',transmission,'|',category,'|',price_per_day)");
 }
 
+$checkChassis = mysqli_query($conn, "SHOW COLUMNS FROM cars LIKE 'chassis_number'");
+if ($checkChassis && mysqli_num_rows($checkChassis) > 0) {
+    $colChassis = mysqli_fetch_assoc($checkChassis);
+    if (isset($colChassis['Type']) && strpos(strtolower($colChassis['Type']), 'varchar(100)') !== false) {
+        mysqli_query($conn, "ALTER TABLE cars MODIFY COLUMN chassis_number VARCHAR(255) NULL");
+    }
+}
+
 // ==========================================
 // Simpan atau edit data mobil
 // ==========================================

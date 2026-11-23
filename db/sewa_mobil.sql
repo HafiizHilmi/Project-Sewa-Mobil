@@ -38,7 +38,7 @@ CREATE TABLE
     `is_type` TINYINT(1) NOT NULL DEFAULT 0,
     `type_key` VARCHAR(255) NULL,
     `number_plate` VARCHAR(50) NULL,
-    `chassis_number` VARCHAR(100) NULL,
+    `chassis_number` VARCHAR(255) NULL,
     `engine_capacity` VARCHAR(50) NULL,
     `transmission` VARCHAR(50) DEFAULT 'Manual',
     PRIMARY KEY (`id`)

@@ -294,7 +294,7 @@ foreach ($types_data as $t) {
                   </template>
                 </div>
                 <div class="bg-slate-50 dark:bg-slate-700/50 border-t border-slate-100 dark:border-slate-700 px-5 py-2.5">
-                  <p class="text-xs text-slate-500">Nomor Rangka:&nbsp;<span class="font-semibold text-slate-700 dark:text-slate-200" x-text="selectedCar.chassis"></span></p>
+                  <p class="text-xs text-slate-500">Nomor Rangka / Webhook:&nbsp;<span class="font-semibold text-slate-700 dark:text-slate-200 break-all" x-text="selectedCar.chassis || '-'"></span></p>
                 </div>
               </div>
             </template>
@@ -344,8 +344,8 @@ foreach ($types_data as $t) {
                             <span class="text-xs font-extrabold text-slate-800 dark:text-slate-100 bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-md font-mono tracking-wider uppercase border border-slate-200/50 dark:border-slate-600 shadow-3xs" x-text="c.plate"></span>
                           </div>
                           
-                          <p class="text-[10px] text-slate-400 font-medium" x-show="c.chassis">
-                            No. Rangka: <span class="font-mono text-slate-600 dark:text-slate-300 font-semibold" x-text="c.chassis.substring(0, 10) + '...'"></span>
+                          <p class="text-[10px] text-slate-400 font-medium truncate" x-show="c.chassis" :title="c.chassis">
+                            No. Rangka: <span class="font-mono text-slate-600 dark:text-slate-300 font-semibold" x-text="c.chassis.length > 20 ? c.chassis.substring(0, 20) + '...' : c.chassis"></span>
                           </p>
 
                           <template x-if="c.status === 'Tersewa' && c.renter">
@@ -486,7 +486,11 @@ foreach ($types_data as $t) {
             <div x-show="!editForm.onlyUnit"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Model</label><input type="text" name="model" x-model="editForm.model" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
             <div x-show="!editForm.onlyUnit"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Tahun</label><input type="text" name="year" x-model="editForm.year" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
             <div x-show="editForm.is_type === 0"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Plat Nomor</label><input type="text" name="plate" x-model="editForm.plate" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
-            <div x-show="editForm.is_type === 0"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">No Rangka</label><input type="text" name="chassis" x-model="editForm.chassis" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
+            <div x-show="editForm.is_type === 0" class="col-span-2">
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">No Rangka / Device ID / Webhook URL</label>
+              <input type="text" name="chassis" x-model="editForm.chassis" placeholder="Contoh: MHFAB8GM4N4001234 atau ID MacroDroid atau http://192.168.11.12:8080/nyalakan_alarm" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/>
+              <p class="text-[10.5px] text-slate-400 mt-1">Dapat diisi No. Rangka fisik, Device ID MacroDroid, atau link URL langsung (misal: <code class="text-blue-500 font-mono">http://192.168.11.12:8080/nyalakan_alarm</code>).</p>
+            </div>
             <div x-show="!editForm.onlyUnit"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Kategori</label><select name="category" x-model="editForm.category" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"><option value="MPV">MPV</option><option value="SUV">SUV</option><option value="Sedan">Sedan</option><option value="EV">EV</option></select></div>
             <div x-show="!editForm.onlyUnit"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Harga Sewa / Hari</label><input type="number" name="price" x-model="editForm.price" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>
             <div x-show="!editForm.onlyUnit"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Jenis BBM</label><input type="text" name="fuel" x-model="editForm.fuel" class="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-700 bg-white dark:bg-slate-700 dark:text-white"/></div>

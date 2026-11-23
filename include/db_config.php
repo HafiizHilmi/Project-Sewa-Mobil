@@ -50,7 +50,7 @@ try {
             'is_type'         => "ALTER TABLE cars ADD COLUMN is_type TINYINT(1) NOT NULL DEFAULT 0",
             'type_key'        => "ALTER TABLE cars ADD COLUMN type_key VARCHAR(255) NULL",
             'number_plate'    => "ALTER TABLE cars ADD COLUMN number_plate VARCHAR(50) NULL",
-            'chassis_number'  => "ALTER TABLE cars ADD COLUMN chassis_number VARCHAR(100) NULL",
+            'chassis_number'  => "ALTER TABLE cars ADD COLUMN chassis_number VARCHAR(255) NULL",
             'engine_capacity' => "ALTER TABLE cars ADD COLUMN engine_capacity VARCHAR(50) NULL",
             'transmission'    => "ALTER TABLE cars ADD COLUMN transmission VARCHAR(50) DEFAULT 'Manual'",
         ];
@@ -59,6 +59,11 @@ try {
             if ($stmt && $stmt->rowCount() === 0) {
                 $pdo->exec($sql);
             }
+        }
+        try {
+            $pdo->exec("ALTER TABLE cars MODIFY COLUMN chassis_number VARCHAR(255) NULL");
+        } catch (Exception $e) {
+            // Abaikan jika tidak didukung
         }
         // Seed armada dari db/cars.json bila tabel cars masih kosong (instalasi baru)
         require_once __DIR__ . '/../db/seed_cars.php';
