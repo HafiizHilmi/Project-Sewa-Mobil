@@ -1,8 +1,10 @@
 <?php
 
-class HomepageController {
+class HomepageController
+{
 
-    public function index() {
+    public function index()
+    {
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
@@ -24,9 +26,18 @@ class HomepageController {
 
         $search = trim($_GET['search'] ?? '');
 
-        // Urutkan berdasarkan harga termurah (MIN(price_per_day))
+        // Satu baris = satu tipe mobil (stok unit digabung per type_key).
+        $baseSelect = "SELECT MAX(c.id) AS id, c.type_key, c.make, c.model, c.year, c.category,
+                c.fuel_type, c.engine_capacity, c.seats, c.price_per_day,
+                COALESCE((SELECT p.image FROM cars p WHERE p.type_key = c.type_key AND p.is_type = 1 AND p.image != '' LIMIT 1), MAX(c.image)) AS image,
+                SUM(c.stock) AS stock,
+                GROUP_CONCAT(DISTINCT c.transmission SEPARATOR ', ') AS transmission
+            FROM cars c
+            WHERE c.is_type = 0 AND c.stock > 0";
+
         if ($search !== '') {
-            $stmt = $pdo->prepare("SELECT MAX(c.id) AS id, c.type_key, c.make, c.model, c.year, c.category, c.fuel_type, c.engine_capacity, c.seats, c.price_per_day, COALESCE((SELECT p.image FROM cars p WHERE p.type_key = c.type_key AND p.is_type = 1 AND p.image != '' LIMIT 1), MAX(c.image)) AS image, SUM(c.stock) AS stock, GROUP_CONCAT(DISTINCT c.transmission SEPARATOR ', ') AS transmission FROM cars c WHERE c.is_type = 0 AND c.stock > 0 AND (c.make LIKE :search1 OR c.model LIKE :search2 OR c.category LIKE :search3 OR c.fuel_type LIKE :search4 OR c.year LIKE :search5) GROUP BY c.type_key ORDER BY MIN(c.price_per_day) ASC");
+            $stmt = $pdo->prepare($baseSelect . " AND (c.make LIKE :search1 OR c.model LIKE :search2 OR c.category LIKE :search3 OR c.fuel_type LIKE :search4 OR c.year LIKE :search5)
+                GROUP BY c.type_key ORDER BY MIN(c.price_per_day) ASC");
             $stmt->execute([
                 'search1' => "%$search%",
                 'search2' => "%$search%",
@@ -35,12 +46,18 @@ class HomepageController {
                 'search5' => "%$search%",
             ]);
         } else {
-            $stmt = $pdo->query("SELECT MAX(c.id) AS id, c.type_key, c.make, c.model, c.year, c.category, c.fuel_type, c.engine_capacity, c.seats, c.price_per_day, COALESCE((SELECT p.image FROM cars p WHERE p.type_key = c.type_key AND p.is_type = 1 AND p.image != '' LIMIT 1), MAX(c.image)) AS image, SUM(c.stock) AS stock, GROUP_CONCAT(DISTINCT c.transmission SEPARATOR ', ') AS transmission FROM cars c WHERE c.is_type = 0 AND c.stock > 0 GROUP BY c.type_key ORDER BY MIN(c.price_per_day) ASC");
+            $stmt = $pdo->query($baseSelect . " GROUP BY c.type_key ORDER BY MIN(c.price_per_day) ASC");
         }
 
         $cars = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        // Data pendukung filter
+        $categories = $pdo->query("SELECT category, COUNT(DISTINCT type_key) AS total FROM cars WHERE is_type = 0 AND stock > 0 GROUP BY category ORDER BY total DESC")->fetchAll(PDO::FETCH_ASSOC);
+        $maxPrice = (int) $pdo->query("SELECT COALESCE(MAX(price_per_day), 1000000) FROM cars WHERE is_type = 0 AND stock > 0")->fetchColumn();
+        $minPrice = (int) $pdo->query("SELECT COALESCE(MIN(price_per_day), 100000) FROM cars WHERE is_type = 0 AND stock > 0")->fetchColumn();
+        $totalTypes = (int) $pdo->query("SELECT COUNT(DISTINCT type_key) FROM cars WHERE is_type = 0 AND stock > 0")->fetchColumn();
+
         require_once __DIR__ . '/views/HomePage.php';
     }
-    
+
 }

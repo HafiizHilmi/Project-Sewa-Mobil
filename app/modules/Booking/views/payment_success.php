@@ -88,12 +88,13 @@ $taxAmount = round($totalPrice - $baseSubtotal);
         })();
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/app.css">
     <script>
         tailwind.config = {
             darkMode: 'class'
         }
     </script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { 
@@ -143,7 +144,7 @@ $taxAmount = round($totalPrice - $baseSubtotal);
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center py-10 px-4 relative transition-colors duration-200">
+<body class="legacy-page flex flex-col items-center justify-center py-10 px-4 relative transition-colors duration-200">
 
     <div class="z-10 flex flex-col items-center text-center mb-6">
         <div class="w-16 h-16 bg-blue-700 text-white rounded-full flex items-center justify-center text-3xl shadow-lg shadow-blue-700/40 mb-4">

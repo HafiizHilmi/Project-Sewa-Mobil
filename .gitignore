@@ -41,4 +41,7 @@ README_DB.md
 app/modules/TrackingDummy/TrackingController.php
 data_sensitive/
 
-public/assets/images
+public/assets/images/*
+# Foto armada ikut di-commit (konten katalog)
+!public/assets/images/cars/
+!public/assets/images/cars/**

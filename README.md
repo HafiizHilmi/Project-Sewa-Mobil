@@ -11,8 +11,9 @@ Berikut adalah teknologi dan layanan pihak ketiga yang digunakan dalam proyek in
 *   **Core Backend:** PHP 8.x (Native dengan MVC kustom)
 *   **Database:** MySQL / MariaDB (Interaksi via PDO & MySQLi)
 *   **Frontend:** HTML5, CSS3, JavaScript (ES6)
-*   **UI Framework & Styling:** Bootstrap 5.3.2
-*   **Typography:** Google Fonts (Plus Jakarta Sans)
+*   **Design System:** `public/assets/css/app.css` — token warna/tipografi/komponen (tanpa framework, tanpa gradien dekoratif, mendukung mode terang & gelap)
+*   **Ikon & Font:** Bootstrap Icons 1.11, Google Fonts (Plus Jakarta Sans)
+*   **Data Armada:** `db/cars.json` (sumber tunggal 50 mobil) + seeder `db/seed_cars.php`
 *   **Integrasi Midtrans:** Payment Gateway Sandbox untuk pemrosesan pembayaran real-time.
 *   **Integrasi Fonnte:** Layanan API WhatsApp untuk notifikasi pemesanan & verifikasi otomatis ke pelanggan.
 *   **Gambar Dinamis:** Unsplash Source API.
@@ -23,8 +24,8 @@ Berikut adalah teknologi dan layanan pihak ketiga yang digunakan dalam proyek in
 
 ### Portal Pelanggan (Customer Portal)
 1.  **Landing Page:**
-    *   Tampilan hero section.
-    *   Menampilkan katalog mobil terbaru dengan detail harga sewa per hari.
+    *   Hero minimalis dengan statistik armada langsung dari database.
+    *   Enam mobil paling sering disewa + alur sewa tiga langkah.
 2.  **Sistem Autentikasi:**
     *   Registrasi dan Login pelanggan.
     *   Proteksi menggunakan token **CSRF (Cross-Site Request Forgery)**.
@@ -33,8 +34,9 @@ Berikut adalah teknologi dan layanan pihak ketiga yang digunakan dalam proyek in
     *   Pengunggahan berkas KTP dan SIM secara langsung melalui halaman profil pelanggan.
     *   Status verifikasi *real-time*: `unverified`, `pending`, `verified`, atau `rejected`.
 4.  **Halaman Utama (Homepage) & Filtrasi:**
+    *   Katalog **50 tipe mobil / 84 unit** dengan foto asli per model.
     *   Pencarian mobil.
-    *   Filtering berdasarkan kategori (MPV, SUV, Sedan, EV), jenis bahan bakar (Bensin, Diesel, Listrik), dan kapasitas tempat duduk (seats).
+    *   Filter kategori (MPV, SUV, Sedan, Hatchback, EV, Luxury), transmisi, batas harga, dan urutan harga; jumlah hasil dihitung langsung di klien.
 5.  **Pemesanan & Sewa Mobil (Booking System):**
     *   Formulir input tanggal mulai dan berakhir, lokasi penjemputan/pengembalian, alamat, serta opsi tambahan sopir (*add-on driver*).
     *   Kalkulasi otomatis total harga sewa secara *real-time* berdasarkan durasi sewa dan tarif harian mobil.
@@ -93,9 +95,41 @@ Proyek ini dilengkapi dengan fitur **Auto-Setup Database** pada berkas `include/
     *   Buka berkas [db_config.php](file:///c:/xampp/htdocs/Project-Sewa-Mobil/include/db_config.php) dan sesuaikan username & password database Anda jika berbeda dari bawaan (`root` / `""`).
     *   Secara otomatis, ketika Anda memuat halaman web untuk pertama kali, sistem akan mendeteksi dan mengonfigurasi skema database dari `db/sewa_mobil.sql`.
 
-5.  **Akses Aplikasi:**
+5.  **Data Armada (50 mobil + foto):**
+    *   Data armada ada di `db/cars.json` (merek, model, tahun, kategori, harga, nama file foto).
+    *   Saat `include/db_config.php` mendeteksi tabel `cars` kosong, seeder otomatis mengisi 50 mobil dari JSON tersebut.
+    *   Untuk menyegarkan data secara manual (upsert, id lama tidak berubah):
+        ```bash
+        php db/seed_cars.php
+        ```
+    *   Foto armada tersimpan di `public/assets/images/cars/`. Bila perlu mengambil ulang dari Wikimedia Commons:
+        ```bash
+        python db/fetch_car_images.py --force
+        ```
+        Sumber & atribusi tiap foto tercatat di `public/assets/images/cars/CREDITS.md`.
+
+6.  **Akses Aplikasi:**
     *   **Customer Portal:** `http://localhost/Project-Sewa-Mobil/public/`
     *   **Admin Portal:** `http://localhost/Project-Sewa-Mobil/admin/`
+    *   Catatan: konfigurasi Apache bawaan proyek ini berjalan di port **82** (`Listen 82`), sehingga URL menjadi `http://localhost:82/Project-Sewa-Mobil/public/`.
+
+---
+
+## Struktur Frontend Pelanggan
+
+| Berkas | Fungsi |
+| :--- | :--- |
+| `public/assets/css/app.css` | Design system: token warna, tipografi, tombol, kartu, form, kalender, dark mode |
+| `include/site.php` | Konteks bersama: setting bisnis, format rupiah, resolver path gambar |
+| `include/nav.php` | Navigasi sticky + drawer mobile + tombol tema |
+| `include/car_card.php` | Partial kartu mobil (dipakai landing & katalog) |
+| `include/footer.php` | Footer bersama |
+| `app/modules/Profile/views/index.php` | Area akun pelanggan (ringkasan, riwayat, dokumen, data pribadi, password, tampilan, bantuan) memakai komponen `.dash` / `.stat-card` / `.list-card` / `.booking-item` |
+| `app/modules/*/views/*.php` | Halaman landing, katalog, auth, booking |
+
+Halaman akun memakai pola **rail menu + konten**: rail 258px (sticky di desktop, menu chip berbalut baris di mobile), heading per panel, kartu statistik bernomor tabular, daftar pesanan bergaris rambut, dan status sebagai pill (`status--pending/active/done/cancel`). Seluruh form lama (unggah KTP/SIM, gerbang konfirmasi, ubah password, pemilih tema) tetap memakai endpoint yang sama; hanya lapisan tampilan dan helper JS kecil (tab, pratinjau file, toggle rincian) yang ditulis ulang.
+
+Aturan tampilan yang dipakai konsisten di semua halaman pelanggan: satu aksen warna (biru), radius 16–30px, garis tipis 1px sebagai pemisah (bukan bayangan tebal), angka harga memakai *tabular numerals*, dan mode gelap mengikuti preferensi sistem atau pilihan tersimpan di `localStorage`.
 
 ---
 

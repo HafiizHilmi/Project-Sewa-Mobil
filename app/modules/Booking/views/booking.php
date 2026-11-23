@@ -65,387 +65,221 @@ $carStock = $totalStock;
             }
         })();
     </script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class'
-        }
-    </script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="assets/css/app.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        
-        .date-cell {
-            cursor: pointer;
-            position: relative;
-            z-index: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 40px;
-            font-size: 0.875rem;
-            color: #4b5563;
-        }
-        .date-cell:hover:not(.empty-cell):not(.bg-gray-100) {
-            background-color: #f3f4f6;
-            border-radius: 9999px;
-        }
-        
-        .date-cell.selected {
-            color: white;
-            font-weight: 600;
-        }
-        .date-cell.selected::before {
-            content: '';
-            position: absolute;
-            top: 2px;
-            bottom: 2px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 36px;
-            background-color: #004aad;
-            border-radius: 50%;
-            z-index: -1;
-        }
-        
-        .date-cell.in-range {
-            color: #1e3a8a;
-        }
-        .date-cell.in-range::before {
-            content: '';
-            position: absolute;
-            top: 2px;
-            bottom: 2px;
-            left: 0;
-            right: 0;
-            background-color: #bfdbfe;
-            z-index: -2;
-        }
-        
-        .date-cell.start-date::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            bottom: 2px;
-            left: 50%;
-            right: 0;
-            background-color: #bfdbfe;
-            z-index: -3;
-        }
-        
-        .date-cell.end-date::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            bottom: 2px;
-            left: 0;
-            right: 50%;
-            background-color: #bfdbfe;
-            z-index: -3;
-        }
-
-        .input-floating-label {
-            position: relative;
-            padding: 12px 16px;
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem;
-        }
-        .input-floating-label label {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #4b5563;
-            margin-bottom: 2px;
-        }
-        .input-floating-label input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            font-size: 0.875rem;
-            color: #1f2937;
-            outline: none;
-        }
-        .input-floating-label input::placeholder {
-            color: #9ca3af;
-        }
-
-        /* Dark Mode overrides */
-        html.dark body {
-            background-color: #020617 !important;
-            color: #f1f5f9 !important;
-        }
-        html.dark .input-floating-label {
-            background-color: #1e293b !important;
-            border-color: #334155 !important;
-        }
-        html.dark .input-floating-label label {
-            color: #94a3b8 !important;
-        }
-        html.dark .input-floating-label input {
-            color: #f8fafc !important;
-        }
-        html.dark .input-floating-label input::placeholder {
-            color: #64748b !important;
-        }
-        html.dark .date-cell {
-            color: #94a3b8 !important;
-        }
-        html.dark .date-cell:hover:not(.empty-cell):not(.bg-gray-150):not(.bg-gray-100) {
-            background-color: #334155 !important;
-        }
-        html.dark .date-cell.in-range {
-            color: #60a5fa !important;
-        }
-        html.dark .date-cell.in-range::before {
-            background-color: rgba(30, 58, 138, 0.4) !important;
-        }
-        html.dark .date-cell.start-date::after,
-        html.dark .date-cell.end-date::after {
-            background-color: rgba(30, 58, 138, 0.4) !important;
-        }
-
-        /* Custom Scrollbar Styles for Autocomplete Dropdowns */
-        [id^="dropdown-"]::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        [id^="dropdown-"]::-webkit-scrollbar-track {
-            background: transparent !important;
-        }
-        [id^="dropdown-"]::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 9999px;
-        }
-        html.dark [id^="dropdown-"]::-webkit-scrollbar-thumb {
-            background-color: #475569;
-        }
-        [id^="dropdown-"]::-webkit-scrollbar-thumb:hover {
-            background-color: #94a3b8;
-        }
-        html.dark [id^="dropdown-"]::-webkit-scrollbar-thumb:hover {
-            background-color: #64748b;
-        }
-        
-        /* Firefox scrollbar support */
-        [id^="dropdown-"] {
-            scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 transparent;
-        }
-        html.dark [id^="dropdown-"] {
-            scrollbar-color: #475569 transparent;
-        }
-    </style>
+    <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.css">
 </head>
-<body class="bg-gray-50 text-gray-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
+<body>
+    <?php $navActive = 'katalog'; include __DIR__ . '/../../../../include/nav.php'; ?>
 
-    <nav class="bg-white dark:bg-slate-900 border-b dark:border-slate-800 sticky top-0 z-50 transition-colors duration-200">
-        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between relative">
-            <a href="index.php?module=Homepage&action=index" class="text-gray-800 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 font-semibold absolute left-6 flex items-center gap-2">
-                <i class="bi bi-arrow-left"></i> Kembali
-            </a>
-            <h1 class="text-lg font-bold w-full text-center dark:text-white">Reservasi Kendaraan</h1>
-                <!-- Theme toggle removed: controlled from Profile page only -->
+    <div class="container" style="padding-top:22px">
+        <a href="index.php?module=Homepage&action=index" class="tiny" style="display:inline-flex;align-items:center;gap:6px;font-weight:650;color:var(--ink-2)">
+            <i class="bi bi-arrow-left"></i> Kembali ke katalog
+        </a>
+        <div class="booking-head">
+            <h1>Reservasi kendaraan</h1>
+            <p>Isi data, pilih tanggal, lalu konfirmasi. Stok otomatis dicek per tanggal.</p>
         </div>
-    </nav>
+    </div>
 
-    <main class="max-w-7xl mx-auto px-6 py-10">
+    <main class="container" style="padding-bottom:64px">
         <?php if (isset($_SESSION['flash'])): ?>
-            <div id="flash-alert" class="mb-6 p-4 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-300 flex items-center justify-center gap-3 shadow-sm transition-all relative">
-                <i class="bi bi-exclamation-triangle-fill text-lg shrink-0"></i>
-                <p class="text-sm font-semibold text-center pr-6"><?= htmlspecialchars($_SESSION['flash']) ?></p>
-                <button type="button" onclick="document.getElementById('flash-alert').remove()" class="absolute right-4 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-700 dark:hover:text-red-400 flex items-center justify-center">
-                    <i class="bi bi-x-lg text-sm"></i>
-                </button>
+            <div class="notice notice--danger" id="flash-alert" role="alert" style="margin:18px 0;align-items:flex-start">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span style="flex:1"><?= htmlspecialchars($_SESSION['flash']) ?></span>
+                <button type="button" onclick="document.getElementById('flash-alert').remove()" aria-label="Tutup"
+                        style="background:none;border:0;color:inherit;line-height:1"><i class="bi bi-x-lg"></i></button>
             </div>
             <?php unset($_SESSION['flash']); ?>
         <?php endif; ?>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <div class="lg:col-span-2 space-y-6">
-                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-800">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-lg">
-                            <i class="bi bi-geo-alt-fill"></i>
+        <div class="booking-grid">
+
+            <div class="u-stack">
+
+                <section class="panel">
+                    <div class="panel-head">
+                        <span class="panel-step">1</span>
+                        <div>
+                            <h2>Detail lokasi</h2>
+                            <p>Ketik nama tempat, pilih dari saran agar titik lokasi tersimpan.</p>
                         </div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Detail Lokasi</h2>
                     </div>
 
-                    <!-- Real-time Geofence Warning Container -->
-                    <div id="geofence-warning-box" class="mb-6 p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-300 flex items-center justify-center gap-3 shadow-sm hidden">
-                        <i class="bi bi-exclamation-triangle-fill text-lg shrink-0"></i>
-                        <p class="text-sm font-semibold text-center" id="geofence-warning-text"></p>
+                    <div id="geofence-warning-box" class="notice notice--danger hidden" style="margin-bottom:16px">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <span id="geofence-warning-text"></span>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="input-floating-label flex items-center justify-between">
-                            <div class="w-full">
-                                <label>Lokasi Pengambilan</label>
-                                <input type="text" id="input-pickup" name="pickup_location" form="booking-form" placeholder="Contoh: Soekarno Hatta T3..." autocomplete="off">
-                            </div>
-                            <i class="bi bi-crosshair text-gray-400"></i>
-                            <div id="dropdown-pickup" class="absolute left-0 right-0 top-[calc(100%+4px)] z-[100] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl shadow-xl max-h-60 overflow-y-auto hidden"></div>
+                    <div class="form-grid form-grid--2">
+                        <div class="field" style="position:relative">
+                            <label for="input-pickup">Lokasi pengambilan</label>
+                            <input class="input" type="text" id="input-pickup" name="pickup_location" form="booking-form"
+                                   placeholder="Contoh: Bandara Juanda T1" autocomplete="off">
+                            <div id="dropdown-pickup" class="suggest hidden"></div>
                         </div>
-                        <div class="input-floating-label">
-                            <label>Lokasi Pengembalian</label>
-                            <input type="text" id="input-return" name="return_location" form="booking-form" placeholder="Sama dengan lokasi pengambilan" autocomplete="off">
-                            <div id="dropdown-return" class="absolute left-0 right-0 top-[calc(100%+4px)] z-[100] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl shadow-xl max-h-60 overflow-y-auto hidden"></div>
+                        <div class="field" style="position:relative">
+                            <label for="input-return">Lokasi pengembalian</label>
+                            <input class="input" type="text" id="input-return" name="return_location" form="booking-form"
+                                   placeholder="Kosongkan bila sama" autocomplete="off">
+                            <div id="dropdown-return" class="suggest hidden"></div>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-800">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-lg">
-                            <i class="bi bi-person-fill"></i>
-                        </div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Detail Personal</h2>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="input-floating-label">
-                            <label>Nama Lengkap</label>
-                            <input type="text" name="full_name" form="booking-form" placeholder="Masukkan nama lengkap">
-                        </div>
-                        <div class="input-floating-label">
-                            <label>Alamat Email</label>
-                            <input type="email" name="email" form="booking-form" placeholder="contoh@email.com">
-                        </div>
-                        <div class="input-floating-label">
-                            <label>Nomor HP</label>
-                            <input type="tel" name="phone" form="booking-form" placeholder="+62 812-xxxx-xxxx">
-                        </div>
-                        <div class="input-floating-label">
-                            <label>Alamat Lengkap</label>
-                            <input type="text" id="input-address" name="address" form="booking-form" placeholder="Jl. Veteran..." autocomplete="off">
-                            <div id="dropdown-address" class="absolute left-0 right-0 top-[calc(100%+4px)] z-[100] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl shadow-xl max-h-60 overflow-y-auto hidden"></div>
+                <section class="panel">
+                    <div class="panel-head">
+                        <span class="panel-step">2</span>
+                        <div>
+                            <h2>Detail personal</h2>
+                            <p>Data ini dipakai untuk kontrak sewa dan notifikasi WhatsApp.</p>
                         </div>
                     </div>
-                </div>
 
-                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-800">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-lg">
-                                <i class="bi bi-calendar-event-fill"></i>
-                            </div>
+                    <div class="form-grid form-grid--2">
+                        <div class="field">
+                            <label for="full_name">Nama lengkap</label>
+                            <input class="input" type="text" id="full_name" name="full_name" form="booking-form" placeholder="Sesuai KTP">
+                        </div>
+                        <div class="field">
+                            <label for="email">Alamat email</label>
+                            <input class="input" type="email" id="email" name="email" form="booking-form" placeholder="nama@email.com">
+                        </div>
+                        <div class="field">
+                            <label for="phone">Nomor HP</label>
+                            <input class="input" type="tel" id="phone" name="phone" form="booking-form" placeholder="0812xxxxxxx">
+                        </div>
+                        <div class="field" style="position:relative">
+                            <label for="input-address">Alamat lengkap</label>
+                            <input class="input" type="text" id="input-address" name="address" form="booking-form"
+                                   placeholder="Jalan, nomor, kota" autocomplete="off">
+                            <div id="dropdown-address" class="suggest hidden"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="calendar-head">
+                        <div class="panel-head" style="margin-bottom:0">
+                            <span class="panel-step">3</span>
                             <div>
-                                <h2 class="text-xl font-bold leading-tight text-gray-900 dark:text-white">Pilih Tanggal</h2>
-                                <p class="text-sm text-gray-500 dark:text-slate-400">Cek ketersediaan kendaraan.</p>
+                                <h2>Pilih tanggal</h2>
+                                <p>Tanggal yang dicoret berarti stok tipe ini sudah habis.</p>
                             </div>
                         </div>
-                        <div class="flex items-center justify-between bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-full px-4 py-2 min-w-[200px]">
-                            <button class="text-gray-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400" id="prev-month"><i class="bi bi-chevron-left"></i></button>
-                            <span class="font-semibold text-sm text-gray-800 dark:text-slate-200" id="current-month-year"></span>
-                            <button class="text-gray-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400" id="next-month"><i class="bi bi-chevron-right"></i></button>
+                        <div class="calendar-nav">
+                            <button type="button" class="icon-btn" id="prev-month" aria-label="Bulan sebelumnya"><i class="bi bi-chevron-left"></i></button>
+                            <span id="current-month-year" style="font-size:.86rem;font-weight:700;min-width:120px;text-align:center"></span>
+                            <button type="button" class="icon-btn" id="next-month" aria-label="Bulan berikutnya"><i class="bi bi-chevron-right"></i></button>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-7 text-center mb-2 font-medium text-gray-500 dark:text-slate-400 text-sm">
-                        <div class="pb-2">Min</div>
-                        <div class="pb-2">Sen</div>
-                        <div class="pb-2">Sel</div>
-                        <div class="pb-2">Rab</div>
-                        <div class="pb-2">Kam</div>
-                        <div class="pb-2">Jum</div>
-                        <div class="pb-2">Sab</div>
+                    <div class="calendar-dow">
+                        <span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span>
                     </div>
-                    <div class="grid grid-cols-7 text-center" id="calendar-grid"></div>
-                </div>
+                    <div class="calendar-grid" id="calendar-grid"></div>
 
-                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-800">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-lg">
-                            <i class="bi bi-nut-fill"></i>
-                        </div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Pilih Layanan Tambahan</h2>
+                    <div class="calendar-legend">
+                        <span><i class="legend-free"></i> Tersedia</span>
+                        <span><i class="legend-selected"></i> Tanggal dipilih</span>
+                        <span><i class="legend-full"></i> Stok habis</span>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="addon-card border border-gray-200 dark:border-slate-700 rounded-xl p-4 cursor-pointer hover:border-blue-300 dark:hover:border-blue-700/50 transition" data-price="100000" onclick="selectAddon(this)">
-                            <h3 class="font-bold text-sm text-gray-900 dark:text-white">Dengan Driver</h3>
-                            <p class="text-xs text-gray-500 dark:text-slate-400 mb-4">Sewa mobil menggunakan supir.</p>
-                            <p class="text-xs font-semibold text-gray-500 dark:text-slate-400">+Rp 100.000 /hari</p>
-                        </div>
-                        <div class="addon-card border-2 border-blue-600 dark:border-blue-500 bg-blue-50/30 dark:bg-blue-900/20 rounded-xl p-4 cursor-pointer transition active-addon" data-price="0" onclick="selectAddon(this)">
-                            <h3 class="font-bold text-sm text-gray-900 dark:text-white">Tanpa Supir</h3>
-                            <p class="text-xs text-gray-500 dark:text-slate-400 mb-4">Sewa mobil tanpa menggunakan supir.</p>
-                            <p class="text-xs font-semibold text-gray-500 dark:text-slate-400">+Rp 0 /hari</p>
-                        </div>
-                    </div>
-                </div>
+                </section>
 
+                <section class="panel">
+                    <div class="panel-head">
+                        <span class="panel-step">4</span>
+                        <div>
+                            <h2>Layanan tambahan</h2>
+                            <p>Supir ditambahkan per hari sewa.</p>
+                        </div>
+                    </div>
+
+                    <div class="addon-grid">
+                        <div class="addon-card" data-price="100000" onclick="selectAddon(this)" role="button" tabindex="0">
+                            <h3>Dengan driver</h3>
+                            <p>Mobil datang lengkap dengan supir.</p>
+                            <span class="addon-price">+Rp 100.000 /hari</span>
+                        </div>
+                        <div class="addon-card is-active" data-price="0" onclick="selectAddon(this)" role="button" tabindex="0">
+                            <h3>Lepas kunci</h3>
+                            <p>Mobil disewa tanpa supir.</p>
+                            <span class="addon-price">Tanpa biaya tambahan</span>
+                        </div>
+                    </div>
+                </section>
             </div>
 
-            <div class="lg:col-span-1">
-                <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden sticky top-24">
-                    <div class="h-48 bg-gray-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
-                        <?php 
-                            // Logika perbaikan path gambar mobil
-                            $rawImg = $car['image'] ?? '';
-                            $carImage = !empty($rawImg) ? (filter_var($rawImg, FILTER_VALIDATE_URL) ? $rawImg : 'assets/images/' . $rawImg) : 'https://images.unsplash.com/photo-1629897048514-3dd74143275d?q=80&w=600&auto=format&fit=crop';
-                        ?>
-                        <img src="<?= htmlspecialchars($carImage) ?>" alt="<?= htmlspecialchars($car['make'] . ' ' . $car['model']) ?>" class="w-full h-full object-cover">
-                    </div>
-                    
-                    <div class="p-6">
-                        <h3 class="font-bold text-xl mb-1 text-gray-900 dark:text-white"><?= htmlspecialchars($car['make'] . ' ' . $car['model'] . ' ' . $car['year']) ?></h3>
-                        <p class="text-sm text-gray-500 dark:text-slate-400 mb-6"><?= htmlspecialchars($car['category'] ?: 'Lainnya') ?> • <?= htmlspecialchars($car['fuel_type'] ?: '-') ?> • <?= htmlspecialchars($car['seats'] ?: '-') ?> Penumpang</p>
-                        
-                        <div class="space-y-4 mb-6">
-                            <div class="flex gap-4">
-                                <i class="bi bi-calendar3 mt-0.5 text-gray-600 dark:text-slate-400"></i>
+            <aside class="booking-aside">
+                <div class="card summary-car">
+                    <?php
+                        $rawImg = $car['image'] ?? '';
+                        $carImage = car_image_url($rawImg);
+                    ?>
+                    <img src="<?= htmlspecialchars($carImage) ?>" alt="<?= htmlspecialchars($car['make'] . ' ' . $car['model']) ?>">
+
+                    <div class="summary-body">
+                        <div class="car-eyebrow" style="margin-bottom:6px">
+                            <span><?= htmlspecialchars($car['category'] ?: 'Lainnya') ?></span>
+                            <span><?= (int) $carStock ?> unit</span>
+                        </div>
+                        <h3><?= htmlspecialchars($car['make'] . ' ' . $car['model'] . ' ' . $car['year']) ?></h3>
+                        <p class="summary-meta">
+                            <?= htmlspecialchars($car['fuel_type'] ?: '-') ?> &middot; <?= htmlspecialchars($car['seats'] ?: '-') ?> kursi
+                            &middot; <?= htmlspecialchars($car['transmission'] ?: 'Manual') ?>
+                        </p>
+
+                        <div class="summary-list">
+                            <div class="summary-item">
+                                <i class="bi bi-calendar3"></i>
                                 <div>
-                                    <p class="text-sm font-medium text-gray-800 dark:text-slate-200" id="summary-dates">Belum pilih tanggal</p>
-                                    <p class="text-xs text-gray-400 dark:text-slate-500" id="summary-days">0 Hari</p>
+                                    <b id="summary-dates">Belum pilih tanggal</b>
+                                    <span id="summary-days">0 hari</span>
                                 </div>
                             </div>
-                            <div class="flex gap-4">
-                                <i class="bi bi-geo-alt-fill mt-0.5 text-blue-600 dark:text-blue-400"></i>
-                                <div class="overflow-hidden">
-                                    <span class="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider block mb-0.5">Lokasi Pengambilan</span>
-                                    <p class="text-sm font-medium text-gray-800 dark:text-slate-200 truncate" id="summary-pickup" title="Lokasi belum ditentukan">Lokasi belum ditentukan</p>
+                            <div class="summary-item">
+                                <i class="bi bi-geo-alt"></i>
+                                <div>
+                                    <b id="summary-pickup" title="Lokasi belum ditentukan" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:230px">Lokasi belum ditentukan</b>
+                                    <span>Pengambilan</span>
                                 </div>
                             </div>
-                            <div class="flex gap-4 mt-3">
-                                <i class="bi bi-geo-alt mt-0.5 text-emerald-600 dark:text-emerald-400"></i>
-                                <div class="overflow-hidden">
-                                    <span class="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider block mb-0.5">Lokasi Pengembalian</span>
-                                    <p class="text-sm font-medium text-gray-800 dark:text-slate-200 truncate" id="summary-return" title="Sama dengan lokasi pengambilan">Sama dengan lokasi pengambilan</p>
+                            <div class="summary-item">
+                                <i class="bi bi-geo"></i>
+                                <div>
+                                    <b id="summary-return" title="Sama dengan lokasi pengambilan" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:230px">Sama dengan lokasi pengambilan</b>
+                                    <span>Pengembalian</span>
                                 </div>
                             </div>
                         </div>
-                        
-                        <hr class="border-gray-100 dark:border-slate-800 mb-4">
-                        
-                        <div class="space-y-2 mb-6">
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-500 dark:text-slate-400">Harga Sewa <span id="label-sewa"></span></span>
-                                <span class="font-medium text-gray-800 dark:text-slate-200" id="summary-base-price">Rp 0</span>
+
+                        <div class="summary-rows">
+                            <div class="summary-row">
+                                <span>Harga sewa <span id="label-sewa" class="tiny"></span></span>
+                                <b id="summary-base-price">Rp 0</b>
                             </div>
-                            <div class="flex justify-between text-sm text-blue-600 dark:text-blue-400 hidden" id="row-driver">
-                                <span>Biaya Supir</span>
-                                <span class="font-medium text-gray-800 dark:text-slate-200" id="summary-driver">Rp 0</span>
+                            <div class="summary-row hidden" id="row-driver">
+                                <span>Biaya driver</span>
+                                <b id="summary-driver">Rp 0</b>
                             </div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-500 dark:text-slate-400">Pajak (10%)</span>
-                                <span class="font-medium text-gray-800 dark:text-slate-200" id="summary-tax">Rp 0</span>
+                            <div class="summary-row">
+                                <span>Pajak 10%</span>
+                                <b id="summary-tax">Rp 0</b>
                             </div>
                         </div>
-                        
-                        <div class="flex justify-between items-center mb-6">
-                            <span class="text-xl font-bold text-gray-900 dark:text-white">Total</span>
-                            <span class="text-xl font-bold text-blue-600 dark:text-blue-400" id="summary-total">Rp 0</span>
+
+                        <div class="summary-total">
+                            <span>Total</span>
+                            <b id="summary-total">Rp 0</b>
                         </div>
-                        
-                        <form action="index.php?module=Booking&action=process" method="POST" id="booking-form">
+
+                        <form action="index.php?module=Booking&action=process" method="POST" id="booking-form" class="summary-cta">
                             <input type="hidden" name="car_id" value="<?= htmlspecialchars($car['id']) ?>">
                             <input type="hidden" name="addon_driver" id="addon-driver-input" value="0">
                             <input type="hidden" name="start_date" id="start-date-input" value="">
                             <input type="hidden" name="end_date" id="end-date-input" value="">
                             <input type="hidden" name="total_price" id="total-price-input" value="0">
-                            
-                            <!-- Geofence Coordinates -->
+
                             <input type="hidden" name="pickup_lat" id="pickup-lat-input" value="">
                             <input type="hidden" name="pickup_lon" id="pickup-lon-input" value="">
                             <input type="hidden" name="return_lat" id="return-lat-input" value="">
@@ -453,14 +287,14 @@ $carStock = $totalStock;
                             <input type="hidden" name="address_lat" id="address-lat-input" value="">
                             <input type="hidden" name="address_lon" id="address-lon-input" value="">
 
-                            <button type="submit" class="w-full bg-blue-700 text-white text-center py-3 rounded-xl font-semibold hover:bg-blue-800 transition">
-                                Konfirmasi Pesanan <i class="bi bi-arrow-right ml-1"></i>
+                            <button type="submit" id="submitBooking" class="btn btn--primary btn--block btn--lg" disabled>
+                                Konfirmasi pesanan <i class="bi bi-arrow-right"></i>
                             </button>
+                            <p class="tiny u-mt-8" id="submitHint" style="text-align:center">Pilih tanggal sewa untuk melanjutkan.</p>
                         </form>
- 
                     </div>
                 </div>
-            </div>
+            </aside>
         </div>
     </main>
 
@@ -542,9 +376,9 @@ $carStock = $totalStock;
 
         function selectAddon(selectedElement) {
             document.querySelectorAll('.addon-card').forEach(card => {
-                card.className = 'addon-card border border-gray-200 dark:border-slate-700 rounded-xl p-4 cursor-pointer hover:border-blue-300 dark:hover:border-blue-700/50 transition';
+                card.className = 'addon-card';
             });
-            selectedElement.className = 'addon-card border-2 border-blue-600 dark:border-blue-500 bg-blue-50/30 dark:bg-blue-900/20 rounded-xl p-4 cursor-pointer transition active-addon';
+            selectedElement.className = 'addon-card is-active';
             
             driverPrice = parseInt(selectedElement.getAttribute('data-price'));
             addonDriverInput.value = driverPrice > 0 ? '1' : '0';
@@ -574,9 +408,9 @@ $carStock = $totalStock;
             const currentRealYear = todayDate.getFullYear();
             
             if (year < currentRealYear || (year === currentRealYear && month <= currentRealMonth)) {
-                prevMonthBtn.classList.add('opacity-20', 'pointer-events-none');
+                prevMonthBtn.classList.add('is-disabled');
             } else {
-                prevMonthBtn.classList.remove('opacity-20', 'pointer-events-none');
+                prevMonthBtn.classList.remove('is-disabled');
             }
             
             for (let i = 0; i < firstDayOfMonth; i++) {
@@ -609,10 +443,10 @@ $carStock = $totalStock;
                 
                 const cellDate = new Date(year, month, i);
                 if (cellDate < today) {
-                    dateCell.classList.add('text-gray-350', 'cursor-not-allowed', 'opacity-30', 'pointer-events-none');
+                    dateCell.classList.add('is-booked');
                 } else if (activeBookingsCount >= carStock) {
                     // Jika stok habis (warna abu-abu disabled)
-                    dateCell.classList.add('text-gray-350', 'dark:text-slate-600', 'cursor-not-allowed', 'opacity-30', 'pointer-events-none');
+                    dateCell.classList.add('is-booked');
                     dateCell.title = "Stok Mobil Habis pada Tanggal Ini";
                 } else {
                     dateCell.addEventListener('click', handleDateClick);
@@ -728,6 +562,14 @@ $carStock = $totalStock;
 
             startDateInput.value = startDate || '';
             endDateInput.value = endDate || '';
+
+            const submitBtn = document.getElementById('submitBooking');
+            const submitHint = document.getElementById('submitHint');
+            const ready = Boolean(startDate && endDate);
+            if (submitBtn) submitBtn.disabled = !ready;
+            if (submitHint) submitHint.textContent = ready
+                ? 'Tanggal siap. Lengkapi data lalu konfirmasi.'
+                : 'Pilih tanggal sewa untuk melanjutkan.';
             calculateTotal();
         }
 
@@ -758,15 +600,13 @@ $carStock = $totalStock;
         function createSuggestionItem(place, index, activeIndex) {
             const mainText = place.name || place.display_name.split(',')[0];
             const secondaryText = place.display_name.replace(mainText + ', ', '') || '';
-            const activeClass = index === activeIndex ? 'bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-600' : 'border-l-4 border-transparent';
+            const activeClass = index === activeIndex ? 'is-active' : '';
             return `
-                <div class="suggestion-item p-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/40 flex items-start gap-3 transition-colors ${activeClass}" data-index="${index}">
-                    <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
-                        <i class="bi bi-geo-alt-fill text-sm"></i>
-                    </div>
-                    <div class="overflow-hidden">
-                        <div class="font-semibold text-sm text-gray-800 dark:text-slate-200 truncate">${escapeHtml(mainText)}</div>
-                        <div class="text-xs text-gray-500 dark:text-slate-400 truncate">${escapeHtml(secondaryText)}</div>
+                <div class="suggest-item suggestion-item ${activeClass}" data-index="${index}">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <div style="min-width:0">
+                        <b>${escapeHtml(mainText)}</b>
+                        <span>${escapeHtml(secondaryText)}</span>
                     </div>
                 </div>
             `;
@@ -774,12 +614,8 @@ $carStock = $totalStock;
 
         function showLoading(dropdown) {
             dropdown.innerHTML = `
-                <div class="p-4 text-center text-sm text-gray-500 dark:text-slate-400 flex items-center justify-center gap-2">
-                    <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Mencari lokasi...</span>
+                <div class="suggest-empty">
+                    <i class="bi bi-hourglass-split"></i> Mencari lokasi…
                 </div>
             `;
             dropdown.classList.remove('hidden');
@@ -787,9 +623,8 @@ $carStock = $totalStock;
 
         function showNoResults(dropdown) {
             dropdown.innerHTML = `
-                <div class="p-4 text-center text-sm text-gray-500 dark:text-slate-400">
-                    <i class="bi bi-geo-fill text-lg block mb-1"></i>
-                    <span>Lokasi tidak ditemukan</span>
+                <div class="suggest-empty">
+                    <i class="bi bi-geo-alt"></i> Lokasi tidak ditemukan
                 </div>
             `;
             dropdown.classList.remove('hidden');

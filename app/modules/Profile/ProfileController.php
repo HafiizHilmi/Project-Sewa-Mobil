@@ -30,6 +30,7 @@ class ProfileController {
                 b.total_price,
                 b.status,
                 b.created_at,
+                b.addon_driver,
                 b.additional_cost,
                 b.damage_image,
                 b.damage_description,

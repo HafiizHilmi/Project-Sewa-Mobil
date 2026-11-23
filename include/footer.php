@@ -1,140 +1,56 @@
-<!-- footer.html -->
-<footer class="text-center lg:text-left text-white bg-[#1c2331] font-sans">
-    <!-- Social Network Bar -->
-    <section class="flex flex-col sm:flex-row justify-between items-center p-4 bg-[#003FB0] gap-3">
-        <div class="text-center sm:text-left">
-            <span>Terhubung dengan kami di jejaring sosial:</span>
-        </div>
-        <div class="flex gap-4">
-            <a href="#!" class="text-white hover:opacity-75 text-xl"><i class="bi bi-whatsapp"></i></a>
-            <a href="#!" class="text-white hover:opacity-75 text-xl"><i class="bi bi-facebook"></i></a>
-            <a href="#!" class="text-white hover:opacity-75 text-xl"><i class="bi bi-instagram"></i></a>
-        </div>
-    </section>
+<?php
+/** Footer pelanggan. Butuh include/site.php. */
+require_once __DIR__ . '/site.php';
+$site = site_settings();
+?>
+<footer class="site-footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <a class="brand" href="index.php?module=Homepage&action=index"><?= site_brand($site['name']) ?></a>
+                <p style="margin-top:14px;max-width:34ch">
+                    Sewa mobil harian, mingguan, dan bulanan di Surabaya. Armada terawat,
+                    harga transparan, verifikasi cepat.
+                </p>
+            </div>
 
-    <!-- Footer Links Section -->
-    <section class="py-10">
-        <div class="container mx-auto px-6 text-center md:text-left">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                
-                <!-- Col 1: About -->
-                <div class="flex flex-col items-center md:items-start">
-                    <h6 class="uppercase font-bold mb-4">Sewa Mobil</h6>
-                    <hr class="mb-4 mt-0 w-[60px] bg-[#1d4ed8] h-[2px] border-none" />
-                    <p class="text-gray-300 text-sm leading-relaxed max-w-xs">
-                        Layanan penyewaan mobil yang menyediakan berbagai jenis kendaraan terawat untuk memenuhi
-                        kebutuhan transportasi Anda. Kami menawarkan layanan yang mudah, cepat, dan tepercaya.
-                    </p>
+            <div class="footer-col">
+                <h4>Layanan</h4>
+                <div class="footer-links">
+                    <a href="index.php?module=Homepage&action=index">Sewa lepas kunci</a>
+                    <a href="index.php?module=Homepage&action=index">Sewa + driver</a>
+                    <a href="index.php?module=Homepage&action=index">Antar-jemput bandara</a>
+                    <a href="index.php?module=Homepage&action=index">Mobil pernikahan</a>
                 </div>
+            </div>
 
-                <!-- Col 2: Services -->
-                <div class="flex flex-col items-center md:items-start">
-                    <h6 class="uppercase font-bold mb-4">Layanan Kami</h6>
-                    <hr class="mb-4 mt-0 w-[60px] bg-[#1d4ed8] h-[2px] border-none" />
-                    <ul class="space-y-2 text-sm text-gray-300">
-                        <li><a href="#!" class="hover:underline hover:text-white transition duration-200">Sewa Lepas Kunci</a></li>
-                        <li><a href="#!" class="hover:underline hover:text-white transition duration-200">Sewa + Driver</a></li>
-                        <li><a href="#!" class="hover:underline hover:text-white transition duration-200">Drop Bandara</a></li>
-                        <li><a href="#!" class="hover:underline hover:text-white transition duration-200">Mobil Pernikahan</a></li>
-                    </ul>
+            <div class="footer-col">
+                <h4>Informasi</h4>
+                <div class="footer-links">
+                    <a href="index.php?module=Landing&action=index#cara-sewa">Cara booking</a>
+                    <a href="index.php?module=Homepage&action=index">Daftar harga</a>
+                    <a href="index.php?module=Auth&action=register">Verifikasi identitas</a>
+                    <a href="index.php?module=Profile&action=index">Pesanan saya</a>
                 </div>
+            </div>
 
-                <!-- Col 3: Information -->
-                <div class="flex flex-col items-center md:items-start">
-                    <h6 class="uppercase font-bold mb-4">Informasi</h6>
-                    <hr class="mb-4 mt-0 w-[60px] bg-[#1d4ed8] h-[2px] border-none" />
-                    <ul class="space-y-2 text-sm text-gray-300">
-                        <li><a href="#!" class="hover:underline hover:text-white transition duration-200">Syarat & Ketentuan</a></li>
-                        <li><a href="#!" class="hover:underline hover:text-white transition duration-200">Cara Booking</a></li>
-                        <li><a href="#!" class="hover:underline hover:text-white transition duration-200">Daftar Harga</a></li>
-                        <li><a href="#!" class="hover:underline hover:text-white transition duration-200">FAQ</a></li>
-                    </ul>
-                </div>
-
-                <!-- Col 4: Contact -->
-                <div class="flex flex-col items-center md:items-start">
-                    <h6 class="uppercase font-bold mb-4">Kontak Kami</h6>
-                    <hr class="mb-4 mt-0 w-[60px] bg-[#004aad] h-0.5 border-0">
-                    <p class="mb-3 flex items-center gap-3">
-                        <i class="bi bi-house-door-fill text-[#004aad]"></i> 
-                        <span><?= htmlspecialchars($appAddress) ?></span>
-                    </p>
-                    <p class="mb-3 flex items-center gap-3">
-                        <i class="bi bi-envelope-fill text-[#004aad]"></i>
-                        <span><?= htmlspecialchars($appEmail) ?></span>
-                    </p>
-                    <p class="mb-3 flex items-center gap-3">
-                        <i class="bi bi-telephone-fill text-[#004aad]"></i>
-                        <span><?= htmlspecialchars($appPhone) ?></span>
-                    </p>
+            <div class="footer-col">
+                <h4>Kontak</h4>
+                <div class="footer-links">
+                    <span class="muted"><i class="bi bi-geo-alt"></i> <?= htmlspecialchars($site['address']) ?></span>
+                    <a href="tel:<?= htmlspecialchars(preg_replace('/\s+/', '', $site['phone'])) ?>"><i class="bi bi-telephone"></i> <?= htmlspecialchars($site['phone']) ?></a>
+                    <a href="mailto:<?= htmlspecialchars($site['email']) ?>"><i class="bi bi-envelope"></i> <?= htmlspecialchars($site['email']) ?></a>
                 </div>
             </div>
         </div>
-    </section>
 
-    <!-- Copyright Section -->
-    <div class="text-center p-4 bg-[#01328d] text-sm font-medium">
-        © 2026 Copyright:
-        <a class="text-white font-bold hover:underline" href="https://sewamobil.com/">sewamobil.com</a>
+        <div class="footer-bottom">
+            <span>&copy; <?= date('Y') ?> <?= htmlspecialchars($site['name']) ?>. Seluruh hak cipta dilindungi.</span>
+            <div class="footer-social">
+                <a href="#" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+            </div>
+        </div>
     </div>
 </footer>
-
-<script>
-    // ==================== FUNGSI GLOBAL UNTUK MENGUBAH TEMA ====================
-    // Dipanggil saat tombol tema di klik
-    function toggleGlobalTheme() {
-        const isDark = document.documentElement.classList.contains('dark');
-        if (isDark) {
-            document.documentElement.classList.remove('dark');
-            document.documentElement.setAttribute('data-bs-theme', 'light');
-            localStorage.setItem('theme', 'light');
-        } else {
-            document.documentElement.classList.add('dark');
-            document.documentElement.setAttribute('data-bs-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
-        }
-        updateGlobalNavbarIcon(!isDark);
-    }
-
-    // ==================== SINKRONISASI VISUAL ICON NAVIGASI UTAMA ====================
-    function updateGlobalNavbarIcon(isDark) {
-        const iconElement = document.getElementById('global-theme-icon');
-        if (iconElement) {
-            if (isDark) {
-                if (iconElement.classList.contains('fs-5')) {
-                    iconElement.className = 'bi bi-sun-fill fs-5 text-warning';
-                } else {
-                    iconElement.className = 'bi bi-sun-fill text-xl text-yellow-400';
-                }
-            } else {
-                if (iconElement.classList.contains('fs-5')) {
-                    iconElement.className = 'bi bi-moon-fill fs-5 text-secondary';
-                } else {
-                    iconElement.className = 'bi bi-moon-fill text-xl text-slate-600';
-                }
-            }
-        }
-    }
-
-    // ==================== CROSS-TAB THEME SYNC ====================
-    // Deteksi perubahan localStorage dari tab/window LAIN secara real-time
-    window.addEventListener('storage', function(e) {
-        if (e.key === 'theme') {
-            const newMode = e.newValue; // 'dark' atau 'light'
-            if (newMode === 'dark') {
-                document.documentElement.classList.add('dark');
-                document.documentElement.setAttribute('data-bs-theme', 'dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-                document.documentElement.setAttribute('data-bs-theme', 'light');
-            }
-            updateGlobalNavbarIcon(newMode === 'dark');
-        }
-    });
-
-    // ==================== INISIALISASI ICON SAAT HALAMAN DIMUAT ====================
-    document.addEventListener("DOMContentLoaded", function() {
-        const isDark = document.documentElement.classList.contains('dark');
-        updateGlobalNavbarIcon(isDark);
-    });
-</script>

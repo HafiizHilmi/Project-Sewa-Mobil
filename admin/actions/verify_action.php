@@ -29,15 +29,16 @@ if ($user_id && in_array($action, ['verified', 'rejected'])) {
             ]);
         }
         
-        // Arahkan kembali ke halaman index dan beri notifikasi
+        // Arahkan kembali ke halaman verifikasi dan beri notifikasi
         echo "<script>
                 alert('Berhasil: Status verifikasi user berhasil diubah menjadi " . strtoupper($action) . ".');
-                window.location.href = '../index.php';
+                window.location.href = '../index.php?page=verifications';
               </script>";
         exit;
     } catch (PDOException $e) {
+        $errorMsg = addslashes($e->getMessage());
         echo "<script>
-                alert('Terjadi kesalahan pada sistem database.');
+                alert('Terjadi kesalahan pada sistem database: " . $errorMsg . "');
                 window.history.back();
               </script>";
         exit;

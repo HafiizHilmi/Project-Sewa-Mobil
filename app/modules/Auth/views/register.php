@@ -1,239 +1,99 @@
-<?php 
-if (session_status() !== PHP_SESSION_ACTIVE) session_start(); 
+<?php
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// ==========================================
-// Panggil Setting Database untuk Nama Navbar
-// ==========================================
-global $pdo; // Ambil koneksi database dari sistem utama
-
-// Jika koneksi tidak ditemukan di sistem utama, panggil file database secara manual
-if (!isset($pdo) || $pdo === null) {
-    // Sesuaikan letak path db_config.php jika terjadi error
-    require_once __DIR__ . '/../../../../include/db_config.php';
-    $pdo = getPDO();
-}
-
-$appName = "SewaMobil SBY"; // Nama default jika database benar-benar kosong
-
-if (isset($pdo)) {
-    try {
-        $stmtSettings = $pdo->query("SELECT setting_key, setting_value FROM settings");
-        while ($row = $stmtSettings->fetch(PDO::FETCH_ASSOC)) {
-            if ($row['setting_key'] === 'app_name') $appName = $row['setting_value'];
-        }
-    } catch (Exception $e) {
-        // Abaikan jika tabel setting belum ada
-    }
-}
-// ==========================================
+require_once __DIR__ . '/../../../../include/site.php';
+$site = site_settings();
+$flash = $_SESSION['flash'] ?? null;
+unset($_SESSION['flash']);
 ?>
-
-<?php if (!empty($_SESSION['flash'])): ?>
-    <div class="alert alert-danger" style="font-size: 0.85rem; padding: 0.5rem 1rem; border-radius: 0.5rem;">
-        <?= htmlspecialchars($_SESSION['flash']) ?>
-    </div>
-    <?php unset($_SESSION['flash']); // Hapus flash message setelah ditampilkan biar tidak muncul lagi ?>
-<?php endif; ?>
-
-<?php if (!empty($_SESSION['flash_success'])): ?>
-    <div class="alert alert-success" style="font-size: 0.85rem; padding: 0.5rem 1rem; border-radius: 0.5rem;">
-        <?= htmlspecialchars($_SESSION['flash_success']) ?>
-    </div>
-    <?php unset($_SESSION['flash_success']); ?>
-<?php endif; ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buat Akun - SewaMobil</title>
+    <title>Daftar akun — <?= htmlspecialchars($site['name']) ?></title>
     <script>
-        (function() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-                document.documentElement.setAttribute('data-bs-theme', 'dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-                document.documentElement.setAttribute('data-bs-theme', 'light');
-            }
+        (function () {
+            var saved = localStorage.getItem('theme');
+            var dark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            document.documentElement.classList.toggle('dark', dark);
+            document.documentElement.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
         })();
     </script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f8fafc;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        .text-brand { color: #004aad; }
-        .bg-brand { background-color: #004aad; }
-        .btn-brand { background-color: #004aad; color: white; }
-        .btn-brand:hover { background-color: #003680; color: white; }
-        
-        .auth-card {
-            border: none;
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.05);
-            overflow: hidden;
-        }
-        .form-control-custom {
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem;
-            padding: 0.6rem 1rem;
-            font-size: 0.85rem;
-        }
-        .form-control-custom:focus {
-            box-shadow: 0 0 0 0.25rem rgba(0, 74, 173, 0.1);
-            border-color: #004aad;
-            background-color: #ffffff;
-        }
-        .image-placeholder {
-            background-color: #e2e8f0;
-            min-height: 100%;
-        }
-        .form-label { margin-bottom: 0.3rem; }
-        html.dark body {
-            background-color: #020617;
-            color: #f8fafc;
-        }
-        html.dark .navbar {
-            background-color: #0f172a !important;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.35);
-        }
-        html.dark .navbar-brand,
-        html.dark .text-brand { color: #93c5fd !important; }
-        html.dark .auth-card { background-color: #111827 !important; }
-        html.dark .form-control-custom { background-color: #0f172a !important; border-color: #334155 !important; color: #f8fafc; }
-        html.dark .form-control-custom:focus { background-color: #111827 !important; box-shadow: 0 0 0 0.2rem rgba(59,130,246,0.2); border-color: #3b82f6 !important; }
-        html.dark .btn-brand { background-color: #2563eb !important; }
-        html.dark .btn-brand:hover { background-color: #1d4ed8 !important; }
-        html.dark .text-muted { color: #94a3b8 !important; }
-        html.dark .image-placeholder { background-color: #111827 !important; }
-        html.dark .text-dark { color: #f8fafc !important; }
-        html.dark .border-top { border-color: #1e293b !important; }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="assets/css/app.css">
 </head>
 <body>
+    <?php $navActive = ''; include __DIR__ . '/../../../../include/nav.php'; ?>
 
-    <nav class="navbar navbar-light bg-white py-3 shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold fs-4 text-decoration-none" href="index.php?module=Homepage&action=index">
-                <?php
-                // Memisahkan warna kata "Sewa" dan sisa namanya menggunakan class Bootstrap
-                if (stripos($appName, 'sewa') === 0) {
-                    $restOfName = substr($appName, 4);
-                    echo '<span class="text-brand">Sewa</span><span class="text-dark">' . htmlspecialchars($restOfName) . '</span>';
-                } else {
-                    echo '<span class="text-brand">' . htmlspecialchars($appName) . '</span>';
-                }
-                ?>
-            </a>
-        </div>
-    </nav>
+    <main class="auth-wrap">
+        <div class="auth-shell">
+            <div class="auth-form">
+                <span class="eyebrow">Akun pelanggan</span>
+                <h1 style="margin-top:12px">Daftar</h1>
+                <p>Buat akun sekali, lalu unggah KTP &amp; SIM di halaman profil untuk mulai menyewa.</p>
 
-    <main class="flex-grow-1 d-flex align-items-center py-5">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-10">
-                    <div class="card auth-card">
-                        <div class="row g-0">
-                            <div class="col-md-6 p-4 p-lg-5">
-                                <h3 class="fw-bold mb-1">Buat Akun</h3>
-                                <p class="text-muted mb-4" style="font-size: 0.85rem;">Bergabung dengan kami untuk mendapatkan pengalaman terbaik.</p>
-                                
-                                <?php if (!empty($_SESSION['flash'])): ?>
-                                    <div class="alert alert-info"><?php echo htmlspecialchars($_SESSION['flash']); unset($_SESSION['flash']); ?></div>
-                                <?php endif; ?>
+                <?php if ($flash): ?>
+                    <div class="notice notice--danger u-mt-24" role="alert">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                        <span><?= htmlspecialchars($flash) ?></span>
+                    </div>
+                <?php endif; ?>
 
-                                <form action="index.php?module=Auth&action=processRegister" method="POST">
-                                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">Nama Lengkap</label>
-                                        <input type="text" name="name" class="form-control form-control-custom" placeholder="Dadang Kurniawan" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">Alamat Email</label>
-                                        <input type="email" name="email" class="form-control form-control-custom" placeholder="dadang@contoh.com" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">Nomor HP</label>
-                                        <input type="tel" name="phone" class="form-control form-control-custom" placeholder="+62-812-3456-7890" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">Password</label>
-                                        <input type="password" name="password" class="form-control form-control-custom" placeholder="********" required>
-                                    </div>
-                                    <div class="mb-4">
-                                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">Konfirmasi Password</label>
-                                        <input type="password" name="password_confirm" class="form-control form-control-custom" placeholder="********" required>
-                                    </div>
-                                    <button type="submit" class="btn btn-brand w-100 py-2 mb-3 fw-semibold rounded-3">Buat Akun</button>
-                                </form>
-                                
-                                <div class="text-center mt-1">
-                                    <span class="text-muted" style="font-size: 0.8rem;">Sudah mempunyai akun? 
-                                        <a href="index.php?module=Auth&action=login" class="text-brand text-decoration-none fw-semibold">Masuk disini</a>
-                                    </span>
-                                </div>
-                            </div>
-                            
-                             <div class="col-md-6 d-none d-md-block p-0 position-relative" style="overflow: hidden; background-color: #0f172a;">
-                                <div id="sliderTrack" style="display: flex; width: 100%; height: 100%; transition: transform 0.8s ease-in-out;">
-                                    
-                                    <img src="assets/images/gambar-login-page.avif" alt="Slide 1" style="min-width: 100%; height: 100%; object-fit: cover;">
-                                    <img src="assets/images/gambar-login-page2.jpg" alt="Slide 2" style="min-width: 100%; height: 100%; object-fit: cover;">
-                                    <img src="assets/images/gambar-login-page3.jpg" alt="Slide 3" style="min-width: 100%; height: 100%; object-fit: cover;">
-                                    
-                                </div>
-                            </div>
+                <form action="index.php?module=Auth&action=processRegister" method="POST">
+                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+
+                    <div class="field">
+                        <label for="name">Nama lengkap</label>
+                        <input class="input" type="text" id="name" name="name" placeholder="Sesuai KTP" autocomplete="name" required>
+                    </div>
+
+                    <div class="form-grid form-grid--2">
+                        <div class="field">
+                            <label for="email">Alamat email</label>
+                            <input class="input" type="email" id="email" name="email" placeholder="nama@email.com" autocomplete="email" required>
+                        </div>
+                        <div class="field">
+                            <label for="phone">Nomor HP</label>
+                            <input class="input" type="tel" id="phone" name="phone" placeholder="0812xxxxxxx" autocomplete="tel" required>
                         </div>
                     </div>
-                </div>
+
+                    <div class="form-grid form-grid--2">
+                        <div class="field">
+                            <label for="password">Password</label>
+                            <input class="input" type="password" id="password" name="password" placeholder="Min. 6 karakter" autocomplete="new-password" required>
+                        </div>
+                        <div class="field">
+                            <label for="password_confirm">Ulangi password</label>
+                            <input class="input" type="password" id="password_confirm" name="password_confirm" placeholder="Ulangi password" autocomplete="new-password" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn--primary btn--block btn--lg">
+                        Buat akun <i class="bi bi-arrow-right"></i>
+                    </button>
+                </form>
+
+                <p class="auth-switch">
+                    Sudah punya akun? <a href="index.php?module=Auth&action=login">Masuk</a>
+                </p>
             </div>
+
+            <aside class="auth-aside">
+                <img src="assets/images/cars/toyota-innova-zenix-2024.jpg" alt="Armada <?= htmlspecialchars($site['name']) ?>">
+                <div class="auth-aside-text">
+                    <p>Verifikasi KTP &amp; SIM cukup sekali, berlaku untuk semua pesanan berikutnya.</p>
+                    <span><?= $site['email'] ?> &middot; <?= $site['phone'] ?></span>
+                </div>
+            </aside>
         </div>
     </main>
 </body>
-
-<script>
-                                document.addEventListener("DOMContentLoaded", function() {
-                                    const sliderTrack = document.getElementById('sliderTrack');
-                                    
-                                    // 1. Gandakan gambar pertama dan taruh di paling akhir (otomatis oleh sistem)
-                                    const firstImgClone = sliderTrack.children[0].cloneNode(true);
-                                    sliderTrack.appendChild(firstImgClone);
-                                    
-                                    const totalImages = sliderTrack.children.length;
-                                    let currentIndex = 0;
-                                    
-                                    setInterval(() => {
-                                        currentIndex++;
-                                        
-                                        // Nyalakan kembali animasi geser (transisi)
-                                        sliderTrack.style.transition = 'transform 0.8s ease-in-out';
-                                        sliderTrack.style.transform = `translateX(-${currentIndex * 100}%)`;
-                                        
-                                        // 2. Jika sistem bergeser menyentuh gambar kloningan terakhir...
-                                        if (currentIndex === totalImages - 1) {
-                                            // Tunggu sampai animasi gesernya selesai (800ms)
-                                            setTimeout(() => {
-                                                // Matikan animasi sejenak dan lompat kembali ke gambar asli paling awal
-                                                sliderTrack.style.transition = 'none'; 
-                                                currentIndex = 0;
-                                                sliderTrack.style.transform = `translateX(0%)`;
-                                            }, 800);
-                                        }
-                                        
-                                    }, 3000); // Ganti gambar setiap 3 detik
-                                });
-</script>
 </html>
