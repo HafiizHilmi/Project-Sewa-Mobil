@@ -48,8 +48,17 @@ if (isset($_POST['login'])) {
     if (mysqli_num_rows($query) > 0) {
         $data = mysqli_fetch_assoc($query);
         
-        // Cocokkan password teks biasa
-        if ($password === $data['password']) {
+        // Cocokkan password dengan password_verify atau fallback teks biasa (auto upgrade ke hash)
+        $passwordMatches = password_verify($password, $data['password']) || ($password === $data['password']);
+
+        if ($passwordMatches) {
+            // Jika masih teks biasa, otomatis update ke bcrypt hash
+            if ($password === $data['password'] && strpos($data['password'], '$2y$') !== 0) {
+                $newHash = password_hash($password, PASSWORD_BCRYPT);
+                $adminIdSafe = intval($data['id']);
+                mysqli_query($conn, "UPDATE admins SET password = '$newHash' WHERE id = $adminIdSafe");
+            }
+
             $_SESSION['admin_id'] = $data['id'];
             $_SESSION['admin_nama'] = $data['nama'];
             $_SESSION['admin_role'] = $data['role'];
@@ -70,7 +79,7 @@ if (isset($_POST['login'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Admin - SewaMobil</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="assets/vendor/tailwind/tailwind.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }

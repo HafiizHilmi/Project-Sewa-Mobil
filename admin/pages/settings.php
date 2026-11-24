@@ -134,7 +134,7 @@ $currCartoApiKey = isset($secSettings['carto_api_key']) && $secSettings['carto_a
                 </button>
                 
                 <?php if(!$isSuper): ?>
-                <form action="actions/admin_action.php" method="POST" class="m-0 p-0" onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun staff ini?');">
+                <form action="actions/admin_action.php" method="POST" class="m-0 p-0" onsubmit="return confirmSubmit(event, 'Apakah Anda yakin ingin menghapus akun staff ini?');">
                     <input type="hidden" name="action" value="delete_admin">
                     <input type="hidden" name="id" value="<?= $admin['id'] ?>">
                     <button type="submit" title="Hapus Staff" class="w-7 h-7 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
@@ -364,7 +364,7 @@ $currCartoApiKey = isset($secSettings['carto_api_key']) && $secSettings['carto_a
                       <?php endif; ?>
                       
                       <?php if (isset($role) && $role === 'superuser'): ?>
-                      <form action="actions/admin_action.php" method="POST" class="m-0 p-0" onsubmit="return confirm('Hapus <?= $isGeofence ? 'geofence' : 'kata kunci' ?> blacklist ini?');">
+                      <form action="actions/admin_action.php" method="POST" class="m-0 p-0" onsubmit="return confirmSubmit(event, 'Hapus blacklist ini?');">
                         <input type="hidden" name="action" value="delete_blacklist">
                         <input type="hidden" name="id" value="<?= $bl['id'] ?>">
                         <button type="submit" title="Hapus Blacklist" class="w-7 h-7 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
@@ -721,7 +721,7 @@ $currCartoApiKey = isset($secSettings['carto_api_key']) && $secSettings['carto_a
                           <h4 class="font-bold text-xs mb-1" style="margin:0; color: #0f172a;">${bl.location_name}</h4>
                           <p class="text-[10px] text-slate-500" style="margin:0 0 8px 0;">Radius: ${rad >= 1000000 ? '1000 km' : (rad >= 1000 ? (rad/1000) + ' km' : rad + ' m')}</p>
                           <?php if (isset($role) && $role === 'superuser'): ?>
-                          <form action="actions/admin_action.php" method="POST" onsubmit="return confirm('Hapus geofence ini?');" style="margin:0;">
+                          <form action="actions/admin_action.php" method="POST" onsubmit="return confirmSubmit(event, 'Hapus geofence ini?');" style="margin:0;">
                               <input type="hidden" name="action" value="delete_blacklist">
                               <input type="hidden" name="id" value="${bl.id}">
                               <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold py-1.5 px-2 rounded-lg transition-colors border-0 cursor-pointer">Hapus Geofence</button>

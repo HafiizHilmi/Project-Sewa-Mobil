@@ -42,6 +42,10 @@ $fmtDate = fn(string $d): string => date('d M Y', strtotime($d));
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <script>
+        document.documentElement.classList.add('js');
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Akun saya — <?= htmlspecialchars($site['name']) ?></title>
@@ -146,13 +150,13 @@ $fmtDate = fn(string $d): string => date('d M Y', strtotime($d));
                 </div>
 
                 <div class="stat-grid">
-                    <div class="stat-card"><b class="num"><?= $totalBookings ?></b><span>Total sewa</span></div>
-                    <div class="stat-card"><b class="num"><?= $pendingBookings ?></b><span>Menunggu bayar</span></div>
-                    <div class="stat-card"><b class="num"><?= $activeBookings ?></b><span>Sedang berjalan</span></div>
-                    <div class="stat-card"><b class="num"><?= $completedBookings ?></b><span>Selesai</span></div>
+                    <div class="stat-card" data-reveal><b class="num" data-count="<?= $totalBookings ?>">0</b><span>Total sewa</span></div>
+                    <div class="stat-card" data-reveal><b class="num" data-count="<?= $pendingBookings ?>">0</b><span>Menunggu bayar</span></div>
+                    <div class="stat-card" data-reveal><b class="num" data-count="<?= $activeBookings ?>">0</b><span>Sedang berjalan</span></div>
+                    <div class="stat-card" data-reveal><b class="num" data-count="<?= $completedBookings ?>">0</b><span>Selesai</span></div>
                 </div>
 
-                <div class="list-card">
+                <div class="list-card" data-reveal>
                     <div class="list-head">
                         <h2>Penyewaan terbaru</h2>
                         <?php if ($totalBookings > 3): ?>
@@ -287,7 +291,7 @@ $fmtDate = fn(string $d): string => date('d M Y', strtotime($d));
                         </article>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <div class="list-card">
+                    <div class="list-card" data-reveal>
                         <div class="empty" style="border:0;background:transparent">
                             <i class="bi bi-car-front"></i>
                             <h3>Belum ada transaksi</h3>

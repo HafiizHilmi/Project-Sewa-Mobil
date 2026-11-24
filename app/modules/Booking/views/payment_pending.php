@@ -74,6 +74,10 @@ $snapScriptUrl = $isProduction ? 'https://app.midtrans.com/snap/snap.js' : 'http
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <script>
+        document.documentElement.classList.add('js');
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reservasi Terkirim - SewaMobil</title>
@@ -385,5 +389,6 @@ $snapScriptUrl = $isProduction ? 'https://app.midtrans.com/snap/snap.js' : 'http
  
         updateGlobalNavbarIcon();
     </script>
+<script src="assets/js/ui.js" defer></script>
 </body>
 </html>

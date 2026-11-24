@@ -1,0 +1,456 @@
+/* ==========================================================================
+   SewaMobil Admin Panel — Design System & Custom Components
+   Aligned with public customer portal tokens (--accent, --surface, --r-*, etc.)
+   ========================================================================== */
+
+:root {
+  --bg: #f6f6f7;
+  --surface: #ffffff;
+  --surface-2: #f0f1f3;
+  --surface-3: #e9eaee;
+  --ink: #0e1013;
+  --ink-2: #4e535c;
+  --ink-3: #6b7079;
+  --line: #e6e7ea;
+  --line-strong: #d3d5da;
+
+  --accent: #1246e4;
+  --accent-ink: #0d34ad;
+  --accent-soft: #eef1fe;
+
+  --ok: #0c7c59;
+  --ok-soft: #e8f6f0;
+  --warn: #9a5b00;
+  --warn-soft: #fdf3e3;
+  --danger: #c8281c;
+  --danger-soft: #fdeceb;
+
+  --r-xs: 10px;
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 22px;
+  --r-xl: 30px;
+  --r-full: 999px;
+
+  --shadow-1: 0 1px 2px rgba(14, 16, 19, .05);
+  --shadow-2: 0 18px 40px -24px rgba(14, 16, 19, .25);
+  --shadow-3: 0 30px 70px -40px rgba(14, 16, 19, .35);
+
+  --dur-1: 130ms;
+  --dur-2: 220ms;
+  --dur-3: 380ms;
+  --dur-4: 620ms;
+
+  --font: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+html.dark {
+  --bg: #0a0b0d;
+  --surface: #121417;
+  --surface-2: #181b1f;
+  --surface-3: #21252b;
+  --ink: #f3f4f6;
+  --ink-2: #b3b8c1;
+  --ink-3: #949aa4;
+  --line: #262a31;
+  --line-strong: #3c424c;
+
+  --accent: #7c97ff;
+  --accent-ink: #a8bbff;
+  --accent-soft: #181f38;
+
+  --ok: #4bd6a0;
+  --ok-soft: #10261e;
+  --warn: #f0b34e;
+  --warn-soft: #2a2011;
+  --danger: #ff8a80;
+  --danger-soft: #2a1413;
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .5);
+}
+
+/* Base resets & typography */
+body {
+  font-family: var(--font);
+  color: var(--ink);
+  background-color: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Card & Surface */
+.adm-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-1);
+  transition: border-color var(--dur-2), box-shadow var(--dur-2);
+}
+
+.adm-card:hover {
+  border-color: var(--line-strong);
+}
+
+/* Status Badges */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--r-full);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: capitalize;
+  line-height: 1;
+}
+
+.badge-status--active, .badge-status--confirmed, .badge-status--verified {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.badge-status--pending {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.badge-status--cancelled, .badge-status--rejected {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.badge-status--completed {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* Button Variants */
+.btn-adm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-weight: 600;
+  transition: all var(--dur-2);
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.btn-adm--primary {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.btn-adm--primary:hover {
+  background: var(--accent-ink);
+  transform: translateY(-1px);
+}
+
+.btn-adm--secondary {
+  background: var(--surface-2);
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.btn-adm--secondary:hover {
+  background: var(--surface-3);
+}
+
+/* Drawer & Modal transitions */
+.drawer-backdrop {
+  background: rgba(14, 16, 19, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+/* Hide scrollbar cleanly */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Image Lazy Loading Skeleton */
+img[loading="lazy"] {
+  opacity: 0;
+  transition: opacity 300ms ease-in-out;
+}
+
+img[loading="lazy"].loaded,
+img[loading="lazy"]:not([src=""]) {
+  opacity: 1;
+}
+
+/* Animation utilities */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================================================
+   Modern Minimalist Toast Notification System
+   Clean, floating pill cards, glassmorphic surface, crisp micro-badges
+   ========================================================================== */
+#toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  max-width: 390px;
+  width: calc(100vw - 36px);
+}
+
+.toast-item {
+  pointer-events: auto;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 15px;
+  border-radius: var(--r-md, 16px);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04), 0 0 0 1px rgba(15, 23, 42, 0.02);
+  transition: opacity 280ms cubic-bezier(.16, 1, .3, 1), transform 280ms cubic-bezier(.16, 1, .3, 1), box-shadow 200ms ease;
+  opacity: 0;
+  transform: translateY(-8px) scale(0.97);
+  user-select: none;
+}
+
+html.dark .toast-item {
+  background: rgba(18, 20, 23, 0.94);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.45), 0 4px 12px -2px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.toast-item.toast-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.toast-item.toast-hiding {
+  opacity: 0;
+  transform: translateX(18px) scale(0.96);
+  transition: opacity 200ms ease, transform 200ms cubic-bezier(.16, 1, .3, 1);
+}
+
+.toast-item.toast-pulse {
+  animation: toastPulse 300ms ease;
+}
+
+@keyframes toastPulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+.toast-icon-wrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: transform 150ms ease;
+}
+
+/* Micro-badge variants */
+.toast-success .toast-icon-wrap {
+  background: #ecfdf5;
+  color: #059669;
+}
+html.dark .toast-success .toast-icon-wrap {
+  background: rgba(5, 150, 105, 0.16);
+  color: #34d399;
+}
+
+.toast-error .toast-icon-wrap,
+.toast-danger .toast-icon-wrap {
+  background: #fef2f2;
+  color: #e11d48;
+}
+html.dark .toast-error .toast-icon-wrap,
+html.dark .toast-danger .toast-icon-wrap {
+  background: rgba(225, 29, 72, 0.16);
+  color: #fb7185;
+}
+
+.toast-warn .toast-icon-wrap {
+  background: #fffbeb;
+  color: #d97706;
+}
+html.dark .toast-warn .toast-icon-wrap {
+  background: rgba(217, 119, 6, 0.16);
+  color: #fbbf24;
+}
+
+.toast-info .toast-icon-wrap {
+  background: #eff6ff;
+  color: #2563eb;
+}
+html.dark .toast-info .toast-icon-wrap {
+  background: rgba(37, 99, 235, 0.16);
+  color: #60a5fa;
+}
+
+.toast-order .toast-icon-wrap {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+html.dark .toast-order .toast-icon-wrap {
+  background: rgba(79, 70, 229, 0.16);
+  color: #818cf8;
+}
+
+.toast-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #0f172a;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+html.dark .toast-title {
+  color: #f8fafc;
+}
+
+.toast-body {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: #64748b;
+  margin: 3px 0 0;
+  word-break: break-word;
+}
+html.dark .toast-body {
+  color: #94a3b8;
+}
+
+.toast-close-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  margin-top: 2px;
+  margin-left: 2px;
+  transition: all 150ms ease;
+}
+.toast-close-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #334155;
+}
+html.dark .toast-close-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+}
+
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  transform-origin: left;
+  border-radius: 0 0 16px 16px;
+  opacity: 0.65;
+}
+.toast-success .toast-progress { background: #059669; }
+.toast-error .toast-progress, .toast-danger .toast-progress { background: #e11d48; }
+.toast-warn .toast-progress { background: #d97706; }
+.toast-info .toast-progress { background: #2563eb; }
+.toast-order .toast-progress { background: #4f46e5; }
+
+/* ==========================================================================
+   Fluid & Dynamic Remote Alarm Modal Animation System
+   ========================================================================== */
+@keyframes fluidPulse {
+  0% {
+    transform: scale(0.65);
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(1.75);
+    opacity: 0;
+  }
+}
+
+@keyframes bellRhythm {
+  0%, 100% { transform: rotate(0) scale(1); }
+  10% { transform: rotate(18deg) scale(1.08); }
+  20% { transform: rotate(-18deg) scale(1.08); }
+  30% { transform: rotate(14deg) scale(1.04); }
+  40% { transform: rotate(-14deg) scale(1.04); }
+  50% { transform: rotate(8deg); }
+  60% { transform: rotate(-8deg); }
+  70% { transform: rotate(0); }
+}
+
+@keyframes soundWaveBar {
+  0%, 100% {
+    transform: scaleY(0.25);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes subtleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-radar-ring-1 {
+  animation: fluidPulse 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+.animate-radar-ring-2 {
+  animation: fluidPulse 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite 0.65s;
+}
+.animate-radar-ring-3 {
+  animation: fluidPulse 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite 1.3s;
+}
+
+.animate-bell-dynamic {
+  animation: bellRhythm 1.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+}
+
+.animate-subtle-float {
+  animation: subtleFloat 3s ease-in-out infinite;
+}
+
+.soundwave-bar {
+  width: 4px;
+  height: 28px;
+  border-radius: 999px;
+  transform-origin: bottom;
+  animation: soundWaveBar 0.9s ease-in-out infinite alternate;
+}
+
+

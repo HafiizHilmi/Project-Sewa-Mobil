@@ -3,12 +3,8 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
-// Pengaman backend: Tolak akses jika bukan superuser
-if (!isset($_SESSION['admin_role']) || $_SESSION['admin_role'] !== 'superuser') {
-    http_response_code(403);
-    die("Akses Ditolak! Hanya Superuser yang diizinkan untuk menambah, mengedit, atau menghapus kendaraan.");
-}
+require_once __DIR__ . '/../inc/guard.php';
+require_superuser();
 
 // Load koneksi database
 require_once '../../Config/database.php';

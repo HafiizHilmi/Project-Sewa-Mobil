@@ -12,6 +12,10 @@ unset($_SESSION['flash']);
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <script>
+        document.documentElement.classList.add('js');
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar akun — <?= htmlspecialchars($site['name']) ?></title>

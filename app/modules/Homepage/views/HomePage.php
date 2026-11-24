@@ -19,6 +19,10 @@ $rangeMax = (int) (ceil($maxPrice / 50000) * 50000);
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <script>
+        document.documentElement.classList.add('js');
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Katalog mobil — <?= htmlspecialchars($site['name']) ?></title>
@@ -35,6 +39,12 @@ $rangeMax = (int) (ceil($maxPrice / 50000) * 50000);
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/app.css">
+    <style>
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(14px) scale(.985); }
+            to { opacity: 1; transform: none; }
+        }
+    </style>
 </head>
 <body>
     <?php $navActive = 'katalog'; include __DIR__ . '/../../../../include/nav.php'; ?>
@@ -200,8 +210,44 @@ $rangeMax = (int) (ceil($maxPrice / 50000) * 50000);
             shown.forEach(c => grid.appendChild(c));
             grid.appendChild(emptyState);
 
+            // Stagger masuk: kartu muncul berurutan, bukan berkedip sekaligus.
+            // Animasi hanya dipasang bila dokumen benar-benar terlihat, supaya tidak
+            // ada kartu yang tertinggal transparan saat tab di background.
+            const motionOK = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                          && document.visibilityState === 'visible';
+            if (motionOK) {
+                shown.slice(0, 18).forEach((card, i) => {
+                    card.style.animation = 'none';
+                    void card.offsetWidth;
+                    card.style.animation = 'cardIn .38s cubic-bezier(.16,1,.3,1) both';
+                    card.style.animationDelay = (i * 28) + 'ms';
+                    // Jaring pengaman: bersihkan animasi agar opacity tidak menggantung.
+                    setTimeout(() => {
+                        card.style.animation = '';
+                        card.style.animationDelay = '';
+                        card.style.opacity = '';
+                    }, 700 + i * 28);
+                });
+            } else {
+                shown.forEach(card => { card.style.animation = ''; card.style.opacity = ''; });
+            }
+
             emptyState.hidden = visible !== 0;
-            countEl.textContent = visible;
+            animateCount(countEl, visible);
+        }
+
+        // Angka hasil ikut beranimasi supaya perubahan filter terasa halus.
+        function animateCount(el, to) {
+            const from = parseInt(el.textContent, 10) || 0;
+            if (from === to) { el.textContent = to; return; }
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = to; return; }
+            const start = performance.now();
+            function step(now) {
+                const p = Math.min((now - start) / 320, 1);
+                el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3)));
+                if (p < 1) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
         }
 
         chips.forEach(chip => {

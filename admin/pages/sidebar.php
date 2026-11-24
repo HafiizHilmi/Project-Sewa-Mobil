@@ -1,104 +1,143 @@
 <?php
-// PHP logic tetap sama, tidak ada yang berubah
 $appName = "SewaMobil SBY";
-$appAddress = "Surabaya, Jawa Timur, Indonesia";
-$appEmail = "admin@sewamobil.com";
-$appPhone = "+62 812 3456 7890";
-
 if (isset($pdo)) {
     try {
-        $stmtSettings = $pdo->query("SELECT setting_key, setting_value FROM settings");
-        while ($row = $stmtSettings->fetch(PDO::FETCH_ASSOC)) {
-            if ($row['setting_key'] === 'app_name') $appName = $row['setting_value'];
-            if ($row['setting_key'] === 'company_address') $appAddress = $row['setting_value'];
-            if ($row['setting_key'] === 'company_email') $appEmail = $row['setting_value'];
-            if ($row['setting_key'] === 'company_phone') $appPhone = $row['setting_value'];
+        $stmtSettings = $pdo->query("SELECT setting_key, setting_value FROM business_settings WHERE setting_key = 'app_name'");
+        if ($stmtSettings && ($row = $stmtSettings->fetch(PDO::FETCH_ASSOC))) {
+            $appName = $row['setting_value'];
         }
     } catch (Exception $e) {}
 }
 ?>
 
 <aside id="sidebar" :class="sidebarOpen ? '' : 'sb-hidden'"
-  class="w-[200px] min-w-[200px] bg-white dark:bg-slate-800 border-r border-slate-100 dark:border-slate-700 flex flex-col h-full overflow-y-auto flex-shrink-0 transition-all">
+  class="w-[250px] min-w-[250px] bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 flex flex-col h-full overflow-y-auto flex-shrink-0 transition-all select-none z-30">
 
-  <div class="px-4 pt-5 pb-4">
-    <span class="font-extrabold tracking-tight">
-      <a href="index.php?module=Homepage&action=index" class="no-underline flex items-center">
-        <?php
-            // Ukuran font logo dikecilkan dari text-2xl menjadi text-lg
-            if (stripos($appName, 'sewa') === 0) {
-                $restOfName = substr($appName, 4);
-                echo '<span class="text-blue-700 dark:text-blue-500 text-lg">Sewa<span class="text-gray-900 dark:text-white">' . htmlspecialchars($restOfName) . '</span></span>';
-            } else {
-                echo '<span class="text-blue-700 dark:text-blue-500 text-lg">' . htmlspecialchars($appName) . '</span>';
-            }
-        ?>
-      </a>
-    </span>
-  </div>
-  <div class="mx-4 border-t border-slate-100 dark:border-slate-700"></div>
-
-  <div class="relative px-3 py-3">
-    <button @click="showProfileMenu = !showProfileMenu"
-      class="flex items-center gap-2.5 w-full rounded-xl px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-left group">
-
-      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-700 flex items-center justify-center flex-shrink-0 shadow-sm">
-        <span class="text-white text-[10px] font-bold">
-          <?= strtoupper(substr($_SESSION['admin_nama'] ?? 'A', 0, 1)) ?>
+  <!-- Brand / Logo Area (Mengadaptasi User Brand Style) -->
+  <div class="px-5 pt-6 pb-4 flex items-center justify-between">
+    <a href="../public/index.php" target="_blank" class="no-underline flex items-center gap-2.5 group" title="Buka Website Pelanggan">
+      <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
+        <i class="fa-solid fa-car-side text-sm"></i>
+      </div>
+      <div>
+        <span class="text-base font-extrabold tracking-tight text-slate-900 dark:text-white">
+          Sewa<span class="text-blue-600 dark:text-blue-500">Mobil</span>
+        </span>
+        <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1">
+          Admin Portal <i class="fa-solid fa-arrow-up-right-from-square text-[8px] opacity-60"></i>
         </span>
       </div>
+    </a>
+  </div>
 
+  <!-- Profil Card (Mengadaptasi .dash-user dari User Portal) -->
+  <div class="mx-3.5 mb-3 p-3 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+    <div class="flex items-center gap-2.5">
+      <div class="w-9 h-9 rounded-full bg-blue-600/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs flex-shrink-0 border border-blue-500/20">
+        <?= strtoupper(substr($_SESSION['admin_nama'] ?? 'A', 0, 1)) ?>
+      </div>
       <div class="min-w-0 flex-1">
         <p class="text-xs font-bold text-slate-800 dark:text-white truncate">
           <?= htmlspecialchars($_SESSION['admin_nama'] ?? 'Admin') ?>
         </p>
-        <p class="text-[9px] text-slate-400 font-medium capitalize">
-          <?= htmlspecialchars($_SESSION['admin_role'] ?? 'Staff') ?>
-        </p>
+        <div class="flex items-center gap-1.5 mt-0.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-400 capitalize">
+            <?= htmlspecialchars($_SESSION['admin_role'] ?? 'Staff') ?>
+          </span>
+        </div>
       </div>
-      <i class="fa-solid fa-chevron-down text-slate-400 text-[9px] transition-transform" :class="showProfileMenu ? 'rotate-180' : ''"></i>
-    </button>
-    
-    <div x-show="showProfileMenu" @click.away="showProfileMenu = false" x-transition
-      class="absolute left-3 right-3 mt-1 z-30 bg-white dark:bg-slate-750 rounded-xl shadow-xl border border-slate-100 dark:border-slate-600 overflow-hidden">
-      <div class="p-1.5">
-        <a href="logout.php" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
-          <i class="fa-solid fa-right-from-bracket"></i> Logout
-        </a>
-      </div>
+      <a href="logout.php" title="Keluar dari sesi" class="w-7 h-7 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors">
+        <i class="fa-solid fa-right-from-bracket text-xs"></i>
+      </a>
     </div>
   </div>
 
-  <div class="mx-4 border-t border-slate-100 dark:border-slate-700 mb-2"></div>
-  <p class="px-4 pb-1 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Menu</p>
+  <div class="mx-4 border-t border-slate-100 dark:border-slate-800 mb-3"></div>
 
-  <nav class="flex-1 px-2 space-y-0.5 pb-4">
-    <template x-for="item in navItems" :key="item.key">
-      <div>
-        <div x-show="item.key === 'settings'" class="pt-2 pb-1">
-          <p class="px-2 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Lainnya</p>
-        </div>
-        <button @click="setPage(item.key)"
-          :class="activePage === item.key ? 'active font-semibold text-blue-600' : 'text-slate-500 dark:text-slate-400 font-medium'"
-          class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs text-left transition-colors">
-          <i class="w-3 text-[13px]" :class="[item.icon, activePage === item.key ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500']"></i>
-          <span x-text="item.label"></span>
-        </button>
+  <!-- Navigasi Menu Bertingkat (Mengadaptasi .dash-menu / .nav-links) -->
+  <nav class="flex-1 px-3 space-y-4 pb-4">
+    
+    <!-- Menu Utama -->
+    <div>
+      <p class="px-3 pb-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Utama</p>
+      <div class="space-y-1">
+        <a :href="'index.php?page=dashboard'"
+           :class="activePage === 'dashboard' 
+             ? 'bg-blue-600 text-white font-bold shadow-sm shadow-blue-500/20' 
+             : 'text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-100/70 dark:hover:bg-slate-800/60'"
+           class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs transition-all">
+          <i class="w-4 text-[13px] text-center fa-solid fa-gauge-high" :class="activePage === 'dashboard' ? 'text-white' : 'text-slate-400'"></i>
+          <span>Dashboard</span>
+        </a>
+        <a :href="'index.php?page=orders'"
+           :class="activePage === 'orders' 
+             ? 'bg-blue-600 text-white font-bold shadow-sm shadow-blue-500/20' 
+             : 'text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-100/70 dark:hover:bg-slate-800/60'"
+           class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs transition-all">
+          <i class="w-4 text-[13px] text-center fa-solid fa-clipboard-list" :class="activePage === 'orders' ? 'text-white' : 'text-slate-400'"></i>
+          <span>Pesanan Rental</span>
+        </a>
       </div>
-    </template>
+    </div>
+
+    <!-- Manajemen Data -->
+    <div>
+      <p class="px-3 pb-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Manajemen</p>
+      <div class="space-y-1">
+        <a :href="'index.php?page=cars'"
+           :class="activePage === 'cars' 
+             ? 'bg-blue-600 text-white font-bold shadow-sm shadow-blue-500/20' 
+             : 'text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-100/70 dark:hover:bg-slate-800/60'"
+           class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs transition-all">
+          <i class="w-4 text-[13px] text-center fa-solid fa-car" :class="activePage === 'cars' ? 'text-white' : 'text-slate-400'"></i>
+          <span>Kelola Armada</span>
+        </a>
+        <a :href="'index.php?page=customers'"
+           :class="activePage === 'customers' 
+             ? 'bg-blue-600 text-white font-bold shadow-sm shadow-blue-500/20' 
+             : 'text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-100/70 dark:hover:bg-slate-800/60'"
+           class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs transition-all">
+          <i class="w-4 text-[13px] text-center fa-solid fa-users" :class="activePage === 'customers' ? 'text-white' : 'text-slate-400'"></i>
+          <span>Pelanggan</span>
+        </a>
+        <a :href="'index.php?page=verifications'"
+           :class="activePage === 'verifications' 
+             ? 'bg-blue-600 text-white font-bold shadow-sm shadow-blue-500/20' 
+             : 'text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-100/70 dark:hover:bg-slate-800/60'"
+           class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs transition-all">
+          <i class="w-4 text-[13px] text-center fa-solid fa-id-card" :class="activePage === 'verifications' ? 'text-white' : 'text-slate-400'"></i>
+          <span>Verifikasi KTP & SIM</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Sistem -->
+    <div>
+      <p class="px-3 pb-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Sistem</p>
+      <div class="space-y-1">
+        <a :href="'index.php?page=settings'"
+           :class="activePage === 'settings' 
+             ? 'bg-blue-600 text-white font-bold shadow-sm shadow-blue-500/20' 
+             : 'text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-100/70 dark:hover:bg-slate-800/60'"
+           class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs transition-all">
+          <i class="w-4 text-[13px] text-center fa-solid fa-gear" :class="activePage === 'settings' ? 'text-white' : 'text-slate-400'"></i>
+          <span>Pengaturan</span>
+        </a>
+      </div>
+    </div>
+
   </nav>
 
-  <div class="mx-3 mb-4 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-    <p class="text-[10px] font-bold text-blue-600">
-        <?php
-            if (stripos($appName, 'sewa') === 0) {
-                $restOfName = substr($appName, 4);
-                echo '<span class="text-blue-700">Sewa<span class="text-slate-600 dark:text-slate-300">' . htmlspecialchars($restOfName) . '</span></span>';
-            } else {
-                echo htmlspecialchars($appName);
-            }
-        ?>
-    </p>
-    <p class="text-[9px] text-blue-400 mt-0.5 opacity-80">v2.0.0 · 2026</p>
+  <!-- Footer Info Sidebar (User Style Minimal Pill) -->
+  <div class="p-3 border-t border-slate-100 dark:border-slate-800">
+    <div class="px-3 py-2.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/40 flex items-center justify-between text-[11px] font-semibold text-slate-400 dark:text-slate-500">
+      <div class="flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="text-slate-600 dark:text-slate-300 font-bold">Online</span>
+      </div>
+      <span class="text-[10px] font-mono opacity-80">v2.1</span>
+    </div>
   </div>
-</aside> 
+
+</aside>

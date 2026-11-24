@@ -16,6 +16,10 @@ $categoryCount = count(array_unique(array_map(fn($c) => strtolower((string) ($c[
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <script>
+        document.documentElement.classList.add('js');
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($site['name']) ?> — Sewa mobil di Surabaya</title>
@@ -40,7 +44,7 @@ $categoryCount = count(array_unique(array_map(fn($c) => strtolower((string) ($c[
     <main>
         <section class="hero">
             <div class="container hero-grid">
-                <div class="hero-copy">
+                <div class="hero-copy" data-reveal>
                     <span class="eyebrow eyebrow--accent">Rental mobil &middot; Surabaya</span>
                     <h1 class="display">Sewa mobil<br>tanpa <em>ribet</em>.</h1>
                     <p class="lead">
@@ -54,13 +58,13 @@ $categoryCount = count(array_unique(array_map(fn($c) => strtolower((string) ($c[
                         <a class="btn btn--outline btn--lg" href="#cara-sewa">Cara sewa</a>
                     </div>
                     <div class="hero-facts">
-                        <div class="fact"><b class="num"><?= (int) $fleetStats['types'] ?></b><span>tipe mobil</span></div>
-                        <div class="fact"><b class="num"><?= (int) $fleetStats['units'] ?></b><span>unit terawat</span></div>
-                        <div class="fact"><b class="num"><?= max(1, (int) ($fleetStats['categories'] ?? 0)) ?: 1 ?></b><span>kategori</span></div>
+                        <div class="fact"><b class="num" data-count="<?= (int) $fleetStats['types'] ?>">0</b><span>tipe mobil</span></div>
+                        <div class="fact"><b class="num" data-count="<?= (int) $fleetStats['units'] ?>">0</b><span>unit terawat</span></div>
+                        <div class="fact"><b class="num" data-count="<?= max(1, (int) ($fleetStats['categories'] ?? 0)) ?: 1 ?>">0</b><span>kategori</span></div>
                     </div>
                 </div>
 
-                <div class="hero-media">
+                <div class="hero-media" data-reveal>
                     <img src="<?= htmlspecialchars($heroImage) ?>" alt="<?= htmlspecialchars($heroName) ?>" fetchpriority="high">
                     <div class="hero-tag">
                         <span class="dot" aria-hidden="true"></span>
@@ -75,7 +79,7 @@ $categoryCount = count(array_unique(array_map(fn($c) => strtolower((string) ($c[
 
         <section class="section section--line" id="armada">
             <div class="container">
-                <div class="section-head">
+                <div class="section-head" data-reveal>
                     <div>
                         <span class="eyebrow">Armada</span>
                         <h2 style="margin-top:10px">Yang paling sering disewa</h2>
@@ -102,7 +106,7 @@ $categoryCount = count(array_unique(array_map(fn($c) => strtolower((string) ($c[
 
         <section class="section" id="cara-sewa">
             <div class="container">
-                <div class="section-head">
+                <div class="section-head" data-reveal>
                     <div>
                         <span class="eyebrow">Cara sewa</span>
                         <h2 style="margin-top:10px">Tiga langkah, satu kunci</h2>
@@ -110,7 +114,7 @@ $categoryCount = count(array_unique(array_map(fn($c) => strtolower((string) ($c[
                     </div>
                 </div>
 
-                <div class="steps">
+                <div class="steps" data-reveal>
                     <div class="step">
                         <h3>Pilih mobil &amp; tanggal</h3>
                         <p>Tentukan unit, tanggal mulai, dan lokasi penjemputan. Kalender menampilkan tanggal yang masih kosong.</p>
@@ -129,7 +133,7 @@ $categoryCount = count(array_unique(array_map(fn($c) => strtolower((string) ($c[
 
         <section class="section section--tight">
             <div class="container">
-                <div class="cta-band">
+                <div class="cta-band" data-reveal>
                     <div>
                         <h2>Butuh mobil untuk besok pagi?</h2>
                         <p>Armada dan harga selalu terbaru di katalog. Pesan sekarang, konfirmasi langsung masuk ke halaman pesananmu.</p>

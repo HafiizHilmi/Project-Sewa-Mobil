@@ -1,4 +1,9 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once __DIR__ . '/../inc/guard.php';
+require_admin();
 // Ambil data input dari penyewa (contoh kota asal, tujuan, dan lokasi jemput)
 $asal_pelanggan = $_POST['kota_asal'] ?? '';   
 $tujuan_penyewa = $_POST['kota_tujuan'] ?? ''; 
@@ -35,11 +40,9 @@ foreach ($blacklists as $b_area) {
 
 // 3. Jika masuk blacklist, langsung tolak pesanan
 if ($is_blacklisted) {
-    // Balikkan user ke halaman sebelumnya dengan pesan error
-    echo "<script>
-            alert('Maaf, pesanan Anda tidak dapat diproses. {$blocked_reason}');
-            window.history.back();
-          </script>";
+    $_SESSION['flash_msg'] = "Maaf, pesanan tidak dapat diproses: " . $blocked_reason;
+    $_SESSION['flash_type'] = "error";
+    header("Location: ../index.php?page=orders");
     exit();
 }
 

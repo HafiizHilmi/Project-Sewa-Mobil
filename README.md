@@ -46,18 +46,21 @@ Berikut adalah teknologi dan layanan pihak ketiga yang digunakan dalam proyek in
 7.  **Riwayat Pesanan & Profil:**
     *   Melihat daftar seluruh transaksi yang pernah dilakukan beserta status terkininya (`pending`, `confirmed`, `completed`, `cancelled`).
 
-### Panel Administrator (Admin Portal)
-1.  **Dashboard Utama:**
-    *   Menampilkan statistik seperti total pesanan pending, jumlah pelanggan aktif, jumlah armada mobil, dan total transaksi sukses.
-2.  **Manajemen Armada Mobil (CRUD):**
-    *   Menambah, mengubah, menampilkan, dan menghapus data mobil (Merek, Model, Tahun, Kategori, Bahan Bakar, Kapasitas Kursi, Stok, Tarif Sewa, dan unggah Gambar).
-3.  **Kelola Pelanggan (Customer Management):**
-    *   Melihat daftar detail seluruh pelanggan yang terdaftar.
-4.  **Tinjau & Verifikasi Dokumen:**
-    *   Memeriksa berkas KTP & SIM yang diunggah oleh pelanggan.
-    *   Tombol persetujuan (`approve`) atau penolakan (`reject`) status verifikasi pelanggan secara instan.
-5.  **Manajemen Pesanan (Order Management):**
-    *   Memantau pemesanan masuk dan mengubah status pesanan pelanggan (`pending`, `confirmed`, `completed`, `cancelled`).
+### Panel Administrator (Admin Portal v2.0)
+1.  **Arsitektur & Performa:**
+    *   **Per-Page Data Separation (Router):** Menggunakan router PHP selektif (`admin/index.php?page=...`). Query dan data hanya dimuat untuk halaman yang aktif, memangkas ukuran DOM dan HTML payload hingga <90 KB per halaman.
+    *   **0 Ketergantungan CDN Eksternal:** Framework Tailwind dan Alpine.js di-vendor secara lokal di `admin/assets/vendor/` untuk kedaulatan data dan kestabilan tanpa koneksi internet luar.
+    *   **Optimasi Agregasi Database:** Grafik analitik pesanan (Harian, Mingguan, Bulanan) menggunakan query agregasi tunggal (turun dari 36 query menjadi 2 query).
+    *   **Sistem Migrasi Terpusat:** `admin/install/migrate.php` dengan schema versioning, mengeliminasi pengecekan `SHOW COLUMNS` berulang pada setiap request.
+2.  **Keamanan & Proteksi (Backend Guard):**
+    *   Semua aksi backend (`car_action`, `customer_action`, `order_action`, `verify_action`, `admin_action`, `triggers`) dan penyajian file sensitif (`serve_file.php`) diproteksi modul `admin/inc/guard.php` (`require_admin()` dan `require_superuser()`).
+    *   Enkripsi kredensial admin menggunakan `password_hash()` (Bcrypt).
+3.  **Sistem Notifikasi & Feedback UI (admin-ui.js):**
+    *   Menghilangkan seluruh popup browser `alert()` dan `confirm()` native, digantikan oleh sistem `toast()` modern dengan animasi, bilah durasi otomatis, jeda saat *hover*, dan dukungan *reduced motion*.
+    *   *Polling background* cerdas (25 detik) dengan auto-pause saat tab tidak aktif (*visibility API*) dan suara notifikasi pesanan masuk.
+4.  **Kontrol Jarak Jauh & Alarm Delay Kendaraan:**
+    *   Mendukung pengiriman sinyal alarm dan pematian mesin jarak jauh via Webhook (MacroDroid / HTTP).
+    *   **Fitur Pengaturan Delay Alarm:** Durasi delay bunyi (0 detik, 5 detik, 10 detik, 30 detik, atau kustom detik) dapat dipilih langsung sebelum sinyal dikirimkan. MacroDroid di perangkat kendaraan dapat membaca parameter `{v=delay}` dan menambahkan aksi *"Wait Before Next Action"* sesuai nilai parameter tersebut.
 6.  **Pengaturan Profil Bisnis:**
     *   Mengubah nama perusahaan, nomor kontak layanan, akun sosial media, dan alamat fisik kantor yang tersinkronisasi langsung ke sistem.
 
@@ -124,10 +127,21 @@ Proyek ini dilengkapi dengan fitur **Auto-Setup Database** pada berkas `include/
 | `include/nav.php` | Navigasi sticky + drawer mobile + tombol tema |
 | `include/car_card.php` | Partial kartu mobil (dipakai landing & katalog) |
 | `include/footer.php` | Footer bersama |
+| `public/assets/js/ui.js` | Motion layer: pill nav, drawer, ripple, reveal saat scroll, counter, progress bar. Fail-safe: tidak ada konten yang disembunyikan bila JS/tab tidak aktif |
+| `public/assets/vendor/bootstrap-icons/` | Bootstrap Icons 1.11.1 (CSS + woff2/woff) — di-vendor lokal agar ikon tetap tampil tanpa CDN |
+| `admin/assets/vendor/fontawesome/` | Font Awesome 6.5 (CSS + webfonts) — di-vendor lokal untuk panel admin |
 | `app/modules/Profile/views/index.php` | Area akun pelanggan (ringkasan, riwayat, dokumen, data pribadi, password, tampilan, bantuan) memakai komponen `.dash` / `.stat-card` / `.list-card` / `.booking-item` |
 | `app/modules/*/views/*.php` | Halaman landing, katalog, auth, booking |
 
 Halaman akun memakai pola **rail menu + konten**: rail 258px (sticky di desktop, menu chip berbalut baris di mobile), heading per panel, kartu statistik bernomor tabular, daftar pesanan bergaris rambut, dan status sebagai pill (`status--pending/active/done/cancel`). Seluruh form lama (unggah KTP/SIM, gerbang konfirmasi, ubah password, pemilih tema) tetap memakai endpoint yang sama; hanya lapisan tampilan dan helper JS kecil (tab, pratinjau file, toggle rincian) yang ditulis ulang.
+
+Aturan gerak (motion) yang dipakai konsisten:
+
+*   **Satu lapisan JS** (`ui.js`) untuk semua animasi; halaman tidak menyimpan skrip animasi sendiri.
+*   **Umpan balik tekan**: setiap tombol/chip/kartu mengecil ~3% saat ditekan, plus ripple ringan.
+*   **Navbar**: indikator pill bergeser mengikuti menu aktif/hover, bayangan muncul setelah scroll, drawer mobile membuka dengan transisi tinggi+opasitas.
+*   **Reveal**: elemen di bawah lipatan muncul bertahap saat masuk viewport. Konten di atas lipatan tidak pernah disembunyikan, dan ada jaring pengaman 2,6 detik agar tidak ada konten tertinggal transparan.
+*   **Hormat preferensi**: semua animasi mati otomatis pada `prefers-reduced-motion: reduce`.
 
 Aturan tampilan yang dipakai konsisten di semua halaman pelanggan: satu aksen warna (biru), radius 16–30px, garis tipis 1px sebagai pemisah (bukan bayangan tebal), angka harga memakai *tabular numerals*, dan mode gelap mengikuti preferensi sistem atau pilihan tersimpan di `localStorage`.
 

@@ -1,4 +1,10 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once __DIR__ . '/inc/guard.php';
+require_admin(true);
+
 $actionType = isset($_GET['type']) ? $_GET['type'] : '';
 $carId = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
@@ -62,24 +68,48 @@ if ($webhookIdentifier !== "") {
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     
     $response = curl_exec($ch);
-    
-    if (curl_errno($ch)) {
-        $error_msg = curl_error($ch);
-        echo "<script>alert('Error Koneksi: " . addslashes($error_msg) . "'); window.history.back();</script>";
-        curl_close($ch);
-        exit;
-    }
+    $curlErr = curl_errno($ch);
+    $error_msg = $curlErr ? curl_error($ch) : '';
     curl_close($ch);
 
-    echo "<script>
-            alert('" . addslashes($pesanSukses) . "');
-            window.history.back();
-          </script>";
+    $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') 
+           || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
+
+    if ($curlErr) {
+        if ($isAjax) {
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success' => false,
+                'message' => "Error Koneksi: " . $error_msg,
+                'target_url' => $url
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+        $_SESSION['flash_msg'] = "Error Koneksi: " . $error_msg;
+        $_SESSION['flash_type'] = "error";
+        header("Location: index.php?page=cars");
+        exit;
+    }
+
+    if ($isAjax) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'success' => true,
+            'message' => $pesanSukses,
+            'target_url' => $url
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    $_SESSION['flash_msg'] = $pesanSukses;
+    $_SESSION['flash_type'] = "success";
+    header("Location: index.php?page=cars");
+    exit;
 } else {
-    echo "<script>
-            alert('Perintah tidak dikenali.');
-            window.history.back();
-          </script>";
+    $_SESSION['flash_msg'] = "Perintah tidak dikenali.";
+    $_SESSION['flash_type'] = "warn";
+    header("Location: index.php?page=cars");
+    exit;
 }
 
 /**

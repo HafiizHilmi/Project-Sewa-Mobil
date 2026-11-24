@@ -437,12 +437,12 @@ foreach ($types_data as $t) {
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
-                  <a :href="'triggers.php?type=alarm&id=' + selectedCar.id" class="flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-4 py-3 rounded-xl transition-all shadow-sm active:scale-95">
+                  <button type="button" @click="triggerAlarm(selectedCar)" class="flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-4 py-3 rounded-xl transition-all shadow-sm active:scale-95">
                     <i class="fa-solid fa-bell"></i> Bunyikan Alarm
-                  </a>
-                  <a :href="'triggers.php?type=mesin_mati&id=' + selectedCar.id" class="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-3 rounded-xl transition-all shadow-sm active:scale-95">
+                  </button>
+                  <button type="button" @click="confirmModal('Peringatan Kelistrikan', 'Apakah Anda yakin ingin mematikan sistem kelistrikan kendaraan ini secara remote?', () => { triggerEngineCutoff(selectedCar); }, { danger: true, confirmText: 'Matikan Mesin' })" class="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-3 rounded-xl transition-all shadow-sm active:scale-95">
                     <i class="fa-solid fa-power-off"></i> Matikan Mesin
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>
@@ -453,6 +453,143 @@ foreach ($types_data as $t) {
         </div>
       </div>
     </template>
+  </div>
+
+  <!-- Fluid Centered Remote Alarm Information Box -->
+  <div x-show="alarmModal.open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <!-- Backdrop Blur -->
+    <div @click="closeAlarmModal()" 
+         x-show="alarmModal.open"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 bg-slate-950/70 backdrop-blur-md"></div>
+    
+    <!-- Modal Card (Centered, Fluid Spring Entrance) -->
+    <div x-show="alarmModal.open"
+         x-transition:enter="transition cubic-bezier(0.16, 1, 0.3, 1) duration-350"
+         x-transition:enter-start="opacity-0 scale-90 translate-y-4"
+         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+         x-transition:leave-end="opacity-0 scale-95 translate-y-2"
+         class="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 p-6 sm:p-7 flex flex-col items-center text-center overflow-hidden z-10">
+      
+      <!-- Close button top-right -->
+      <button @click="closeAlarmModal()" type="button" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 flex items-center justify-center transition-colors">
+        <i class="fa-solid fa-xmark text-xs"></i>
+      </button>
+
+      <!-- Vehicle Pill Badge -->
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700 text-[11.5px] font-bold text-slate-700 dark:text-slate-200 mb-2">
+        <i class="fa-solid fa-car text-amber-500"></i>
+        <span x-text="alarmModal.car ? (alarmModal.car.make + ' ' + alarmModal.car.model + (alarmModal.car.number_plate ? ' • ' + alarmModal.car.number_plate : '')) : 'Armada'"></span>
+      </div>
+
+      <!-- Fluid Radar Beacon & Soundwave Pulse -->
+      <div class="relative flex items-center justify-center w-36 h-36 my-2">
+        <!-- Concentric Expanding Radar Waves -->
+        <template x-if="alarmModal.state === 'transmitting'">
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="absolute w-28 h-28 rounded-full border border-amber-500/40 animate-radar-ring-1"></div>
+            <div class="absolute w-28 h-28 rounded-full border border-amber-500/30 animate-radar-ring-2"></div>
+            <div class="absolute w-28 h-28 rounded-full border border-amber-500/20 animate-radar-ring-3"></div>
+          </div>
+        </template>
+        
+        <template x-if="alarmModal.state === 'active'">
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="absolute w-32 h-32 rounded-full border-2 border-emerald-500/30 animate-radar-ring-1"></div>
+            <div class="absolute w-32 h-32 rounded-full border border-amber-500/40 animate-radar-ring-2"></div>
+            <div class="absolute w-32 h-32 rounded-full bg-amber-500/10 dark:bg-amber-500/20 animate-pulse"></div>
+          </div>
+        </template>
+
+        <template x-if="alarmModal.state === 'error'">
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="absolute w-28 h-28 rounded-full border border-rose-500/30 animate-ping"></div>
+            <div class="absolute w-28 h-28 rounded-full bg-rose-500/10"></div>
+          </div>
+        </template>
+
+        <!-- Central Emblem / Icon Shield -->
+        <div class="relative z-10 w-20 h-20 rounded-2xl flex items-center justify-center shadow-xl transition-all duration-300"
+             :class="{
+               'bg-gradient-to-tr from-amber-500 to-amber-400 text-white shadow-amber-500/30': alarmModal.state === 'transmitting',
+               'bg-gradient-to-tr from-emerald-500 to-teal-400 text-white shadow-emerald-500/40 animate-subtle-float': alarmModal.state === 'active',
+               'bg-gradient-to-tr from-rose-600 to-rose-500 text-white shadow-rose-500/30': alarmModal.state === 'error'
+             }">
+          <template x-if="alarmModal.state === 'transmitting'">
+            <i class="fa-solid fa-satellite-dish text-2xl animate-pulse"></i>
+          </template>
+          <template x-if="alarmModal.state === 'active'">
+            <i class="fa-solid fa-bell text-3xl animate-bell-dynamic"></i>
+          </template>
+          <template x-if="alarmModal.state === 'error'">
+            <i class="fa-solid fa-triangle-exclamation text-3xl"></i>
+          </template>
+        </div>
+      </div>
+
+      <!-- Dynamic Equalizer Soundbars (Shown when Active) -->
+      <template x-if="alarmModal.state === 'active'">
+        <div class="flex items-center justify-center gap-1.5 h-8 my-1">
+          <div class="soundwave-bar bg-emerald-500" style="animation-delay: 0.1s"></div>
+          <div class="soundwave-bar bg-emerald-400" style="animation-delay: 0.3s"></div>
+          <div class="soundwave-bar bg-amber-400" style="animation-delay: 0.5s"></div>
+          <div class="soundwave-bar bg-amber-500" style="animation-delay: 0.2s"></div>
+          <div class="soundwave-bar bg-emerald-500" style="animation-delay: 0.4s"></div>
+          <div class="soundwave-bar bg-emerald-400" style="animation-delay: 0.6s"></div>
+          <div class="soundwave-bar bg-amber-400" style="animation-delay: 0.15s"></div>
+          <div class="soundwave-bar bg-amber-500" style="animation-delay: 0.35s"></div>
+        </div>
+      </template>
+
+      <!-- Status Title -->
+      <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white mt-1">
+        <span x-show="alarmModal.state === 'transmitting'">Mengirim Sinyal Alarm...</span>
+        <span x-show="alarmModal.state === 'active'">Alarm Kendaraan Aktif!</span>
+        <span x-show="alarmModal.state === 'error'">Sinyal Tidak Terjangkau</span>
+      </h3>
+
+      <!-- Status Explanation / Live Message -->
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 max-w-xs leading-relaxed" x-text="alarmModal.message"></p>
+
+      <!-- Action Buttons -->
+      <div class="w-full flex items-center justify-center gap-2.5 mt-5 pt-4 border-t border-slate-100 dark:border-slate-800">
+        <template x-if="alarmModal.state === 'transmitting'">
+          <button type="button" @click="closeAlarmModal()" class="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            Tutup
+          </button>
+        </template>
+
+        <template x-if="alarmModal.state === 'active'">
+          <div class="w-full flex gap-2">
+            <button type="button" @click="closeAlarmModal()" class="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+              Selesai
+            </button>
+            <button type="button" @click="triggerAlarm(alarmModal.car)" class="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-rotate-right"></i> Bunyikan Lagi
+            </button>
+          </div>
+        </template>
+
+        <template x-if="alarmModal.state === 'error'">
+          <div class="w-full flex gap-2">
+            <button type="button" @click="closeAlarmModal()" class="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+              Tutup
+            </button>
+            <button type="button" @click="triggerAlarm(alarmModal.car)" class="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-rotate-right"></i> Coba Lagi
+            </button>
+          </div>
+        </template>
+      </div>
+
+    </div>
   </div>
 
   <?php if (isset($_SESSION['admin_role']) && $_SESSION['admin_role'] === 'superuser'): ?>
@@ -555,6 +692,13 @@ document.addEventListener('alpine:init', () => {
         carSearch: '', // <-- Tambahan state untuk input pencarian
         selectedCar: null,
         imagePreview: null,
+        
+        alarmModal: {
+            open: false,
+            car: null,
+            state: 'idle',
+            message: ''
+        },
         
         cars: <?php echo json_encode($cars_data); ?>,
         
@@ -711,6 +855,95 @@ document.addEventListener('alpine:init', () => {
                 }
                 window.location.href = url;
             }
+        },
+        
+        triggerAlarm(car) {
+            if (!car) return;
+            this.alarmModal.car = car;
+            this.alarmModal.open = true;
+            this.alarmModal.state = 'transmitting';
+            this.alarmModal.message = 'Menghubungkan sinyal remote ke modul kelistrikan & sirene kendaraan...';
+
+            const carId = car.id;
+            fetch('triggers.php?type=alarm&id=' + carId, {
+                headers: { 
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    this.alarmModal.state = 'active';
+                    this.alarmModal.message = data.message || 'Sinyal berhasil diterima kendaraan! Sirene dan lampu hazard darurat aktif.';
+                    this.playAlarmSfx();
+                } else {
+                    this.alarmModal.state = 'error';
+                    this.alarmModal.message = data.message || 'Perangkat tidak merespons atau sedang offline.';
+                }
+            })
+            .catch(() => {
+                this.alarmModal.state = 'error';
+                this.alarmModal.message = 'Gagal terhubung ke kendaraan (koneksi timeout / modul offline).';
+            });
+        },
+
+        closeAlarmModal() {
+            this.alarmModal.open = false;
+        },
+
+        triggerEngineCutoff(car) {
+            if (!car || !car.id) return;
+            if (typeof window.toastInfo === 'function') {
+                window.toastInfo('Mematikan Mesin', 'Menghubungkan sinyal remote untuk mematikan sistem kelistrikan...');
+            }
+            fetch('triggers.php?type=mesin_mati&id=' + car.id, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (typeof window.toastSuccess === 'function') {
+                        window.toastSuccess('Mesin Dimatikan', data.message || 'Sistem kelistrikan kendaraan berhasil dimatikan!');
+                    }
+                } else {
+                    if (typeof window.toastError === 'function') {
+                        window.toastError('Gagal Matikan Mesin', data.message || 'Perangkat tidak merespons atau sedang offline.');
+                    }
+                }
+            })
+            .catch(() => {
+                if (typeof window.toastError === 'function') {
+                    window.toastError('Koneksi Gagal', 'Gagal terhubung ke kendaraan (koneksi timeout / modul offline).');
+                }
+            });
+        },
+
+        playAlarmSfx() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                if (!window._alarmAudioCtx) window._alarmAudioCtx = new AudioCtx();
+                const ctx = window._alarmAudioCtx;
+                if (ctx.state === 'suspended') ctx.resume();
+
+                [0, 0.22, 0.44].forEach(offset => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(920, ctx.currentTime + offset);
+                    osc.frequency.exponentialRampToValueAtTime(1750, ctx.currentTime + offset + 0.12);
+                    gain.gain.setValueAtTime(0.06, ctx.currentTime + offset);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + offset + 0.15);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime + offset);
+                    osc.stop(ctx.currentTime + offset + 0.16);
+                });
+            } catch (e) {}
         },
         
         carBadge(status) {

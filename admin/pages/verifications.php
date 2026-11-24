@@ -124,13 +124,13 @@
             <div>
                 <p class="text-sm font-bold text-slate-700 mb-2">Dokumen KTP</p>
                 <div class="border rounded-xl p-2 bg-slate-50 aspect-video flex items-center justify-center overflow-hidden">
-                    <img :src="'serve_file.php?file=' + selectedVerification.ktp_file" class="max-w-full max-h-full object-contain hover:scale-110 transition cursor-zoom-in" alt="KTP">
+                    <img :src="'serve_file.php?file=' + selectedVerification.ktp_file" loading="lazy" decoding="async" class="max-w-full max-h-full object-contain hover:scale-110 transition cursor-zoom-in" alt="KTP">
                 </div>
             </div>
             <div>
                 <p class="text-sm font-bold text-slate-700 mb-2">Dokumen SIM</p>
                 <div class="border rounded-xl p-2 bg-slate-50 aspect-video flex items-center justify-center overflow-hidden">
-                    <img :src="'serve_file.php?file=' + selectedVerification.sim_file" class="max-w-full max-h-full object-contain hover:scale-110 transition cursor-zoom-in" alt="SIM">
+                    <img :src="'serve_file.php?file=' + selectedVerification.sim_file" loading="lazy" decoding="async" class="max-w-full max-h-full object-contain hover:scale-110 transition cursor-zoom-in" alt="SIM">
                 </div>
             </div>
         </div>
@@ -150,7 +150,7 @@
                         </button>
                     </div>
 
-                    <form method="POST" action="actions/verify_action.php" x-show="action !== ''" x-transition.opacity class="mt-4 bg-white border border-blue-200 rounded-xl p-4 shadow-sm">
+                    <form method="POST" action="actions/verify_action.php" @submit.prevent="submitVerification($el)" x-show="action !== ''" x-transition.opacity class="mt-4 bg-white border border-blue-200 rounded-xl p-4 shadow-sm">
                         <input type="hidden" name="user_id" :value="selectedVerification.id">
                         <input type="hidden" name="action" :value="action">
                         

@@ -134,17 +134,32 @@
      * 4. Reveal saat elemen masuk viewport
      * ------------------------------------------------------------------ */
     function initReveal() {
-        var items = document.querySelectorAll('[data-reveal]');
+        var items = Array.prototype.slice.call(document.querySelectorAll('[data-reveal]'));
         if (!items.length) return;
 
-        if (reduceMotion || !('IntersectionObserver' in window)) {
-            items.forEach(function (el) { el.classList.add('is-revealed'); });
-            return;
-        }
+        // Hormati preferensi gerak minimal: biarkan semuanya terlihat.
+        if (reduceMotion || !('IntersectionObserver' in window)) return;
 
-        // Beri jeda bertingkat untuk elemen yang berdekatan.
-        var groups = new Map();
+        // Dokumen tidak terlihat (tab background / prerender): transisi CSS tidak
+        // berjalan, jadi jangan pernah menyembunyikan konten.
+        if (document.visibilityState !== 'visible') return;
+
+        var vh = window.innerHeight || document.documentElement.clientHeight;
+        var pending = [];
+
+        // Hanya elemen yang benar-benar di bawah lipatan yang disembunyikan.
         items.forEach(function (el) {
+            var box = el.getBoundingClientRect();
+            if (box.top > vh * 0.9) {
+                el.classList.add('is-pending');
+                pending.push(el);
+            }
+        });
+        if (!pending.length) return;
+
+        // Jeda bertingkat untuk elemen yang berdekatan dalam satu wadah.
+        var groups = new Map();
+        pending.forEach(function (el) {
             var parent = el.parentElement;
             var index = groups.get(parent) || 0;
             el.style.setProperty('--reveal-delay', Math.min(index, 6) * 55 + 'ms');
@@ -154,12 +169,29 @@
         var io = new IntersectionObserver(function (entries) {
             entries.forEach(function (entry) {
                 if (!entry.isIntersecting) return;
-                entry.target.classList.add('is-revealed');
-                io.unobserve(entry.target);
+                var el = entry.target;
+                el.classList.remove('is-pending');
+                el.classList.add('is-revealed');
+                io.unobserve(el);
             });
         }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
 
-        items.forEach(function (el) { io.observe(el); });
+        pending.forEach(function (el) { io.observe(el); });
+
+        // Jaring pengaman: apa pun yang terjadi, konten tidak boleh tetap kosong.
+        // Inline style dipakai supaya tidak bergantung pada transisi CSS yang bisa
+        // tertahan saat tab tidak aktif (mis. dibuka di background).
+        setTimeout(function () {
+            pending.forEach(function (el) {
+                if (!el.classList.contains('is-pending')) return;
+                el.style.transition = 'none';
+                el.classList.remove('is-pending');
+                el.classList.add('is-revealed');
+                el.style.opacity = '1';
+                el.style.transform = 'none';
+                io.unobserve(el);
+            });
+        }, 2600);
     }
 
     /* ------------------------------------------------------------------ *
@@ -244,6 +276,18 @@
     /* ------------------------------------------------------------------ *
      * Boot
      * ------------------------------------------------------------------ */
+    // Kalau tab sempat tidak aktif (transisi tertahan), selesaikan reveal saat kembali.
+    document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState !== 'visible') return;
+        document.querySelectorAll('[data-reveal].is-pending').forEach(function (el) {
+            el.style.transition = 'none';
+            el.classList.remove('is-pending');
+            el.classList.add('is-revealed');
+            el.style.opacity = '1';
+            el.style.transform = 'none';
+        });
+    });
+
     function boot() {
         initNavPill();
         initNavScroll();

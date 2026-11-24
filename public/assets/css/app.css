@@ -1083,7 +1083,8 @@ body.legacy-page .dark\:text-blue-400 { color: var(--accent) !important; }
     width: 42px;
     height: 42px;
     border-radius: var(--r-full);
-    background: var(--accent-soft);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
     color: var(--accent);
     font-size: .95rem;
     font-weight: 800;
@@ -1130,12 +1131,18 @@ body.legacy-page .dark\:text-blue-400 { color: var(--accent) !important; }
 .dash-link:hover { background: var(--surface-2); color: var(--ink); }
 .dash-link:hover i { color: var(--ink); }
 .dash-link.active {
-    background: var(--accent-soft);
-    border-color: transparent;
+    background: rgba(37, 99, 235, 0.08);
+    border-color: rgba(37, 99, 235, 0.2);
     color: var(--accent);
     font-weight: 700;
 }
+html.dark .dash-link.active {
+    background: rgba(124, 151, 255, 0.12);
+    border-color: rgba(124, 151, 255, 0.22);
+    color: #9cb5ff;
+}
 .dash-link.active i { color: var(--accent); }
+html.dark .dash-link.active i { color: #9cb5ff; }
 .dash-link .count {
     margin-left: auto;
     padding: 1px 7px;
@@ -1346,14 +1353,18 @@ body.legacy-page .dark\:text-blue-400 { color: var(--accent) !important; }
 }
 body { animation: pageIn var(--dur-3) var(--ease-out) both; }
 
-/* Reveal saat digulir */
+/* Reveal saat digulir — fail-safe: konten terlihat secara default.
+   Hanya elemen di bawah lipatan yang diberi .is-pending oleh ui.js, jadi bila
+   JS gagal/transisi tidak jalan, tidak ada konten yang tertinggal tak terlihat. */
 [data-reveal] {
-    opacity: 0;
-    transform: translateY(18px);
     transition: opacity var(--dur-4) var(--ease-out), transform var(--dur-4) var(--ease-out);
     transition-delay: var(--reveal-delay, 0ms);
 }
-[data-reveal].is-revealed { opacity: 1; transform: none; }
+[data-reveal].is-pending {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: none;
+}
 
 /* Kartu: angkat halus */
 .car-card { will-change: transform; }
@@ -1429,7 +1440,7 @@ body { animation: pageIn var(--dur-3) var(--ease-out) both; }
 
 @media (prefers-reduced-motion: reduce) {
     body, [data-reveal], .tab-panel.active, .flash, .date-cell.selected { animation: none !important; }
-    [data-reveal] { opacity: 1 !important; transform: none !important; }
+    [data-reveal], [data-reveal].is-pending { opacity: 1 !important; transform: none !important; }
     .ripple { display: none; }
     .nav-pill { transition: none; }
 }

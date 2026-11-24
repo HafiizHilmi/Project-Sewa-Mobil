@@ -93,7 +93,7 @@
                 <button type="button" @click="openEditCustModal(c); open = false;" class="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2">
                   <i class="fa-solid fa-pen text-slate-400 text-[10px]"></i> Edit Data
                 </button>
-                <form action="actions/customer_action.php" method="POST" class="m-0 p-0" :onsubmit="c.status === 'Suspended' ? 'return confirm(\'Aktifkan kembali pelanggan ini?\')' : 'return confirm(\'Apakah Anda yakin ingin men-suspend pelanggan ini?\')'">
+                <form action="actions/customer_action.php" method="POST" class="m-0 p-0" onsubmit="return confirmSubmit(event, 'Ubah status akses pelanggan ini?')">
                   <input type="hidden" name="user_id" :value="c.id">
                   <input type="hidden" name="action" :value="c.status === 'Suspended' ? 'unsuspend' : 'suspend'">
                   <button type="submit" class="w-full text-left px-4 py-2 text-xs font-semibold flex items-center gap-2" :class="c.status === 'Suspended' ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/20' : 'text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/20'">
@@ -102,7 +102,7 @@
                   </button>
                 </form>
                 <div class="h-[1px] bg-slate-100 dark:bg-slate-700 my-1"></div>
-                <form action="actions/customer_action.php" method="POST" class="m-0 p-0" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pelanggan ini? Semua data terkait pesanan juga akan terpengaruh.')">
+                <form action="actions/customer_action.php" method="POST" class="m-0 p-0" onsubmit="return confirmSubmit(event, 'Apakah Anda yakin ingin menghapus pelanggan ini? Semua data terkait pesanan juga akan terpengaruh.')">
                   <input type="hidden" name="user_id" :value="c.id">
                   <input type="hidden" name="action" value="delete">
                   <button type="submit" class="w-full text-left px-4 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 flex items-center gap-2">
@@ -148,7 +148,7 @@
                 <button type="button" @click="openEditCustModal(c); open = false;" class="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-750 flex items-center gap-2">
                   <i class="fa-solid fa-pen text-slate-400 text-[10px]"></i> Edit Data
                 </button>
-                <form action="actions/customer_action.php" method="POST" class="m-0 p-0" :onsubmit="c.status === 'Suspended' ? 'return confirm(\'Aktifkan kembali pelanggan ini?\')' : 'return confirm(\'Apakah Anda yakin ingin men-suspend pelanggan ini?\')'">
+                <form action="actions/customer_action.php" method="POST" class="m-0 p-0" onsubmit="return confirmSubmit(event, 'Ubah status akses pelanggan ini?')">
                   <input type="hidden" name="user_id" :value="c.id">
                   <input type="hidden" name="action" :value="c.status === 'Suspended' ? 'unsuspend' : 'suspend'">
                   <button type="submit" class="w-full text-left px-4 py-2 text-xs font-semibold flex items-center gap-2" :class="c.status === 'Suspended' ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/20' : 'text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/20'">
@@ -157,7 +157,7 @@
                   </button>
                 </form>
                 <div class="h-[1px] bg-slate-100 dark:bg-slate-700 my-1"></div>
-                <form action="actions/customer_action.php" method="POST" class="m-0 p-0" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pelanggan ini? Semua data terkait pesanan juga akan terpengaruh.')">
+                <form action="actions/customer_action.php" method="POST" class="m-0 p-0" onsubmit="return confirmSubmit(event, 'Apakah Anda yakin ingin menghapus pelanggan ini? Semua data terkait pesanan juga akan terpengaruh.')">
                   <input type="hidden" name="user_id" :value="c.id">
                   <input type="hidden" name="action" value="delete">
                   <button type="submit" class="w-full text-left px-4 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 flex items-center gap-2">
@@ -200,7 +200,7 @@
     <div class="flex items-center gap-2">
       <!-- Bulk Suspend Button -->
       <form action="actions/customer_action.php" method="POST" class="m-0 p-0" 
-            @submit="return confirm('Apakah Anda yakin ingin men-suspend ' + selectedCustIds.length + ' pelanggan terpilih?\nSemua status akun mereka akan diubah menjadi Suspended.')">
+            @submit="return confirmSubmit(event, 'Suspend ' + selectedCustIds.length + ' pelanggan terpilih?')">
         <input type="hidden" name="action" value="bulk_suspend">
         <input type="hidden" name="user_ids" :value="selectedCustIds.join(',')">
         <button type="submit" class="px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-amber-900/10 text-white">
@@ -210,7 +210,7 @@
       
       <!-- Bulk Delete Button -->
       <form action="actions/customer_action.php" method="POST" class="m-0 p-0" 
-            @submit="return confirm('PERINGATAN KRITIS: Anda akan menghapus ' + selectedCustIds.length + ' pelanggan secara permanen!\nSemua data pemesanan terkait juga akan terpengaruh.\nApakah Anda benar-benar yakin?')">
+            @submit="return confirmSubmit(event, 'PERINGATAN: Hapus ' + selectedCustIds.length + ' pelanggan secara permanen?')">
         <input type="hidden" name="action" value="bulk_delete">
         <input type="hidden" name="user_ids" :value="selectedCustIds.join(',')">
         <button type="submit" class="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-rose-900/10 text-white">

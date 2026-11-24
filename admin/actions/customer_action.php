@@ -1,5 +1,9 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once __DIR__ . '/../inc/guard.php';
+require_admin();
 require_once __DIR__ . '/../../include/db_config.php';
 $pdo = getPDO();
 
@@ -27,27 +31,24 @@ if (in_array($action, ['bulk_suspend', 'bulk_delete'])) {
             $stmt = $pdo->prepare("UPDATE users SET verification_status = 'rejected' WHERE id IN ($in_query) AND role = 'user'");
             $stmt->execute($ids);
 
-            echo "<script>
-                    alert('Berhasil men-suspend " . count($ids) . " pelanggan.');
-                    window.location.href = '../index.php?page=customers';
-                  </script>";
+            $_SESSION['flash_msg'] = "Berhasil men-suspend " . count($ids) . " pelanggan.";
+            $_SESSION['flash_type'] = "success";
+            header("Location: ../index.php?page=customers");
             exit;
         } elseif ($action === 'bulk_delete') {
             $in_query = implode(',', array_fill(0, count($ids), '?'));
             $stmt = $pdo->prepare("DELETE FROM users WHERE id IN ($in_query) AND role = 'user'");
             $stmt->execute($ids);
 
-            echo "<script>
-                    alert('Berhasil menghapus " . count($ids) . " pelanggan secara permanen.');
-                    window.location.href = '../index.php?page=customers';
-                  </script>";
+            $_SESSION['flash_msg'] = "Berhasil menghapus " . count($ids) . " pelanggan secara permanen.";
+            $_SESSION['flash_type'] = "success";
+            header("Location: ../index.php?page=customers");
             exit;
         }
     } catch (Exception $e) {
-        echo "<script>
-                alert('Terjadi kesalahan: " . addslashes($e->getMessage()) . "');
-                window.history.back();
-              </script>";
+        $_SESSION['flash_msg'] = "Terjadi kesalahan: " . $e->getMessage();
+        $_SESSION['flash_type'] = "error";
+        header("Location: ../index.php?page=customers");
         exit;
     }
 }
@@ -75,10 +76,9 @@ if ($user_id && in_array($action, ['edit', 'suspend', 'unsuspend', 'delete'])) {
                 ':id' => $user_id
             ]);
 
-            echo "<script>
-                    alert('Data pelanggan berhasil diubah.');
-                    window.location.href = '../index.php?page=customers';
-                  </script>";
+            $_SESSION['flash_msg'] = "Data pelanggan berhasil diubah.";
+            $_SESSION['flash_type'] = "success";
+            header("Location: ../index.php?page=customers");
             exit;
 
         } elseif ($action === 'suspend') {
@@ -86,10 +86,9 @@ if ($user_id && in_array($action, ['edit', 'suspend', 'unsuspend', 'delete'])) {
             $stmt = $pdo->prepare("UPDATE users SET verification_status = 'rejected' WHERE id = :id");
             $stmt->execute([':id' => $user_id]);
 
-            echo "<script>
-                    alert('Pelanggan berhasil di-suspend.');
-                    window.location.href = '../index.php?page=customers';
-                  </script>";
+            $_SESSION['flash_msg'] = "Pelanggan berhasil di-suspend.";
+            $_SESSION['flash_type'] = "warn";
+            header("Location: ../index.php?page=customers");
             exit;
 
         } elseif ($action === 'unsuspend') {
@@ -97,10 +96,9 @@ if ($user_id && in_array($action, ['edit', 'suspend', 'unsuspend', 'delete'])) {
             $stmt = $pdo->prepare("UPDATE users SET verification_status = 'verified' WHERE id = :id");
             $stmt->execute([':id' => $user_id]);
 
-            echo "<script>
-                    alert('Akun pelanggan berhasil diaktifkan kembali.');
-                    window.location.href = '../index.php?page=customers';
-                  </script>";
+            $_SESSION['flash_msg'] = "Akun pelanggan berhasil diaktifkan kembali.";
+            $_SESSION['flash_type'] = "success";
+            header("Location: ../index.php?page=customers");
             exit;
 
         } elseif ($action === 'delete') {
@@ -108,24 +106,21 @@ if ($user_id && in_array($action, ['edit', 'suspend', 'unsuspend', 'delete'])) {
             $stmt = $pdo->prepare("DELETE FROM users WHERE id = :id AND role = 'user'");
             $stmt->execute([':id' => $user_id]);
 
-            echo "<script>
-                    alert('Pelanggan berhasil dihapus.');
-                    window.location.href = '../index.php?page=customers';
-                  </script>";
+            $_SESSION['flash_msg'] = "Pelanggan berhasil dihapus.";
+            $_SESSION['flash_type'] = "success";
+            header("Location: ../index.php?page=customers");
             exit;
         }
 
     } catch (Exception $e) {
-        echo "<script>
-                alert('Terjadi kesalahan: " . addslashes($e->getMessage()) . "');
-                window.history.back();
-              </script>";
+        $_SESSION['flash_msg'] = "Terjadi kesalahan: " . $e->getMessage();
+        $_SESSION['flash_type'] = "error";
+        header("Location: ../index.php?page=customers");
         exit;
     }
 } else {
-    echo "<script>
-            alert('Data tidak valid.');
-            window.history.back();
-          </script>";
+    $_SESSION['flash_msg'] = "Data tidak valid.";
+    $_SESSION['flash_type'] = "error";
+    header("Location: ../index.php?page=customers");
     exit;
 }

@@ -19,7 +19,7 @@ if (!function_exists('car_card')) {
         $id       = (int) ($car['id'] ?? 0);
         $stock    = (int) ($car['stock'] ?? 1);
         ?>
-        <article class="car-card"<?= $attrs ?>>
+        <article class="car-card" data-reveal<?= $attrs ?>>
             <div class="car-media">
                 <img src="<?= htmlspecialchars($image) ?>" alt="<?= htmlspecialchars($name . ' ' . $year) ?>" loading="lazy">
                 <span class="badge badge--accent"><?= htmlspecialchars($category) ?></span>

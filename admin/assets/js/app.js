@@ -1,16 +1,23 @@
 function appData() {
+  const savedTheme = localStorage.getItem('admin_theme');
+  const isDark = savedTheme ? (savedTheme === 'dark') : window.matchMedia('(prefers-color-scheme: dark)').matches;
+
   return {
     /* ── Core State ── */
     activePage: 'dashboard',
     sidebarOpen: false,
     showProfileMenu: false,
-    darkMode: false,
+    darkMode: isDark,
     chartMode: 'monthly',
 
     /* ── Init ── */
     init() {
+      // Pastikan class 'dark' selalu sinkron sejak awal
+      document.documentElement.classList.toggle('dark', this.darkMode);
+
       this.$watch('darkMode', val => {
         document.documentElement.classList.toggle('dark', val);
+        localStorage.setItem('admin_theme', val ? 'dark' : 'light');
       });
       const urlParams = new URLSearchParams(window.location.search);
       const page = urlParams.get('page');
@@ -33,6 +40,7 @@ function appData() {
       this.activePage = p;
       this.sidebarOpen = false;
       this.showCarDetail = false;
+      window.location.href = 'index.php?page=' + p;
     },
 
     get pageTitle() {
@@ -151,6 +159,41 @@ function appData() {
       this.showVerificationDetail = false;
       this.selectedVerification = null;
     },
+    submitVerification(formEl) {
+      if (!formEl) return;
+      const formData = new FormData(formEl);
+      const actionVal = formData.get('action');
+      const userId = formData.get('user_id');
+
+      fetch('actions/verify_action.php', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.success) {
+          if (this.selectedVerification) {
+            this.selectedVerification.verification_status = actionVal;
+          }
+          const item = this.verifications.find(v => String(v.id) === String(userId));
+          if (item) {
+            item.verification_status = actionVal;
+          }
+          if (typeof window.toastSuccess === 'function') {
+            window.toastSuccess('Berhasil', data.message || `Status verifikasi diubah menjadi ${actionVal.toUpperCase()}`);
+          }
+          this.closeVerificationDetail();
+        } else {
+          if (typeof window.toastError === 'function') {
+            window.toastError('Gagal', (data && data.message) ? data.message : 'Terjadi kesalahan sistem.');
+          }
+        }
+      })
+      .catch(() => {
+        formEl.submit();
+      });
+    },
 
     /* ── Settings / Admin ── */
     activeTab: 'preferences',
@@ -218,7 +261,9 @@ function appData() {
     },
     saveCar() {
       this.showEditModal = false;
-      alert(this.editingCarId ? 'Perubahan disimpan (Demo)' : 'Kendaraan baru ditambahkan (Demo)');
+      if (typeof window.toastSuccess === 'function') {
+        window.toastSuccess('Berhasil', this.editingCarId ? 'Perubahan disimpan (Demo)' : 'Kendaraan baru ditambahkan (Demo)');
+      }
     },
 
     /* ── Orders ── */
@@ -305,7 +350,7 @@ function appData() {
       this.showCompleteModal = true;
     },
     skipComplete(id) {
-      if (confirm('Selesaikan sewa kendaraan ini tanpa biaya tambahan atau kerusakan?')) {
+      window.confirmModal('Selesaikan Sewa', 'Selesaikan sewa kendaraan ini tanpa biaya tambahan atau kerusakan?', () => {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = 'actions/order_action.php';
@@ -330,7 +375,7 @@ function appData() {
         form.appendChild(skipInput);
         document.body.appendChild(form);
         form.submit();
-      }
+      }, { danger: false, confirmText: 'Selesaikan' });
     }
 
   };

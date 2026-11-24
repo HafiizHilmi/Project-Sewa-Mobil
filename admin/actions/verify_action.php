@@ -1,5 +1,9 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once __DIR__ . '/../inc/guard.php';
+require_admin();
 require_once __DIR__ . '/../../include/db_config.php';
 $pdo = getPDO();
 
@@ -11,6 +15,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $user_id = $_POST['user_id'] ?? null;
 $action = $_POST['action'] ?? null;
 $reject_reason = $_POST['reject_reason'] ?? null;
+
+$isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') 
+       || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
 
 if ($user_id && in_array($action, ['verified', 'rejected'])) {
     try {
@@ -29,24 +36,46 @@ if ($user_id && in_array($action, ['verified', 'rejected'])) {
             ]);
         }
         
+        $msg = "Status verifikasi berhasil diubah menjadi " . strtoupper($action) . ".";
+        if ($isAjax) {
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success' => true,
+                'message' => $msg,
+                'status' => $action,
+                'user_id' => (int) $user_id
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
         // Arahkan kembali ke halaman verifikasi dan beri notifikasi
-        echo "<script>
-                alert('Berhasil: Status verifikasi user berhasil diubah menjadi " . strtoupper($action) . ".');
-                window.location.href = '../index.php?page=verifications';
-              </script>";
+        $_SESSION['flash_msg'] = $msg;
+        $_SESSION['flash_type'] = "success";
+        header("Location: ../index.php?page=verifications");
         exit;
     } catch (PDOException $e) {
-        $errorMsg = addslashes($e->getMessage());
-        echo "<script>
-                alert('Terjadi kesalahan pada sistem database: " . $errorMsg . "');
-                window.history.back();
-              </script>";
+        $errMsg = "Terjadi kesalahan database: " . $e->getMessage();
+        if ($isAjax) {
+            header('Content-Type: application/json; charset=utf-8');
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => $errMsg], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+        $_SESSION['flash_msg'] = $errMsg;
+        $_SESSION['flash_type'] = "error";
+        header("Location: ../index.php?page=verifications");
         exit;
     }
 } else {
-    echo "<script>
-            alert('Data tidak valid.');
-            window.history.back();
-          </script>";
+    $errMsg = "Data verifikasi tidak valid.";
+    if ($isAjax) {
+        header('Content-Type: application/json; charset=utf-8');
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => $errMsg], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    $_SESSION['flash_msg'] = $errMsg;
+    $_SESSION['flash_type'] = "error";
+    header("Location: ../index.php?page=verifications");
     exit;
 }

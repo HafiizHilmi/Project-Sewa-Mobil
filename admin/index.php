@@ -1,114 +1,96 @@
 <?php
-session_start();
-
-if (!isset($_SESSION['admin_id'])) {
-    header("Location: login.php");
-    exit();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
-$role = $_SESSION['admin_role'] ?? 'staff';
 
+require_once __DIR__ . '/inc/guard.php';
+require_admin(true);
+
+$role = $_SESSION['admin_role'] ?? 'staff';
 
 require_once __DIR__ . '/../include/db_config.php';
 $pdo = getPDO();
 
-// Pastikan kolom assigned_car_id ada di tabel bookings
-$checkAssigned = $pdo->query("SHOW COLUMNS FROM bookings LIKE 'assigned_car_id'");
-if ($checkAssigned->rowCount() === 0) {
-    $pdo->exec("ALTER TABLE bookings ADD COLUMN assigned_car_id INT UNSIGNED NULL");
+// ── Router Halaman ──────────────────────────────────────────────────────────
+$page = $_GET['page'] ?? 'dashboard';
+$allowedPages = ['dashboard', 'orders', 'cars', 'customers', 'verifications', 'settings'];
+if (!in_array($page, $allowedPages, true)) {
+    $page = 'dashboard';
 }
 
-// Pastikan kolom biaya tambahan dan kerusakan ada di tabel bookings
-$checkAdditional = $pdo->query("SHOW COLUMNS FROM bookings LIKE 'additional_cost'");
-if ($checkAdditional->rowCount() === 0) {
-    $pdo->exec("ALTER TABLE bookings ADD COLUMN additional_cost DECIMAL(12, 2) DEFAULT 0.00");
+// ── Data Fetching Selektif (Hanya load query untuk halaman yang aktif) ──────
+$verifications = [];
+$orders = [];
+$customers = [];
+
+if ($page === 'verifications' || $page === 'dashboard') {
+    $stmt = $pdo->query("
+        SELECT id, name, email, verification_status, ktp_file, sim_file, created_at 
+        FROM users 
+        WHERE verification_status != 'unverified' 
+        ORDER BY FIELD(verification_status, 'pending') DESC, id DESC
+    ");
+    $verifications = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
 }
-$checkDamageImg = $pdo->query("SHOW COLUMNS FROM bookings LIKE 'damage_image'");
-if ($checkDamageImg->rowCount() === 0) {
-    $pdo->exec("ALTER TABLE bookings ADD COLUMN damage_image VARCHAR(255) NULL");
+
+if ($page === 'orders') {
+    $stmtOrders = $pdo->query("
+        SELECT 
+            b.id,
+            b.full_name,
+            b.email,
+            b.phone,
+            b.start_date,
+            b.end_date,
+            b.total_price,
+            b.status,
+            b.created_at,
+            b.assigned_car_id,
+            b.additional_cost,
+            b.damage_image,
+            b.damage_description,
+            b.pickup_location,
+            b.return_location,
+            c.make,
+            c.model,
+            c.category,
+            c.fuel_type,
+            ac.number_plate AS assigned_plate
+        FROM bookings b
+        JOIN cars c ON b.car_id = c.id
+        LEFT JOIN cars ac ON b.assigned_car_id = ac.id
+        ORDER BY b.id DESC
+    ");
+    $orders = $stmtOrders ? $stmtOrders->fetchAll(PDO::FETCH_ASSOC) : [];
 }
-$checkDamageDesc = $pdo->query("SHOW COLUMNS FROM bookings LIKE 'damage_description'");
-if ($checkDamageDesc->rowCount() === 0) {
-    $pdo->exec("ALTER TABLE bookings ADD COLUMN damage_description TEXT NULL");
+
+if ($page === 'customers') {
+    $stmtCustomers = $pdo->query("
+        SELECT 
+            u.id,
+            u.name,
+            u.email,
+            u.phone,
+            u.verification_status,
+            u.created_at,
+            COUNT(b.id) AS total_orders,
+            MAX(b.start_date) AS last_order,
+            MAX(b.address) AS address,
+            COALESCE(SUM(COALESCE(b.total_price, 0) + COALESCE(b.additional_cost, 0)), 0) AS total_spent,
+            COALESCE(SUM(CASE WHEN b.additional_cost > 0 OR b.damage_image IS NOT NULL OR (b.damage_description IS NOT NULL AND b.damage_description != '') THEN 1 ELSE 0 END), 0) AS total_damaged,
+            GROUP_CONCAT(DISTINCT CONCAT(c.make, ' ', c.model, '::', COALESCE(ac.number_plate, 'Pending')) SEPARATOR '|') AS rented_cars
+        FROM users u
+        LEFT JOIN bookings b ON u.id = b.user_id
+        LEFT JOIN cars c ON b.car_id = c.id
+        LEFT JOIN cars ac ON b.assigned_car_id = ac.id
+        WHERE u.role = 'user'
+        GROUP BY u.id
+        ORDER BY u.id DESC
+    ");
+    $customers = $stmtCustomers ? $stmtCustomers->fetchAll(PDO::FETCH_ASSOC) : [];
 }
 
-// Upgrade kolom pembayaran Midtrans
-try {
-    $pdo->exec("ALTER TABLE bookings ADD COLUMN payment_token VARCHAR(255) DEFAULT NULL");
-} catch (Exception $e) {}
-try {
-    $pdo->exec("ALTER TABLE bookings ADD COLUMN payment_url VARCHAR(255) DEFAULT NULL");
-} catch (Exception $e) {}
-try {
-    $pdo->exec("ALTER TABLE bookings ADD COLUMN payment_expiry TIMESTAMP NULL DEFAULT NULL");
-} catch (Exception $e) {}
-try {
-    $pdo->exec("ALTER TABLE bookings ADD COLUMN midtrans_order_id VARCHAR(100) DEFAULT NULL");
-} catch (Exception $e) {}
-
-// Otomatis batalkan transaksi pending yang telat bayar
-try {
-    $pdo->exec("UPDATE bookings SET status = 'cancelled' WHERE status = 'pending' AND payment_expiry IS NOT NULL AND payment_expiry < NOW()");
-} catch (Exception $e) {}
-
-
-// Ambil data pelanggan yang sedang mengajukan verifikasi atau sudah selesai diproses
-$stmt = $pdo->query("SELECT id, name, email, verification_status, ktp_file, sim_file, created_at FROM users WHERE verification_status != 'unverified' ORDER BY FIELD(verification_status, 'pending') DESC, id DESC");
-$verifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Tarik data riwayat penyewaan (booking)
-$stmtOrders = $pdo->query("
-    SELECT 
-        b.id,
-        b.full_name,
-        b.email,
-        b.phone,
-        b.start_date,
-        b.end_date,
-        b.total_price,
-        b.status,
-        b.created_at,
-        b.assigned_car_id,
-        b.additional_cost,
-        b.damage_image,
-        b.damage_description,
-        b.pickup_location,
-        b.return_location,
-        c.make,
-        c.model,
-        c.category,
-        c.fuel_type,
-        ac.number_plate AS assigned_plate
-    FROM bookings b
-    JOIN cars c ON b.car_id = c.id
-    LEFT JOIN cars ac ON b.assigned_car_id = ac.id
-    ORDER BY b.id DESC
-");
-$orders = $stmtOrders->fetchAll(PDO::FETCH_ASSOC);
-
-// Tarik daftar semua pelanggan (customer)
-$stmtCustomers = $pdo->query("
-    SELECT 
-        u.id,
-        u.name,
-        u.email,
-        u.phone,
-        u.verification_status,
-        u.created_at,
-        COUNT(b.id) AS total_orders,
-        MAX(b.start_date) AS last_order,
-        MAX(b.address) AS address,
-        COALESCE(SUM(COALESCE(b.total_price, 0) + COALESCE(b.additional_cost, 0)), 0) AS total_spent,
-        COALESCE(SUM(CASE WHEN b.additional_cost > 0 OR b.damage_image IS NOT NULL OR (b.damage_description IS NOT NULL AND b.damage_description != '') THEN 1 ELSE 0 END), 0) AS total_damaged,
-        GROUP_CONCAT(DISTINCT CONCAT(c.make, ' ', c.model, '::', COALESCE(ac.number_plate, 'Pending')) SEPARATOR '|') AS rented_cars
-    FROM users u
-    LEFT JOIN bookings b ON u.id = b.user_id
-    LEFT JOIN cars c ON b.car_id = c.id
-    LEFT JOIN cars ac ON b.assigned_car_id = ac.id
-    WHERE u.role = 'user'
-    GROUP BY u.id
-    ORDER BY u.id DESC
-");
-$customers = $stmtCustomers->fetchAll(PDO::FETCH_ASSOC);
+$flashData = get_flash();
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -118,12 +100,27 @@ $customers = $stmtCustomers->fetchAll(PDO::FETCH_ASSOC);
   <title>SewaMobil - Admin Panel</title>
   <meta name="description" content="Sistem Admin Dashboard SewaMobil — Customers, Settings, dan manajemen armada."/>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+  <!-- Anti-FOUC Theme Initializer: Terapkan tema instan sebelum rendering untuk mencegah glitch saat ganti halaman di sidebar -->
+  <script>
+    (function () {
+      var saved = localStorage.getItem('admin_theme');
+      var isDark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    })();
+  </script>
+
+  <!-- Local Vendored Frameworks (0 CDN dependencies) -->
+  <script src="assets/vendor/tailwind/tailwind.min.js"></script>
+  <script defer src="assets/vendor/alpine/alpine.min.js"></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css"/>
 
   <script>
     tailwind.config = {
@@ -137,31 +134,17 @@ $customers = $stmtCustomers->fetchAll(PDO::FETCH_ASSOC);
   </script>
 
   <link rel="stylesheet" href="assets/css/style.css"/>
+  <link rel="stylesheet" href="assets/css/admin.css"/>
 </head>
 
 <body x-data="appData()" 
-      x-init="
-        const p = new URLSearchParams(window.location.search); 
-        if(p.has('page')) activePage = p.get('page');
-        
-        // Memantau setiap perubahan halaman, dan mencatatnya ke address bar browser
-        $watch('activePage', val => {
-            const url = new URL(window.location);
-            url.searchParams.set('page', val);
-            window.history.replaceState(null, '', url);
-        });
-      " 
       x-cloak 
       class="font-sans antialiased bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-200">
 
-      <?php if (isset($_SESSION['flash_msg'])): ?>
-    <script>
-        // Gunakan setTimeout agar alert muncul mulus setelah UI selesai dimuat
-        setTimeout(() => {
-            alert("<?= $_SESSION['flash_msg'] ?>");
-        }, 150);
-    </script>
-    <?php unset($_SESSION['flash_msg']); // Hapus flash message dari session agar tidak tampil lagi ?>
+<?php if ($flashData): ?>
+<script>
+  window.SERVER_FLASH = <?= json_encode($flashData, JSON_UNESCAPED_UNICODE) ?>;
+</script>
 <?php endif; ?>
 
 <div class="flex h-screen overflow-hidden">
@@ -182,22 +165,25 @@ $customers = $stmtCustomers->fetchAll(PDO::FETCH_ASSOC);
     <?php include 'pages/header.php'; ?>
 
     <main class="flex-1 overflow-hidden relative">
-      <?php include 'pages/dashboard.php'; ?>
-      <?php include 'pages/cars.php'; ?>
-      <?php include 'pages/orders.php'; ?>
-      <?php include 'pages/customers.php'; ?>
-      <?php include 'pages/verifications.php'; ?>
-      <?php include 'pages/settings.php'; ?>
+      <?php 
+        $pageFile = __DIR__ . "/pages/{$page}.php";
+        if (file_exists($pageFile)) {
+            include $pageFile;
+        } else {
+            include __DIR__ . "/pages/dashboard.php";
+        }
+      ?>
     </main>
 
   </div>
 </div>
 
 <script>
-  window.SERVER_VERIFICATIONS = <?= json_encode($verifications) ?>;
-  window.SERVER_ORDERS = <?= json_encode($orders) ?>;
-  window.SERVER_CUSTOMERS = <?= json_encode($customers) ?>;
+  window.SERVER_VERIFICATIONS = <?= json_encode($verifications, JSON_UNESCAPED_UNICODE) ?>;
+  window.SERVER_ORDERS = <?= json_encode($orders, JSON_UNESCAPED_UNICODE) ?>;
+  window.SERVER_CUSTOMERS = <?= json_encode($customers, JSON_UNESCAPED_UNICODE) ?>;
 </script>
+<script src="assets/js/admin-ui.js?v=<?= time() ?>"></script>
 <script src="assets/js/app.js?v=<?= time() ?>"></script>
 
 </body>

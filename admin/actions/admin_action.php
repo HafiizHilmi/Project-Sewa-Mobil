@@ -1,6 +1,9 @@
 <?php
-
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once __DIR__ . '/../inc/guard.php';
+require_admin();
 require_once __DIR__ . '/../../include/db_config.php';
 $pdo = getPDO();
 
@@ -8,12 +11,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     
     // Tambah akun admin baru
     if ($_POST['action'] === 'add_admin') {
-        if (!isset($_SESSION['admin_role']) || $_SESSION['admin_role'] !== 'superuser') die("Akses Ditolak!");
+        require_superuser();
         
-        $nama = $_POST['nama'];
-        $email = $_POST['email'];
-        $password = $_POST['password']; 
-        $role = $_POST['role'];
+        $nama = trim($_POST['nama'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? ''; 
+        $role = in_array($_POST['role'] ?? '', ['superuser', 'staff']) ? $_POST['role'] : 'staff';
+
+        if (empty($nama) || empty($email) || empty($password)) {
+            $_SESSION['flash_msg'] = "Gagal! Semua kolom wajib diisi.";
+            header("Location: ../index.php?page=settings");
+            exit();
+        }
 
         $checkEmail = $pdo->prepare("SELECT id FROM admins WHERE email = ?");
         $checkEmail->execute([$email]);
@@ -23,8 +32,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             exit();
         }
 
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
         $stmt = $pdo->prepare("INSERT INTO admins (nama, email, password, role) VALUES (?, ?, ?, ?)");
-        if ($stmt->execute([$nama, $email, $password, $role])) {
+        if ($stmt->execute([$nama, $email, $hashedPassword, $role])) {
             $_SESSION['flash_msg'] = "Berhasil! Admin/Staff baru ditambahkan.";
             header("Location: ../index.php?page=settings");
             exit();
@@ -33,9 +43,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     
     // Hapus akun admin
     if ($_POST['action'] === 'delete_admin') {
-        if (!isset($_SESSION['admin_role']) || $_SESSION['admin_role'] !== 'superuser') die("Akses Ditolak!");
+        require_superuser();
         
-        $id = $_POST['id'];
+        $id = intval($_POST['id'] ?? 0);
+        if ($id === intval($_SESSION['admin_id'])) {
+            $_SESSION['flash_msg'] = "Gagal! Anda tidak dapat menghapus akun Anda sendiri.";
+            header("Location: ../index.php?page=settings");
+            exit();
+        }
+
         $stmt = $pdo->prepare("DELETE FROM admins WHERE id = ?");
         if ($stmt->execute([$id])) {
             $_SESSION['flash_msg'] = "Akun staff berhasil dihapus!";
@@ -46,17 +62,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
     // Edit data admin
     if ($_POST['action'] === 'edit_admin') {
-        if (!isset($_SESSION['admin_role']) || $_SESSION['admin_role'] !== 'superuser') die("Akses Ditolak!");
+        require_superuser();
 
-        $id = $_POST['id'];
-        $nama = $_POST['nama'];
-        $email = $_POST['email'];
-        $role = $_POST['role'];
-        $password = $_POST['password'];
+        $id = intval($_POST['id'] ?? 0);
+        $nama = trim($_POST['nama'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $role = in_array($_POST['role'] ?? '', ['superuser', 'staff']) ? $_POST['role'] : 'staff';
+        $password = $_POST['password'] ?? '';
 
         if (!empty($password)) {
+            $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
             $stmt = $pdo->prepare("UPDATE admins SET nama=?, email=?, role=?, password=? WHERE id=?");
-            $stmt->execute([$nama, $email, $role, $password, $id]);
+            $stmt->execute([$nama, $email, $role, $hashedPassword, $id]);
         } else {
             $stmt = $pdo->prepare("UPDATE admins SET nama=?, email=?, role=? WHERE id=?");
             $stmt->execute([$nama, $email, $role, $id]);
@@ -70,16 +87,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     // Ganti password admin
     if ($_POST['action'] === 'change_password') {
         $admin_id = $_SESSION['admin_id'];
-        $old_pass = $_POST['old_password'];
-        $new_pass = $_POST['new_password'];
+        $old_pass = $_POST['old_password'] ?? '';
+        $new_pass = $_POST['new_password'] ?? '';
+
+        if (empty($new_pass)) {
+            $_SESSION['flash_msg'] = "Password baru tidak boleh kosong.";
+            header("Location: ../index.php?page=settings");
+            exit();
+        }
 
         $stmt = $pdo->prepare("SELECT password FROM admins WHERE id = ?");
         $stmt->execute([$admin_id]);
         $user = $stmt->fetch();
 
-        if ($user && $old_pass === $user['password']) {
+        $oldMatches = $user && (password_verify($old_pass, $user['password']) || $old_pass === $user['password']);
+
+        if ($oldMatches) {
+            $hashedNewPass = password_hash($new_pass, PASSWORD_BCRYPT);
             $update = $pdo->prepare("UPDATE admins SET password = ? WHERE id = ?");
-            $update->execute([$new_pass, $admin_id]);
+            $update->execute([$hashedNewPass, $admin_id]);
             $_SESSION['flash_msg'] = "Password berhasil diubah!";
         } else {
             $_SESSION['flash_msg'] = "Gagal! Password lama yang Anda masukkan salah.";
@@ -177,7 +203,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     }
 
     // Refresh kembali ke tab Business
-    echo "<script>alert('Informasi Bisnis berhasil diperbarui!'); window.location.href='../index.php?page=settings&tab=business';</script>";
+    $_SESSION['flash_msg'] = "Informasi Bisnis berhasil diperbarui!";
+    $_SESSION['flash_type'] = "success";
+    header("Location: ../index.php?page=settings&tab=business");
     exit;
 }
 }

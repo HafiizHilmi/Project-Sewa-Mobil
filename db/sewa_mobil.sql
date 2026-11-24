@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS `admins` (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 INSERT IGNORE INTO `admins` (`nama`, `email`, `password`, `role`) VALUES
-  ('Ahmad Fauzi', 'ahmad@sewamobilsby.id', 'admin123', 'superuser');
+  ('Ahmad Fauzi', 'ahmad@sewamobilsby.id', '$2y$10$mj2z89QYog5oZTjJFtE6Y.EkhVGjoYZxiGREUvfhAiaefkGYpzpR2', 'superuser');
 
 -- Business Settings table
 CREATE TABLE IF NOT EXISTS `business_settings` (

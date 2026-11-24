@@ -311,7 +311,7 @@
             </template>
             <template x-if="selectedOrder.damageImage">
               <div class="mt-2.5 rounded-lg overflow-hidden border border-rose-200 dark:border-rose-800">
-                <img :src="'../public/assets/images/damages/' + selectedOrder.damageImage" class="w-full h-auto object-cover">
+                <img :src="'../public/assets/images/damages/' + selectedOrder.damageImage" loading="lazy" decoding="async" class="w-full h-auto object-cover">
               </div>
             </template>
           </div>
